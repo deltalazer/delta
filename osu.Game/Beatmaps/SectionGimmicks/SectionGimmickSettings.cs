@@ -79,6 +79,9 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public bool ForceNoApproachCircle { get; set; }
         public bool ForceHardRock { get; set; }
         public bool ForceFlashlight { get; set; }
+        public ForcedSpinnerDirection SpinnerDirection { get; set; }
+        public SpinnerWrongDirectionBehaviour SpinnerWrongDirection { get; set; }
+        public SpinnerDirectionIndicator SpinnerIndicator { get; set; }
         public float FlashlightRadius { get; set; } = float.NaN;
         public bool EnableGradualFlashlightRadiusChange { get; set; }
         public bool EnableGradualFlashlightFadeIn { get; set; }

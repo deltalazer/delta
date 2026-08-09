@@ -315,6 +315,9 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
                 ForceNoApproachCircle = source.ForceNoApproachCircle,
                 ForceHardRock = source.ForceHardRock,
                 ForceFlashlight = source.ForceFlashlight,
+                SpinnerDirection = source.SpinnerDirection,
+                SpinnerWrongDirection = source.SpinnerWrongDirection,
+                SpinnerIndicator = source.SpinnerIndicator,
                 ForceTraceable = source.ForceTraceable,
                 FlashlightRadius = source.FlashlightRadius,
             };

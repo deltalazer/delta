@@ -15,6 +15,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Edit;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
 using osuTK;
 using osuTK.Graphics;
@@ -88,6 +89,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceFlashlight = null!;
         private FormNumberBox flashlightRadius = null!;
         private FormCheckBox forceNoApproachCircle = null!;
+        private FormEnumDropdown<ForcedSpinnerDirection> spinnerDirection = null!;
+        private FormEnumDropdown<SpinnerWrongDirectionBehaviour> spinnerWrongDirection = null!;
+        private FormEnumDropdown<SpinnerDirectionIndicator> spinnerIndicator = null!;
 
         private FillFlowContainer hpFields = null!;
         private FillFlowContainer countLimitFields = null!;
@@ -277,6 +281,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                     forceFlashlight = new FormCheckBox { Caption = "Force Flashlight (FL)" },
                     flashlightRadius = new FormNumberBox(allowDecimals: true) { Caption = "FL radius (20-400)" },
                     forceNoApproachCircle = new FormCheckBox { Caption = "Force No Approach Circle" },
+                    spinnerDirection = new FormEnumDropdown<ForcedSpinnerDirection> { Caption = "Spinner direction" },
+                    spinnerWrongDirection = new FormEnumDropdown<SpinnerWrongDirectionBehaviour> { Caption = "Wrong direction" },
+                    spinnerIndicator = new FormEnumDropdown<SpinnerDirectionIndicator> { Caption = "Direction indicator" },
                 }
             };
 
@@ -378,6 +385,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceFlashlight.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.ForceFlashlight = value));
             bindFloatOnCommitOnly(flashlightRadius, (s, value) => s.FlashlightRadius = value, v => Math.Clamp(v, 20f, 400f));
             forceNoApproachCircle.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.ForceNoApproachCircle = value));
+            spinnerDirection.Current.BindValueChanged(v => setEnum(v.NewValue, (s, value) => s.SpinnerDirection = value));
+            spinnerWrongDirection.Current.BindValueChanged(v => setEnum(v.NewValue, (s, value) => s.SpinnerWrongDirection = value));
+            spinnerIndicator.Current.BindValueChanged(v => setEnum(v.NewValue, (s, value) => s.SpinnerIndicator = value));
 
             bindFloat(hp300, (s, value) => s.HP300 = value, v => Math.Clamp(v, -2f, 2f));
             bindFloat(hp100, (s, value) => s.HP100 = value, v => Math.Clamp(v, -2f, 2f));
@@ -466,7 +476,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                 enableGreatOffsetPenalty, greatOffsetThreshold, greatOffsetPenaltyHp,
                 enableDifficultyOverrides, allowUnsafeDifficultyOverrideValues, sectionCircleSize, sectionApproachRate, sectionOverallDifficulty,
                 allowUnsafeStackLeniencyOverrideValues, sectionStackLeniency, allowUnsafeTickRateOverrideValues, sectionTickRate,
-                forceHidden, forceHardRock, forceFlashlight, flashlightRadius, forceNoApproachCircle);
+                forceHidden, forceHardRock, forceFlashlight, flashlightRadius, forceNoApproachCircle,
+                spinnerDirection, spinnerWrongDirection, spinnerIndicator);
 
             enableHpGimmick.Current.Value = hasSelection && state.EnableHPGimmick;
             fakeNote.Current.Value = hasSelection && state.IsFakeNote;
@@ -490,6 +501,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceHardRock.Current.Value = hasSelection && state.ForceHardRock;
             forceFlashlight.Current.Value = hasSelection && state.ForceFlashlight;
             forceNoApproachCircle.Current.Value = hasSelection && state.ForceNoApproachCircle;
+            spinnerDirection.Current.Value = state.RepresentativeSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Any;
+            spinnerWrongDirection.Current.Value = state.RepresentativeSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.NoProgress;
+            spinnerIndicator.Current.Value = state.RepresentativeSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.None;
 
             hp300.Current.Value = formatFloat(representative?.HP300 ?? float.NaN);
             hp100.Current.Value = formatFloat(representative?.HP100 ?? float.NaN);
@@ -584,7 +598,8 @@ namespace osu.Game.Rulesets.Osu.Edit
                     enableGreatOffsetPenalty, greatOffsetThreshold, greatOffsetPenaltyHp,
                     enableDifficultyOverrides, allowUnsafeDifficultyOverrideValues, sectionCircleSize, sectionApproachRate, sectionOverallDifficulty,
                     allowUnsafeStackLeniencyOverrideValues, sectionStackLeniency, allowUnsafeTickRateOverrideValues, sectionTickRate,
-                    forceHidden, forceHardRock, forceFlashlight, flashlightRadius, forceNoApproachCircle);
+                    forceHidden, forceHardRock, forceFlashlight, flashlightRadius, forceNoApproachCircle,
+                    spinnerDirection, spinnerWrongDirection, spinnerIndicator);
 
                 setEnabledState(enabled && fakeNote.Current.Value,
                     fakePunishMode, fakePlayHitsound, fakeAutoHitOnApproachClose, fakeAutoHitPlayHitsound, fakeRevealEnabled,
@@ -617,6 +632,18 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             fadeSchedules[slot]?.Cancel();
             fadeSchedules[slot] = Scheduler.AddDelayed(() => container.FadeTo(target, 150), 0);
+        }
+
+        private void setEnum<T>(T value, Action<osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings, T> setter) where T : struct, Enum
+        {
+            if (updatingControls)
+                return;
+
+            if (!model.HasSelection)
+                return;
+
+            model.SetSelectionEnumSetting(setter, value);
+            scheduleSelectionUpdate();
         }
 
         private void setBool(bool value, Action<osu.Game.Beatmaps.HitObjectGimmicks.HitObjectGimmickSettings, bool> setter)

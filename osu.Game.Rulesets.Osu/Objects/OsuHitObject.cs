@@ -71,6 +71,12 @@ namespace osu.Game.Rulesets.Osu.Objects
         /// </summary>
         public bool ForceTraceable { get; set; }
 
+        public ForcedSpinnerDirection SpinnerDirection { get; set; }
+
+        public SpinnerWrongDirectionBehaviour SpinnerWrongDirection { get; set; }
+
+        public SpinnerDirectionIndicator SpinnerIndicator { get; set; }
+
         /// <summary>
         /// Baseline non-HR position used to make section force-HR reversible.
         /// </summary>
