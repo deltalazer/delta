@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -57,6 +57,12 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private FormCheckBox enableNoMiss = null!;
 
+        private FormCheckBox forceAllMiss = null!;
+        private FillFlowContainer allMissFields = null!;
+        private FormCheckBox freezeHP = null!;
+        private FormCheckBox freezeAccuracy = null!;
+        private FormCheckBox freezeCombo = null!;
+
         private FormCheckBox enableCountLimits = null!;
         private FormNumberBox max300 = null!;
         private FormNumberBox max100 = null!;
@@ -92,7 +98,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         private OsuSpriteText selectionStatus = null!;
 
         private bool updatingControls;
-        private readonly ScheduledDelegate[] fadeSchedules = new ScheduledDelegate[6];
+        private readonly ScheduledDelegate[] fadeSchedules = new ScheduledDelegate[7];
         private bool selectionUpdateScheduled;
 
         public HitObjectGimmickToolboxGroup()
@@ -174,6 +180,12 @@ namespace osu.Game.Rulesets.Osu.Edit
                         hpMiss = new FormNumberBox(allowDecimals: true) { Caption = "HPMiss" }),
 
                     enableNoMiss = new FormCheckBox { Caption = "No Miss" },
+
+                    forceAllMiss = new FormCheckBox { Caption = "All Miss" },
+                    allMissFields = createContainer(
+                        freezeHP = new FormCheckBox { Caption = "Freeze HP" },
+                        freezeAccuracy = new FormCheckBox { Caption = "Freeze accuracy" },
+                        freezeCombo = new FormCheckBox { Caption = "Freeze Combo" }),
 
                     enableCountLimits = new FormCheckBox { Caption = "Count Limits" },
                     countLimitFields = createContainer(
@@ -306,7 +318,23 @@ namespace osu.Game.Rulesets.Osu.Edit
             bindFloat(fakeRevealFadeOutStartMs, (s, value) => s.FakeRevealFadeOutStartMs = value, v => Math.Max(0f, v));
             bindFloat(fakeRevealFadeOutLengthMs, (s, value) => s.FakeRevealFadeOutLengthMs = value, v => Math.Max(0f, v));
 
-            enableNoMiss.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.EnableNoMiss = value));
+            enableNoMiss.Current.BindValueChanged(v =>
+            {
+                setBool(v.NewValue, (s, value) => s.EnableNoMiss = value);
+
+                if (v.NewValue && !updatingControls)
+                    forceAllMiss.Current.Value = false;
+            });
+            forceAllMiss.Current.BindValueChanged(v =>
+            {
+                setBool(v.NewValue, (s, value) => s.ForceAllMiss = value);
+
+                if (v.NewValue && !updatingControls)
+                    enableNoMiss.Current.Value = false;
+            });
+            freezeHP.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FreezeHP = value));
+            freezeAccuracy.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FreezeAccuracy = value));
+            freezeCombo.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.FreezeCombo = value));
             enableCountLimits.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.EnableCountLimits = value));
             enableGreatOffsetPenalty.Current.BindValueChanged(v => setBool(v.NewValue, (s, value) => s.EnableGreatOffsetPenalty = value));
             enableDifficultyOverrides.Current.BindValueChanged(v =>
@@ -433,6 +461,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                 fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
                 fakeRevealLeadInStartMs, fakeRevealLeadInLengthMs, fakeRevealFadeOutStartMs, fakeRevealFadeOutLengthMs,
                 enableNoMiss,
+                forceAllMiss, freezeHP, freezeAccuracy, freezeCombo,
                 enableCountLimits, max300, max100, max50, maxMiss,
                 enableGreatOffsetPenalty, greatOffsetThreshold, greatOffsetPenaltyHp,
                 enableDifficultyOverrides, allowUnsafeDifficultyOverrideValues, sectionCircleSize, sectionApproachRate, sectionOverallDifficulty,
@@ -443,6 +472,10 @@ namespace osu.Game.Rulesets.Osu.Edit
             fakeNote.Current.Value = hasSelection && state.IsFakeNote;
             fakePunishMode.Current.Value = hasSelection ? state.FakePunishMode : FakePunishMode.None;
             enableNoMiss.Current.Value = hasSelection && state.EnableNoMiss;
+            forceAllMiss.Current.Value = hasSelection && (state.RepresentativeSettings?.ForceAllMiss ?? false);
+            freezeHP.Current.Value = state.RepresentativeSettings?.FreezeHP ?? true;
+            freezeAccuracy.Current.Value = state.RepresentativeSettings?.FreezeAccuracy ?? true;
+            freezeCombo.Current.Value = state.RepresentativeSettings?.FreezeCombo ?? true;
             enableCountLimits.Current.Value = hasSelection && state.EnableCountLimits;
             enableGreatOffsetPenalty.Current.Value = hasSelection && state.EnableGreatOffsetPenalty;
             enableDifficultyOverrides.Current.Value = hasSelection && state.EnableDifficultyOverrides;
@@ -518,6 +551,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             scheduleFade(hpFields, enableHpGimmick.Current.Value, 0);
             hpFields.AlwaysPresent = enableHpGimmick.Current.Value;
 
+            scheduleFade(allMissFields, forceAllMiss.Current.Value, 6);
+            allMissFields.AlwaysPresent = forceAllMiss.Current.Value;
+
             scheduleFade(fakeNoteFields, fakeNote.Current.Value, 4);
             fakeNoteFields.AlwaysPresent = fakeNote.Current.Value;
 
@@ -543,6 +579,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                     fakeRevealRed, fakeRevealGreen, fakeRevealBlue,
                     fakeRevealLeadInStartMs, fakeRevealLeadInLengthMs, fakeRevealFadeOutStartMs, fakeRevealFadeOutLengthMs,
                     enableNoMiss,
+                    forceAllMiss, freezeHP, freezeAccuracy, freezeCombo, freezeCombo,
                     enableCountLimits, max300, max100, max50, maxMiss,
                     enableGreatOffsetPenalty, greatOffsetThreshold, greatOffsetPenaltyHp,
                     enableDifficultyOverrides, allowUnsafeDifficultyOverrideValues, sectionCircleSize, sectionApproachRate, sectionOverallDifficulty,
@@ -720,6 +757,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                     case FormEnumDropdown<FakePunishMode> d:
                         d.Current.Disabled = !enabled;
                         break;
+
 
                     case FormTextBox t:
                         t.ReadOnly = !enabled;

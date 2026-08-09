@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -269,6 +269,10 @@ namespace osu.Game.Screens.Edit.Compose
             {
                 EnableHPGimmick = settings.EnableHPGimmick,
                 EnableNoMiss = settings.EnableNoMiss,
+                ForceAllMiss = settings.ForceAllMiss,
+                FreezeHP = settings.FreezeHP,
+                FreezeAccuracy = settings.FreezeAccuracy,
+                FreezeCombo = settings.FreezeCombo,
                 EnableAccuracyRequirement = settings.EnableAccuracyRequirement,
                 RequiredAccuracy = settings.RequiredAccuracy,
                 EnableCountLimits = settings.EnableCountLimits,

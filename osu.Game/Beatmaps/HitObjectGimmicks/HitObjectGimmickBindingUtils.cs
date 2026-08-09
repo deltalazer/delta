@@ -281,6 +281,10 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
 
                 EnableHPGimmick = source.EnableHPGimmick,
                 EnableNoMiss = source.EnableNoMiss,
+                ForceAllMiss = source.ForceAllMiss,
+                FreezeHP = source.FreezeHP,
+                FreezeAccuracy = source.FreezeAccuracy,
+                FreezeCombo = source.FreezeCombo,
                 EnableCountLimits = source.EnableCountLimits,
                 EnableGreatOffsetPenalty = source.EnableGreatOffsetPenalty,
 
