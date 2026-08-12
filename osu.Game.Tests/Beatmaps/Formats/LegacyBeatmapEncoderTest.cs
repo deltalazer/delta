@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -43,16 +43,16 @@ namespace osu.Game.Tests.Beatmaps.Formats
 
         private static IEnumerable<string> allBeatmaps = beatmaps_resource_store.GetAvailableResources().Where(res => res.EndsWith(".osu", StringComparison.Ordinal));
 
+        public record BeatmapComponents(IBeatmap Beatmap, LegacySkin Skin, Storyboard Storyboard);
+
         [Test]
-        public void TestUnsupportedStoryboardEvents()
+        public void TestStoryboardEvents()
         {
             const string name = "Resources/storyboard_only_video.osu";
 
-            var decoded = decodeFromLegacy(beatmaps_resource_store.GetStream(name), name);
-            Assert.That(decoded.beatmap.UnhandledEventLines.Count, Is.EqualTo(1));
-            Assert.That(decoded.beatmap.UnhandledEventLines.Single(), Is.EqualTo("Video,0,\"video.avi\""));
+            var decoded = DecodeFromLegacy(beatmaps_resource_store.GetStream(name), beatmaps_resource_store, name);
 
-            var memoryStream = encodeToLegacy(decoded);
+            var memoryStream = EncodeToLegacy(decoded);
 
             var storyboard = new LegacyStoryboardDecoder().Decode(new LineBufferedReader(memoryStream));
             StoryboardLayer video = storyboard.Layers.Single(l => l.Name == "Video");
@@ -62,42 +62,42 @@ namespace osu.Game.Tests.Beatmaps.Formats
         [TestCaseSource(nameof(allBeatmaps))]
         public void TestEncodeDecodeStability(string name)
         {
-            var decoded = decodeFromLegacy(beatmaps_resource_store.GetStream(name), name);
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy(decoded), name);
+            var decoded = DecodeFromLegacy(beatmaps_resource_store.GetStream(name), beatmaps_resource_store, name);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(decoded), beatmaps_resource_store, name);
 
-            sort(decoded.beatmap);
-            sort(decodedAfterEncode.beatmap);
+            Sort(decoded.Beatmap);
+            Sort(decodedAfterEncode.Beatmap);
 
-            compareBeatmaps(decoded, decodedAfterEncode);
+            CompareBeatmaps(decoded, decodedAfterEncode);
         }
 
         [TestCaseSource(nameof(allBeatmaps))]
         public void TestEncodeDecodeStabilityDoubleConvert(string name)
         {
-            var decoded = decodeFromLegacy(beatmaps_resource_store.GetStream(name), name);
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy(decoded), name);
+            var decoded = DecodeFromLegacy(beatmaps_resource_store.GetStream(name), beatmaps_resource_store, name);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(decoded), beatmaps_resource_store, name);
 
             // run an extra convert. this is expected to be stable.
-            decodedAfterEncode.beatmap = convert(decodedAfterEncode.beatmap);
+            decodedAfterEncode = decodedAfterEncode with { Beatmap = convert(decodedAfterEncode.Beatmap) };
 
-            sort(decoded.beatmap);
-            sort(decodedAfterEncode.beatmap);
+            Sort(decoded.Beatmap);
+            Sort(decodedAfterEncode.Beatmap);
 
-            compareBeatmaps(decoded, decodedAfterEncode);
+            CompareBeatmaps(decoded, decodedAfterEncode);
         }
 
         [TestCaseSource(nameof(allBeatmaps))]
         public void TestEncodeDecodeStabilityWithNonLegacyControlPoints(string name)
         {
-            var decoded = decodeFromLegacy(beatmaps_resource_store.GetStream(name), name);
+            var decoded = DecodeFromLegacy(beatmaps_resource_store.GetStream(name), beatmaps_resource_store, name);
 
             // we are testing that the transfer of relevant data to hitobjects (from legacy control points) sticks through encode/decode.
             // before the encode step, the legacy information is removed here.
-            decoded.beatmap.ControlPointInfo = removeLegacyControlPointTypes(decoded.beatmap.ControlPointInfo);
+            decoded.Beatmap.ControlPointInfo = removeLegacyControlPointTypes(decoded.Beatmap.ControlPointInfo);
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy(decoded), name);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(decoded), beatmaps_resource_store, name);
 
-            compareBeatmaps(decoded, decodedAfterEncode);
+            CompareBeatmaps(decoded, decodedAfterEncode);
 
             static ControlPointInfo removeLegacyControlPointTypes(ControlPointInfo controlPointInfo)
             {
@@ -122,17 +122,21 @@ namespace osu.Game.Tests.Beatmaps.Formats
             }
         }
 
-        private void compareBeatmaps((IBeatmap beatmap, TestLegacySkin skin) expected, (IBeatmap beatmap, TestLegacySkin skin) actual)
+        public static void CompareBeatmaps(BeatmapComponents expected, BeatmapComponents actual)
         {
             // Check all control points that are still considered to be at a global level.
-            Assert.That(actual.beatmap.ControlPointInfo.TimingPoints.Serialize(), Is.EqualTo(expected.beatmap.ControlPointInfo.TimingPoints.Serialize()));
-            Assert.That(actual.beatmap.ControlPointInfo.EffectPoints.Serialize(), Is.EqualTo(expected.beatmap.ControlPointInfo.EffectPoints.Serialize()));
+            Assert.That(actual.Beatmap.ControlPointInfo.TimingPoints.Serialize(), Is.EqualTo(expected.Beatmap.ControlPointInfo.TimingPoints.Serialize()));
+            Assert.That(actual.Beatmap.ControlPointInfo.EffectPoints.Serialize(), Is.EqualTo(expected.Beatmap.ControlPointInfo.EffectPoints.Serialize()));
 
             // Check all hitobjects.
-            Assert.That(actual.beatmap.HitObjects.Serialize(), Is.EqualTo(expected.beatmap.HitObjects.Serialize()));
+            Assert.That(actual.Beatmap.HitObjects.Serialize(), Is.EqualTo(expected.Beatmap.HitObjects.Serialize()));
 
             // Check skin.
-            ClassicAssert.True(areComboColoursEqual(expected.skin.Configuration, actual.skin.Configuration));
+            ClassicAssert.True(areComboColoursEqual(expected.Skin.Configuration, actual.Skin.Configuration));
+
+            // Do a rough pass on storyboard layers.
+            foreach (string layer in actual.Storyboard.Layers.Concat(expected.Storyboard.Layers).Select(l => l.Name).Distinct())
+                Assert.That(actual.Storyboard.GetLayer(layer).Elements.Count, Is.EqualTo(expected.Storyboard.GetLayer(layer).Elements.Count));
         }
 
         [Test]
@@ -155,8 +159,9 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
-            var decodedSlider = (Slider)decodedAfterEncode.beatmap.HitObjects[0];
+            var encoded = EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty);
+            var decodedSlider = (Slider)decodedAfterEncode.Beatmap.HitObjects[0];
             Assert.That(decodedSlider.Path.ControlPoints.Count, Is.EqualTo(4));
             Assert.That(decodedSlider.Path.ControlPoints[0].Type, Is.EqualTo(PathType.BSpline(3)));
             Assert.That(decodedSlider.Path.ControlPoints[2].Type, Is.EqualTo(PathType.BSpline(3)));
@@ -184,8 +189,9 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
-            var decodedSlider = (Slider)decodedAfterEncode.beatmap.HitObjects[0];
+            var encoded = EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty);
+            var decodedSlider = (Slider)decodedAfterEncode.Beatmap.HitObjects[0];
             Assert.That(decodedSlider.Path.ControlPoints.Count, Is.EqualTo(5));
         }
 
@@ -211,8 +217,9 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((new Beatmap(), beatmapSkin)), string.Empty);
-            Assert.That(decodedAfterEncode.skin.Configuration.CustomComboColours, Has.Count.EqualTo(8));
+            var encoded = EncodeToLegacy(new BeatmapComponents(new Beatmap(), beatmapSkin, new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty);
+            Assert.That(decodedAfterEncode.Skin.Configuration.CustomComboColours, Has.Count.EqualTo(8));
         }
 
         [Test]
@@ -233,9 +240,9 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 HitObjects = { originalSlider }
             };
 
-            var encoded = encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty)));
-            var decodedAfterEncode = decodeFromLegacy(encoded, string.Empty, version: LegacyBeatmapEncoder.FIRST_LAZER_VERSION);
-            var decodedSlider = (Slider)decodedAfterEncode.beatmap.HitObjects[0];
+            var encoded = EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty, version: LegacyBeatmapEncoder.FIRST_LAZER_VERSION);
+            var decodedSlider = (Slider)decodedAfterEncode.Beatmap.HitObjects[0];
             Assert.That(decodedSlider.Path.ControlPoints.Select(p => p.Position),
                 Is.EquivalentTo(originalSlider.Path.ControlPoints.Select(p => p.Position)));
         }
@@ -265,12 +272,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.SectionName, Is.EqualTo("Boss Intro"));
 
             // color round-trips via 8-bit channel quantisation; compare with tolerance.
@@ -305,12 +312,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.SectionApproachRate, Is.EqualTo(10).Within(0.001));
             Assert.That(section.Settings.SectionOverallDifficulty, Is.EqualTo(8.5f).Within(0.001));
@@ -340,12 +347,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.SectionCircleSize, Is.EqualTo(7f).Within(0.001));
         }
@@ -377,12 +384,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.AllowUnsafeStackLeniencyOverrideValues, Is.True);
             Assert.That(section.Settings.SectionStackLeniency, Is.EqualTo(-0.2f).Within(0.001f));
             Assert.That(section.Settings.AllowUnsafeTickRateOverrideValues, Is.True);
@@ -416,12 +423,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.EnableGradualDifficultyChange, Is.True);
             Assert.That(section.Settings.GradualDifficultyChangeEndTimeMs, Is.EqualTo(1000f).Within(0.001));
@@ -454,12 +461,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.EnableDifficultyOverrides, Is.True);
             Assert.That(section.Settings.ForceNoApproachCircle, Is.True);
         }
@@ -487,12 +494,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.ForceSingleTap, Is.True);
         }
 
@@ -519,12 +526,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
 
-            var section = decodedAfterEncode.beatmap.SectionGimmicks.Sections[0];
+            var section = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0];
             Assert.That(section.Settings.ForceAlternate, Is.True);
         }
 
@@ -551,12 +558,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
 
-            var entry = decodedAfterEncode.beatmap.HitObjectGimmicks.Entries[0];
+            var entry = decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries[0];
             Assert.That(entry.ObjectId, Is.EqualTo(12345));
             Assert.That(entry.StartTime, Is.EqualTo(1000).Within(0.001));
             Assert.That(entry.ComboIndexWithOffsets, Is.EqualTo(2));
@@ -590,12 +597,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
 
-            var entry = decodedAfterEncode.beatmap.HitObjectGimmicks.Entries[0];
+            var entry = decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries[0];
             Assert.That(entry.ObjectId, Is.EqualTo(12345));
             Assert.That(entry.Settings.AllowUnsafeStackLeniencyOverrideValues, Is.True);
             Assert.That(entry.Settings.SectionStackLeniency, Is.EqualTo(-0.5f).Within(0.001f));
@@ -649,12 +656,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks, Is.Not.Null);
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks, Is.Not.Null);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries.Count, Is.EqualTo(1));
 
-            var entry = decodedAfterEncode.beatmap.HitObjectGimmicks.Entries[0];
+            var entry = decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries[0];
             Assert.That(entry.Settings.IsFakeNote, Is.True);
             Assert.That(entry.Settings.FakePunishMode, Is.EqualTo(FakePunishMode.Miss));
             Assert.That(entry.Settings.FakePlayHitsound, Is.False);
@@ -701,11 +708,11 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
 
-            var slider = decodedAfterEncode.beatmap.HitObjects.OfType<Slider>().Single();
+            var slider = decodedAfterEncode.Beatmap.HitObjects.OfType<Slider>().Single();
             Assert.That(slider.SliderVelocityMultiplier, Is.EqualTo(250).Within(0.001));
-            Assert.That(decodedAfterEncode.beatmap.HitObjectGimmicks.Entries.Single().ObjectId, Is.EqualTo(777));
+            Assert.That(decodedAfterEncode.Beatmap.HitObjectGimmicks.Entries.Single().ObjectId, Is.EqualTo(777));
         }
 
         [Test]
@@ -721,19 +728,45 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 }
             };
 
-            var decodedAfterEncode = decodeFromLegacy(encodeToLegacy((beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty))), string.Empty);
+            var encoded = EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[0].Samples[0].Suffix, Is.Null);
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[0].Samples[0].UseBeatmapSamples, Is.False);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[0].Samples[0].Suffix, Is.Null);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[0].Samples[0].UseBeatmapSamples, Is.False);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[1].Samples[0].Suffix, Is.Null);
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[1].Samples[0].UseBeatmapSamples, Is.True);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[1].Samples[0].Suffix, Is.Null);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[1].Samples[0].UseBeatmapSamples, Is.True);
 
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[2].Samples[0].Suffix, Is.EqualTo("3"));
-            Assert.That(decodedAfterEncode.beatmap.HitObjects[2].Samples[0].UseBeatmapSamples, Is.True);
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[2].Samples[0].Suffix, Is.EqualTo("3"));
+            Assert.That(decodedAfterEncode.Beatmap.HitObjects[2].Samples[0].UseBeatmapSamples, Is.True);
         }
 
-        private bool areComboColoursEqual(IHasComboColours a, IHasComboColours b)
+        [Test]
+        [SetCulture("pl-PL")]
+        public void TestSliderVelocityPresetCultureInvariance()
+        {
+            var beatmap = new Beatmap();
+
+            var encoded = EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard()));
+            var decodedAfterEncode = DecodeFromLegacy(encoded, beatmaps_resource_store, string.Empty);
+
+            Assert.That(decodedAfterEncode.Beatmap.SliderVelocityPresets, Is.EquivalentTo(beatmap.SliderVelocityPresets));
+        }
+
+        [TestCaseSource(nameof(allBeatmaps))]
+        [SetCulture("pl-PL")]
+        public void TestCultureInvariance(string name)
+        {
+            var decoded = DecodeFromLegacy(beatmaps_resource_store.GetStream(name), beatmaps_resource_store, name);
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(decoded), beatmaps_resource_store, name);
+
+            Sort(decoded.Beatmap);
+            Sort(decodedAfterEncode.Beatmap);
+
+            CompareBeatmaps(decoded, decodedAfterEncode);
+        }
+
+        private static bool areComboColoursEqual(IHasComboColours a, IHasComboColours b)
         {
             // equal to null, no need to SequenceEqual
             if (a.ComboColours == null && b.ComboColours == null)
@@ -745,7 +778,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
             return a.ComboColours.SequenceEqual(b.ComboColours);
         }
 
-        private void sort(IBeatmap beatmap)
+        public static void Sort(IBeatmap beatmap)
         {
             // Sort control points to ensure a sane ordering, as they may be parsed in different orders. This works because each group contains only uniquely-typed control points.
             foreach (var g in beatmap.ControlPointInfo.Groups)
@@ -755,19 +788,21 @@ namespace osu.Game.Tests.Beatmaps.Formats
             }
         }
 
-        private (IBeatmap beatmap, TestLegacySkin skin) decodeFromLegacy(Stream stream, string name, int version = LegacyDecoder<Beatmap>.LATEST_VERSION)
+        public static BeatmapComponents DecodeFromLegacy(Stream stream, IResourceStore<byte[]> beatmapsResourceStore, string name, int version = LegacyDecoder<Beatmap>.LATEST_VERSION)
         {
             using (var reader = new LineBufferedReader(stream))
             {
                 var beatmap = new LegacyBeatmapDecoder(version) { ApplyOffsets = false }.Decode(reader);
-                var beatmapSkin = new TestLegacySkin(beatmaps_resource_store, name);
+                var beatmapSkin = new TestLegacySkin(beatmapsResourceStore, name);
                 stream.Seek(0, SeekOrigin.Begin);
                 beatmapSkin.Configuration = new LegacySkinDecoder().Decode(reader);
-                return (convert(beatmap), beatmapSkin);
+                stream.Seek(0, SeekOrigin.Begin);
+                var storyboard = new LegacyStoryboardDecoder().Decode(reader);
+                return new BeatmapComponents(convert(beatmap), beatmapSkin, storyboard);
             }
         }
 
-        private class TestLegacySkin : LegacySkin
+        public class TestLegacySkin : LegacySkin
         {
             public TestLegacySkin(IResourceStore<byte[]> fallbackStore, string fileName)
                 : base(new SkinInfo { Name = "Test Skin", Creator = "Craftplacer" }, null, fallbackStore, fileName)
@@ -775,20 +810,20 @@ namespace osu.Game.Tests.Beatmaps.Formats
             }
         }
 
-        private MemoryStream encodeToLegacy((IBeatmap beatmap, ISkin skin) fullBeatmap)
+        public static MemoryStream EncodeToLegacy(BeatmapComponents fullBeatmap)
         {
-            var (beatmap, beatmapSkin) = fullBeatmap;
+            var (beatmap, beatmapSkin, storyboard) = fullBeatmap;
             var stream = new MemoryStream();
 
             using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
-                new LegacyBeatmapEncoder(beatmap, beatmapSkin).Encode(writer);
+                new LegacyBeatmapEncoder(beatmap, beatmapSkin, storyboard).Encode(writer);
 
             stream.Position = 0;
 
             return stream;
         }
 
-        private IBeatmap convert(IBeatmap beatmap)
+        private static IBeatmap convert(IBeatmap beatmap)
         {
             switch (beatmap.BeatmapInfo.Ruleset.OnlineID)
             {

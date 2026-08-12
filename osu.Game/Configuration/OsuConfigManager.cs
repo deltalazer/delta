@@ -33,7 +33,6 @@ namespace osu.Game.Configuration
         public OsuConfigManager(Storage storage)
             : base(storage)
         {
-            Migrate();
         }
 
         protected override void InitialiseDefaults()
@@ -133,7 +132,10 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.CursorRotation, true);
 
+#pragma warning disable CS0612 // Type or member is obsolete (setting default value to avoid risk of any future crashes)
             SetDefault(OsuSetting.MenuParallax, true);
+#pragma warning restore CS0612 // Type or member is obsolete
+            SetDefault(OsuSetting.MenuParallaxScale, 1.0f, 0.0f, 2.0f, 0.1f);
 
             // See https://stackoverflow.com/a/63307411 for default sourcing.
             SetDefault(OsuSetting.Prefer24HourTime, !CultureInfoHelper.SystemCulture.DateTimeFormat.ShortTimePattern.Contains(@"tt"));
@@ -212,6 +214,7 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.MultiplayerRoomFilter, RoomPermissionsFilter.All);
             SetDefault(OsuSetting.MultiplayerShowInProgressFilter, true);
+            SetDefault(OsuSetting.MultiplayerShowFullFilter, false);
 
             SetDefault(OsuSetting.LastProcessedMetadataId, -1);
 
@@ -249,31 +252,6 @@ namespace osu.Game.Configuration
             }
 
             return false;
-        }
-
-        public void Migrate()
-        {
-            // arrives as 2020.123.0-lazer
-            string rawVersion = Get<string>(OsuSetting.Version);
-
-            if (rawVersion.Length < 6)
-                return;
-
-            string[] pieces = rawVersion.Split('.');
-
-            // on a fresh install or when coming from a non-release build, execution will end here.
-            // we don't want to run migrations in such cases.
-            if (!int.TryParse(pieces[0], out int year)) return;
-            if (!int.TryParse(pieces[1], out int monthDay)) return;
-
-            int combined = year * 10000 + monthDay;
-
-            if (combined < 20250214)
-            {
-                // UI scaling on mobile platforms has been internally adjusted such that 1x UI scale looks correctly zoomed in than before.
-                if (RuntimeInfo.IsMobile)
-                    GetBindable<float>(OsuSetting.UIScale).SetDefault();
-            }
         }
 
         public override TrackedSettings CreateTrackedSettings()
@@ -390,7 +368,11 @@ namespace osu.Game.Configuration
         MenuVoice,
         MenuTips,
         CursorRotation,
-        MenuParallax,
+
+        [Obsolete]
+        MenuParallax, // todo: can be removed 20270101
+
+        MenuParallaxScale,
         Prefer24HourTime,
         BeatmapDetailTab,
         BeatmapLeaderboardSortMode,
@@ -475,6 +457,7 @@ namespace osu.Game.Configuration
         EditorAdjustExistingObjectsOnTimingChanges,
         AlwaysRequireHoldingForPause,
         MultiplayerShowInProgressFilter,
+        MultiplayerShowFullFilter,
         BeatmapListingFeaturedArtistFilter,
         ShowMobileDisclaimer,
         EditorShowStoryboard,
