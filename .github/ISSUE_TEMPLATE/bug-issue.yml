@@ -1,28 +1,74 @@
-name: Bug report
+﻿name: Bug report
 description: Report a very clearly broken issue.
 body:
   - type: markdown
     attributes:
       value: |
-        # osu! bug report
+        # DeltaLazer bug report
 
-        Important to note that your issue may have already been reported before. Please check:
-        - Pinned issues, at the top of https://github.com/ppy/osu/issues.
-        - Current open `priority:0` issues, filterable [here](https://github.com/ppy/osu/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Apriority%3A0).
+        **THIS IS ONLY FOR *ACTUAL BUG REPORTS*.**
+        YOU WILL BE REQUIRED TO **PROVIDE LOGS**.
+        YOU WILL BE REQUIRED TO **SEARCH FOR DUPLICATES**.
+
+        ANY ISSUE WHICH IS NOT A VALID BUG REPORT WILL BE CLOSED WITHOUT EXPLANATION.
+
+        USE DISCUSSIONS FOR ANYTHING YOU'RE NOT SURE ABOUT SOMETHING.
+
+
+
+        **IMPORTANT: Is this an upstream issue?**
+        Most core game issues come from the upstream client. If you can reproduce this bug in osu!lazer, **please open an issue on the [official ppy/osu repository](https://github.com/ppy/osu/issues)** instead. 
+        If you do report a bug there, please **DO NOT** mention "Delta" or "DeltaLazer", as we are unaffiliated with the official ppy team.
+        
+        The official developers do not provide support for third-party forks.
+        Mentioning a modified client in their issue tracker wastes their time, creates unnecessary confusion, and can be viewed as disrespectful.
+        Furthermore, **it will likely cause your issue to be immediately closed**, as they cannot guarantee the bug wasn't caused by our custom code.
+
+
+        **Only use this form if the bug is specific to DeltaLazer features!**
+        
+        
+        Your issue may also have already been reported. Please check:
+        - The Pinned issues tab, at the top of https://github.com/ppy/osu/issues and https://github.com/deltalazer/delta/issues.
+        - Current open `priority:0` issues for BOTH [the upstream client](https://github.com/ppy/osu/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Apriority%3A0) and [DeltaLazer](https://github.com/deltalazer/delta/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Apriority%3A0).
         - And most importantly, search for your issue both in the [issue listing](https://github.com/ppy/osu/issues) and the [Q&A discussion listing](https://github.com/ppy/osu/discussions/categories/q-a). If you find that it already exists, respond with a reaction or add any further information that may be helpful.
 
         # ATTENTION LINUX USERS
 
-        If you are having an issue and it is hardware related, **please open a [q&a discussion](https://github.com/ppy/osu/discussions/categories/q-a)** instead of an issue. There's a high chance your issue is due to your system configuration, and not our software.
+        If you are having an issue and it is hardware or system-related, **please consult the [q&a discussion tab](https://github.com/ppy/osu/discussions/categories/q-a)** of the upstream client.
+        There's a high chance your issue is due to your system configuration, and not our fork. 
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      description: Please verify the following before submitting your bug report.
+      options:
+        - label: I have verified that this bug only occurs in DeltaLazer and NOT in the official osu!lazer client.
+          required: true
+        - label: I have searched the existing DeltaLazer issues and found no duplicates.
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        # How do I Determine my Build Type?
 
+        If you grabbed your build from the Releases section, it is likely a **Release Build**
+
+        If you built your client from an IDE [Like Visual Studio or Jetbrains Rider], You likely have a **Debug Build** 
+  - type: dropdown
+    attributes:
+      label: Build Type
+      description: Which type of build are you using? (See README for details)
+      options:
+        - Debug
+        - Release
+    validations:
+      required: true
   - type: dropdown
     attributes:
       label: Type
       options:
         - Crash to desktop
         - Game behaviour
-        - Performance
-        - Cosmetic
         - Other
     validations:
       required: true
@@ -38,11 +84,11 @@ body:
       description: Add screenshots or videos that show the bug here.
       placeholder: Drag and drop the screenshots/videos into this box.
     validations:
-      required: false
+      required: true
   - type: input
     attributes:
       label: Version
-      description: The version you encountered this bug on. This is shown at the end of the settings overlay.
+      description: The version you encountered this bug on. This is shown at the bottom of the settings overlay.
     validations:
       required: true
   - type: markdown
@@ -66,6 +112,8 @@ body:
         The places to find the logs on mobile platforms are as follows:
           - *On Android*, navigate to `Android/data/sh.ppy.osulazer/files/logs` using a file browser app.
           - *On iOS*, connect your device to a PC and copy the `logs` directory from the app's document storage using iTunes. (https://support.apple.com/en-us/HT201301#copy-to-computer)
+        
+        Please Note: DeltaLazer currently has very limited resources; Mobile support is currently our last priority and our modifications may make mobile builds unstable
 
   - type: textarea
     attributes:

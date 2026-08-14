@@ -162,7 +162,7 @@ namespace osu.Game.Screens.Menu
                     Anchor = Anchor.Centre,
                     Origin = Anchor.CentreLeft,
                     Position = new Vector2(circle_offset, 0),
-                    Colour = Color4Extensions.FromHex(@"9fe16d"),
+                    Colour = Color4Extensions.FromHex(@"c53a42"),
                 },
             };
 

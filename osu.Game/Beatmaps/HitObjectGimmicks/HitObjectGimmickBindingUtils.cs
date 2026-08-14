@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
@@ -47,6 +47,9 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
                 EnsureObjectIds(hitObjects);
                 return;
             }
+
+            if (hitObjects.Count == 0)
+                return;
 
             var usedObjectIds = new HashSet<long>(hitObjects.Where(h => h.GimmickObjectId.HasValue).Select(h => h.GimmickObjectId!.Value));
 
@@ -174,15 +177,25 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
 
         private static long generateUniqueObjectId(HashSet<long> usedObjectIds)
         {
-            long id;
+            long id = 1;
 
-            do
-            {
-                id = GenerateNewObjectId();
-            }
-            while (!usedObjectIds.Add(id));
+            while (!usedObjectIds.Add(id))
+                id++;
+
+            advanceSharedCounterTo(id);
 
             return id;
+        }
+
+        private static void advanceSharedCounterTo(long value)
+        {
+            long current;
+
+            while ((current = Interlocked.Read(ref nextObjectId)) < value)
+            {
+                if (Interlocked.CompareExchange(ref nextObjectId, value, current) == current)
+                    break;
+            }
         }
 
         private static bool tryDequeueUnclaimed(Queue<HitObject>? candidates, HashSet<HitObject> claimed, out HitObject? hitObject)

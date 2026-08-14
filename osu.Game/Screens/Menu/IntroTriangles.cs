@@ -205,7 +205,7 @@ namespace osu.Game.Screens.Menu
 
                     using (BeginDelayedSequence(text_4))
                     {
-                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to osu!");
+                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to deltalazer!");
                         welcomeText.TransformTo(nameof(welcomeText.Spacing), new Vector2(50, 0), 5000);
                     }
 

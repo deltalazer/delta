@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -19,6 +19,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Edit.Tools;
@@ -28,7 +29,9 @@ using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
+using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components.TernaryButtons;
+using osu.Game.Screens.Edit.Compose;
 using osu.Game.Screens.Edit.Compose.Components;
 using osuTK;
 using osuTK.Input;
@@ -56,7 +59,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private readonly Bindable<TernaryState> rectangularGridSnapToggle = new Bindable<TernaryState>();
 
-        protected override Drawable CreateHitObjectInspector() => new OsuHitObjectInspector();
+        protected override Drawable CreateHitObjectInspector() => new OsuHitObjectInspector(DistanceSnapProvider);
 
         protected override IEnumerable<Drawable> CreateTernaryButtons()
             => base.CreateTernaryButtons()
@@ -76,6 +79,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         public readonly OsuDistanceSnapProvider DistanceSnapProvider = new OsuDistanceSnapProvider();
 
         [Cached]
+        private readonly OsuSliderVelocityToolboxGroup sliderVelocityToolboxGroup = new OsuSliderVelocityToolboxGroup();
+
+        [Cached]
         protected readonly OsuGridToolboxGroup OsuGridToolboxGroup = new OsuGridToolboxGroup();
 
         [Cached]
@@ -86,6 +92,16 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         [Cached]
         protected readonly HitObjectGimmickToolboxGroup HitObjectGimmickToolboxGroup = new HitObjectGimmickToolboxGroup();
+
+        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent)
+        {
+            var dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
+            if (dependencies.Get<SectionGimmickEditorModel>() == null)
+                dependencies.CacheAs(new SectionGimmickEditorModel(dependencies.Get<EditorBeatmap>()));
+
+            return dependencies;
+        }
 
         [BackgroundDependencyLoader]
         private void load()
@@ -117,6 +133,12 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             RightToolbox.AddRange(new Drawable[]
                 {
+                    new OsuContextMenuContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Child = sliderVelocityToolboxGroup,
+                    },
                     OsuGridToolboxGroup,
                     new TransformToolboxGroup
                     {
