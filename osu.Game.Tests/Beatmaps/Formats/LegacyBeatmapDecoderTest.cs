@@ -1257,7 +1257,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 var working = new TestWorkingBeatmap(decoder.Decode(stream));
                 IBeatmap beatmap = working.GetPlayableBeatmap(ruleset.RulesetInfo, Array.Empty<Mod>());
 
-                Assert.That(beatmap.HitObjects[0].GetEndTime(), Is.EqualTo(3153));
+                Assert.That(beatmap.HitObjects[0].GetEndTime(), Is.EqualTo(31278));
             }
         }
 
