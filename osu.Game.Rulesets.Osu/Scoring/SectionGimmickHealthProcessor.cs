@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -8,6 +8,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Judgements;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Scoring;
 
@@ -20,6 +21,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
         private BeatmapHitObjectGimmicks hitObjectGimmicks = new BeatmapHitObjectGimmicks();
         private Dictionary<long, HitObjectGimmickSettings> objectSettingsById = new Dictionary<long, HitObjectGimmickSettings>();
         private Dictionary<(double StartTime, int ComboIndexWithOffsets), HitObjectGimmickSettings> objectSettingsLookup = new Dictionary<(double StartTime, int ComboIndexWithOffsets), HitObjectGimmickSettings>();
+        private readonly List<(double Start, double End)> keptHealthRanges = new List<(double, double)>();
         private SectionGimmickSection? activeSection;
         private double activeSectionAccuracyBaseScore;
         private double activeSectionAccuracyMaxBaseScore;
@@ -39,23 +41,43 @@ namespace osu.Game.Rulesets.Osu.Scoring
             objectSettingsById = createObjectSettingsLookupByObjectId(hitObjectGimmicks);
             objectSettingsLookup = createObjectSettingsLookup(hitObjectGimmicks);
             SectionGimmicksValidator.Validate(gimmicks);
+
+            keptHealthRanges.Clear();
+            keptHealthRanges.AddRange(beatmap.HitObjects
+                                             .Where(h => h is { ForceAllMiss: true, FreezeHP: true })
+                                             .Select(h => (h.StartTime, h.GetEndTime())));
+
             base.ApplyBeatmap(beatmap);
+        }
+
+        public bool IsHealthKeptAt(double time)
+        {
+            if (SectionGimmickSectionResolver.Resolve(gimmicks, time)?.Settings is { ForceAllMiss: true, FreezeHP: true })
+                return true;
+
+            foreach ((double start, double end) in keptHealthRanges)
+            {
+                if (time >= start && time <= end)
+                    return true;
+            }
+
+            return false;
         }
 
         protected override void Update()
         {
             base.Update();
 
-            var section = resolveSection(Time.Current);
-            if (section == null)
-                return;
+            var settings = resolveSection(Time.Current)?.Settings;
 
-            var settings = section.Settings;
-
-            if (settings.EnableHPGimmick && !float.IsNaN(settings.HPCap))
+            if (settings != null && settings.EnableHPGimmick && !float.IsNaN(settings.HPCap))
                 Health.Value = Math.Min(Health.Value, settings.HPCap);
 
-            if ((settings.EnableHPGimmick && settings.NoDrain) || settings.EnableGreatOffsetPenalty)
+            bool cancelDrain = settings != null && ((settings.EnableHPGimmick && settings.NoDrain) || settings.EnableGreatOffsetPenalty);
+
+            cancelDrain |= IsHealthKeptAt(Time.Current);
+
+            if (cancelDrain)
             {
                 // cancel out frame drain while this mode is active.
                 // keep this section-scoped
@@ -79,7 +101,7 @@ namespace osu.Game.Rulesets.Osu.Scoring
             {
                 settings = mergeSettings(section?.Settings, objectSettings);
 
-                if (settings.EnableNoMiss && result.Type == HitResult.Miss)
+                if (settings.EnableNoMiss && result.Type == HitResult.Miss && !result.HitObject.ForceAllMiss)
                 {
                     TriggerFailure();
                     return;
@@ -128,6 +150,9 @@ namespace osu.Game.Rulesets.Osu.Scoring
 
         protected override double GetHealthIncreaseFor(JudgementResult result)
         {
+            if (result.HitObject is { ForceAllMiss: true, FreezeHP: true })
+                return 0;
+
             var section = resolveSection(result.HitObject.StartTime);
             var objectSettings = resolveObjectSettings(result.HitObject);
             if (section == null && objectSettings == null)
@@ -373,10 +398,11 @@ namespace osu.Game.Rulesets.Osu.Scoring
         }
 
         private static bool affectsSectionAccuracyDenominator(JudgementResult result)
-            => result.Judgement.MaxResult.AffectsAccuracy()
-               || (result.HitObject is FakeHitCircle or FakeSlider
-                   && result.Type == HitResult.Miss
-                   && result.Judgement.MaxResult == HitResult.IgnoreHit);
+            => result.HitObject is not { ForceAllMiss: true, FreezeAccuracy: true }
+               && (result.Judgement.MaxResult.AffectsAccuracy()
+                   || (result.HitObject is FakeHitCircle or FakeSlider
+                       && result.Type == HitResult.Miss
+                       && result.Judgement.MaxResult == HitResult.IgnoreHit));
 
         private static int getSectionAccuracyMaxBaseScoreForResult(JudgementResult result)
         {
