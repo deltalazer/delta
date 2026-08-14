@@ -733,6 +733,9 @@ namespace osu.Game.Rulesets.Objects.Drawables
             if (!Result.HasResult)
                 throw new InvalidOperationException($"{GetType().ReadableName()} applied a {nameof(JudgementResult)} but did not update {nameof(JudgementResult.Type)}.");
 
+            if (HitObject.ForceAllMiss)
+                Result.Type = Result.Judgement.MinResult;
+
             HitResultExtensions.ValidateHitResultPair(Result.Judgement.MaxResult, Result.Judgement.MinResult);
 
             bool isValidHitResult = Result.Type.IsValidHitResult(Result.Judgement.MinResult, Result.Judgement.MaxResult)

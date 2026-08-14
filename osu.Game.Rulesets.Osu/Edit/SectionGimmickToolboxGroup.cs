@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
@@ -85,6 +86,11 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FillFlowContainer hpSliderRoutingFields = null!;
 
         private FormCheckBox enableNoMiss = null!;
+        private FormCheckBox forceAllMiss = null!;
+        private FillFlowContainer allMissFields = null!;
+        private FormCheckBox freezeHP = null!;
+        private FormCheckBox freezeAccuracy = null!;
+        private FormCheckBox freezeCombo = null!;
         private FormCheckBox enableAccuracyRequirement = null!;
         private FormNumberBox requiredAccuracy = null!;
 
@@ -149,6 +155,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceNoApproachCircle = null!;
         private FormCheckBox forceHardRock = null!;
         private FormCheckBox forceFlashlight = null!;
+        private FormEnumDropdown<ForcedSpinnerDirection> spinnerDirection = null!;
+        private FormEnumDropdown<SpinnerWrongDirectionBehaviour> spinnerWrongDirection = null!;
+        private FormEnumDropdown<SpinnerDirectionIndicator> spinnerIndicator = null!;
         private FormNumberBox flashlightRadius = null!;
         private FormCheckBox enableGradualFlashlightRadiusChange = null!;
         private FormCheckBox enableGradualFlashlightFadeIn = null!;
@@ -196,7 +205,7 @@ namespace osu.Game.Rulesets.Osu.Edit
 
         private bool updatingControls;
         private readonly BindableList<HitObject> selectedHitObjects = new BindableList<HitObject>();
-        private readonly ScheduledDelegate[] fadeSchedules = new ScheduledDelegate[15];
+        private readonly ScheduledDelegate[] fadeSchedules = new ScheduledDelegate[16];
 
         public SectionGimmickToolboxGroup()
             : base("Section gimmicks")
@@ -435,6 +444,32 @@ namespace osu.Game.Rulesets.Osu.Edit
                             enableNoMiss = new FormCheckBox
                             {
                                 Caption = "No Miss",
+                            },
+                            forceAllMiss = new FormCheckBox
+                            {
+                                Caption = "All Miss",
+                            },
+                            allMissFields = new FillFlowContainer
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(5),
+                                Children = new Drawable[]
+                                {
+                                    freezeHP = new FormCheckBox
+                                    {
+                                        Caption = "Freeze HP",
+                                    },
+                                    freezeAccuracy = new FormCheckBox
+                                    {
+                                        Caption = "Freeze accuracy",
+                                    },
+                                    freezeCombo = new FormCheckBox
+                                    {
+                                        Caption = "Freeze Combo",
+                                    },
+                                }
                             },
                             enableAccuracyRequirement = new FormCheckBox
                             {
@@ -903,6 +938,18 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "Force FL",
                                     },
+                                    spinnerDirection = new FormEnumDropdown<ForcedSpinnerDirection>
+                                    {
+                                        Caption = "Spinner direction",
+                                    },
+                                    spinnerWrongDirection = new FormEnumDropdown<SpinnerWrongDirectionBehaviour>
+                                    {
+                                        Caption = "Wrong direction",
+                                    },
+                                    spinnerIndicator = new FormEnumDropdown<SpinnerDirectionIndicator>
+                                    {
+                                        Caption = "Direction indicator",
+                                    },
                                     flashlightRadius = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "FL radius (20-400)",
@@ -1179,7 +1226,23 @@ namespace osu.Game.Rulesets.Osu.Edit
             hpMissAffectsSliderEndAndTickMisses.Current.BindValueChanged(v => mutateSetting(s => s.HPMissAffectsSliderEndAndTickMisses = v.NewValue));
             showHpSliderRouting.Current.BindValueChanged(_ => updateGroupVisibility());
 
-            enableNoMiss.Current.BindValueChanged(v => mutateSetting(s => s.EnableNoMiss = v.NewValue));
+            enableNoMiss.Current.BindValueChanged(v =>
+            {
+                mutateSetting(s => s.EnableNoMiss = v.NewValue);
+
+                if (v.NewValue && !updatingControls)
+                    forceAllMiss.Current.Value = false;
+            });
+            forceAllMiss.Current.BindValueChanged(v =>
+            {
+                mutateSetting(s => s.ForceAllMiss = v.NewValue);
+
+                if (v.NewValue && !updatingControls)
+                    enableNoMiss.Current.Value = false;
+            });
+            freezeHP.Current.BindValueChanged(v => mutateSetting(s => s.FreezeHP = v.NewValue));
+            freezeAccuracy.Current.BindValueChanged(v => mutateSetting(s => s.FreezeAccuracy = v.NewValue));
+            freezeCombo.Current.BindValueChanged(v => mutateSetting(s => s.FreezeCombo = v.NewValue));
             enableAccuracyRequirement.Current.BindValueChanged(v => mutateSetting(s => s.EnableAccuracyRequirement = v.NewValue));
             bindAccuracyPercentageSetting(requiredAccuracy, (s, v) => s.RequiredAccuracy = v);
 
@@ -1268,6 +1331,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceNoApproachCircle.Current.BindValueChanged(v => mutateSetting(s => s.ForceNoApproachCircle = v.NewValue));
             forceHardRock.Current.BindValueChanged(v => mutateSetting(s => s.ForceHardRock = v.NewValue));
             forceFlashlight.Current.BindValueChanged(v => mutateSetting(s => s.ForceFlashlight = v.NewValue));
+            spinnerDirection.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerDirection = v.NewValue));
+            spinnerWrongDirection.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerWrongDirection = v.NewValue));
+            spinnerIndicator.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerIndicator = v.NewValue));
             bindFloatSettingOnCommitOnly(flashlightRadius, (s, v) => s.FlashlightRadius = v, v => Math.Clamp(v, 20f, 400f));
             enableGradualFlashlightRadiusChange.Current.BindValueChanged(v => mutateSetting(s => s.EnableGradualFlashlightRadiusChange = v.NewValue));
             bindFloatSetting(gradualFlashlightRadiusEndTime, (s, v) => s.GradualFlashlightRadiusEndTimeMs = v, v => Math.Max(0f, v));
@@ -1400,6 +1466,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                                                     || settings.HPMissAffectsSliderEndAndTickMisses;
 
                 enableNoMiss.Current.Value = settings.EnableNoMiss;
+                forceAllMiss.Current.Value = settings.ForceAllMiss;
+                freezeHP.Current.Value = settings.FreezeHP;
+                freezeAccuracy.Current.Value = settings.FreezeAccuracy;
+                freezeCombo.Current.Value = settings.FreezeCombo;
                 enableAccuracyRequirement.Current.Value = settings.EnableAccuracyRequirement;
                 requiredAccuracy.Current.Value = formatAccuracyPercent(settings.RequiredAccuracy);
 
@@ -1453,6 +1523,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceNoApproachCircle.Current.Value = settings.ForceNoApproachCircle;
                 forceHardRock.Current.Value = settings.ForceHardRock;
                 forceFlashlight.Current.Value = settings.ForceFlashlight;
+                spinnerDirection.Current.Value = settings.SpinnerDirection;
+                spinnerWrongDirection.Current.Value = settings.SpinnerWrongDirection;
+                spinnerIndicator.Current.Value = settings.SpinnerIndicator;
                 flashlightRadius.Current.Value = formatFloat(settings.FlashlightRadius);
                 enableGradualFlashlightRadiusChange.Current.Value = settings.EnableGradualFlashlightRadiusChange;
                 enableGradualFlashlightFadeIn.Current.Value = settings.EnableGradualFlashlightFadeIn;
@@ -1526,6 +1599,9 @@ namespace osu.Game.Rulesets.Osu.Edit
 
             scheduleFade(requiredAccuracy, enableAccuracyRequirement.Current.Value, 2);
             requiredAccuracy.AlwaysPresent = enableAccuracyRequirement.Current.Value;
+
+            scheduleFade(allMissFields, forceAllMiss.Current.Value, 15);
+            allMissFields.AlwaysPresent = forceAllMiss.Current.Value;
 
             scheduleFade(countLimitFields, enableCountLimits.Current.Value, 3);
             countLimitFields.AlwaysPresent = enableCountLimits.Current.Value;

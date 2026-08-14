@@ -17,6 +17,7 @@ using osu.Framework.Lists;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Scoring;
@@ -58,6 +59,28 @@ namespace osu.Game.Rulesets.Objects
         /// Optional identifier used to bind hit-object gimmick settings directly to this object.
         /// </summary>
         public long? GimmickObjectId { get; set; }
+
+        /// <summary>
+        /// Whether this hitobject is judged as a miss even when it is hit.
+        /// Set by section or object gimmicks during PostProcess.
+        /// </summary>
+        public bool ForceAllMiss { get; set; }
+
+        /// <summary>
+        /// Whether the miss forced by <see cref="ForceAllMiss"/> leaves health untouched.
+        /// </summary>
+        public bool FreezeHP { get; set; } = true;
+
+        /// <summary>
+        /// Whether the miss forced by <see cref="ForceAllMiss"/> leaves accuracy untouched.
+        /// </summary>
+        public bool FreezeAccuracy { get; set; } = true;
+
+        /// <summary>
+        /// Whether the miss forced by <see cref="ForceAllMiss"/> keeps combo intact, so that
+        /// performance is not dragged down by a miss the player was never able to avoid.
+        /// </summary>
+        public bool FreezeCombo { get; set; } = true;
 
         public readonly BindableList<HitSampleInfo> SamplesBindable = new BindableList<HitSampleInfo>();
 

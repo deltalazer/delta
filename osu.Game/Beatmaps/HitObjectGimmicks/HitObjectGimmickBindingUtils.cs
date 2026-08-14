@@ -281,6 +281,10 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
 
                 EnableHPGimmick = source.EnableHPGimmick,
                 EnableNoMiss = source.EnableNoMiss,
+                ForceAllMiss = source.ForceAllMiss,
+                FreezeHP = source.FreezeHP,
+                FreezeAccuracy = source.FreezeAccuracy,
+                FreezeCombo = source.FreezeCombo,
                 EnableCountLimits = source.EnableCountLimits,
                 EnableGreatOffsetPenalty = source.EnableGreatOffsetPenalty,
 
@@ -311,6 +315,9 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
                 ForceNoApproachCircle = source.ForceNoApproachCircle,
                 ForceHardRock = source.ForceHardRock,
                 ForceFlashlight = source.ForceFlashlight,
+                SpinnerDirection = source.SpinnerDirection,
+                SpinnerWrongDirection = source.SpinnerWrongDirection,
+                SpinnerIndicator = source.SpinnerIndicator,
                 ForceTraceable = source.ForceTraceable,
                 FlashlightRadius = source.FlashlightRadius,
             };

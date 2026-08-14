@@ -660,6 +660,10 @@ namespace osu.Game.Beatmaps.Formats
                     {
                         case "EnableHPGimmick": section.Settings.EnableHPGimmick = parseBool(value); break;
                         case "EnableNoMiss": section.Settings.EnableNoMiss = parseBool(value); break;
+                        case "ForceAllMiss": section.Settings.ForceAllMiss = parseBool(value); break;
+                        case "FreezeHP": section.Settings.FreezeHP = parseBool(value); break;
+                        case "FreezeAccuracy": section.Settings.FreezeAccuracy = parseBool(value); break;
+                        case "FreezeCombo": section.Settings.FreezeCombo = parseBool(value); break;
                         case "EnableAccuracyRequirement": section.Settings.EnableAccuracyRequirement = parseBool(value); break;
                         case "RequiredAccuracy": section.Settings.RequiredAccuracy = Parsing.ParseFloat(value); break;
                         case "EnableCountLimits": section.Settings.EnableCountLimits = parseBool(value); break;
@@ -716,6 +720,9 @@ namespace osu.Game.Beatmaps.Formats
                         case "ForceNoApproachCircle": section.Settings.ForceNoApproachCircle = parseBool(value); break;
                         case "ForceHardRock": section.Settings.ForceHardRock = parseBool(value); break;
                         case "ForceFlashlight": section.Settings.ForceFlashlight = parseBool(value); break;
+                        case "SpinnerDirection": section.Settings.SpinnerDirection = parseEnum<ForcedSpinnerDirection>(value); break;
+                        case "SpinnerWrongDirection": section.Settings.SpinnerWrongDirection = parseEnum<SpinnerWrongDirectionBehaviour>(value); break;
+                        case "SpinnerIndicator": section.Settings.SpinnerIndicator = parseEnum<SpinnerDirectionIndicator>(value); break;
                         case "ForceTraceable": section.Settings.ForceTraceable = parseBool(value); break;
                         case "FlashlightRadius": section.Settings.FlashlightRadius = Parsing.ParseFloat(value); break;
                         case "EnableGradualFlashlightRadiusChange": section.Settings.EnableGradualFlashlightRadiusChange = parseBool(value); break;
@@ -771,6 +778,10 @@ namespace osu.Game.Beatmaps.Formats
 
             static bool parseBool(string boolValue)
                 => boolValue == "1" || boolValue.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            static T parseEnum<T>(string enumValue) where T : struct, Enum
+                => Enum.TryParse(enumValue, true, out T result) ? result : default;
+
         }
 
         private void handleHitObjectGimmick(string line)
@@ -863,6 +874,18 @@ namespace osu.Game.Beatmaps.Formats
                         case "EnableNoMiss":
                             entry.Settings.EnableNoMiss = parseBool(value);
                             break;
+                        case "ForceAllMiss":
+                            entry.Settings.ForceAllMiss = parseBool(value);
+                            break;
+                        case "FreezeHP":
+                            entry.Settings.FreezeHP = parseBool(value);
+                            break;
+                        case "FreezeAccuracy":
+                            entry.Settings.FreezeAccuracy = parseBool(value);
+                            break;
+                        case "FreezeCombo":
+                            entry.Settings.FreezeCombo = parseBool(value);
+                            break;
                         case "EnableCountLimits":
                             entry.Settings.EnableCountLimits = parseBool(value);
                             break;
@@ -941,6 +964,18 @@ namespace osu.Game.Beatmaps.Formats
                         case "ForceTraceable":
                             entry.Settings.ForceTraceable = parseBool(value);
                             break;
+
+                        case "SpinnerDirection":
+                            entry.Settings.SpinnerDirection = parseEnum<ForcedSpinnerDirection>(value);
+                            break;
+
+                        case "SpinnerWrongDirection":
+                            entry.Settings.SpinnerWrongDirection = parseEnum<SpinnerWrongDirectionBehaviour>(value);
+                            break;
+
+                        case "SpinnerIndicator":
+                            entry.Settings.SpinnerIndicator = parseEnum<SpinnerDirectionIndicator>(value);
+                            break;
                         case "FlashlightRadius":
                             entry.Settings.FlashlightRadius = Parsing.ParseFloat(value);
                             break;
@@ -954,6 +989,10 @@ namespace osu.Game.Beatmaps.Formats
 
             static bool parseBool(string boolValue)
                 => boolValue == "1" || boolValue.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+            static T parseEnum<T>(string enumValue) where T : struct, Enum
+                => Enum.TryParse(enumValue, true, out T result) ? result : default;
+
         }
 
         private int getOffsetTime(int time) => time + (ApplyOffsets ? offset : 0);

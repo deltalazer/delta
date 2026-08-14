@@ -1,6 +1,7 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osuTK.Graphics;
 
 namespace osu.Game.Beatmaps.SectionGimmicks
@@ -9,6 +10,10 @@ namespace osu.Game.Beatmaps.SectionGimmicks
     {
         public bool EnableHPGimmick { get; set; }
         public bool EnableNoMiss { get; set; }
+        public bool ForceAllMiss { get; set; }
+        public bool FreezeHP { get; set; } = true;
+        public bool FreezeAccuracy { get; set; } = true;
+        public bool FreezeCombo { get; set; } = true;
         public bool EnableAccuracyRequirement { get; set; }
         public float RequiredAccuracy { get; set; } = float.NaN;
         public bool EnableCountLimits { get; set; }
@@ -74,6 +79,9 @@ namespace osu.Game.Beatmaps.SectionGimmicks
         public bool ForceNoApproachCircle { get; set; }
         public bool ForceHardRock { get; set; }
         public bool ForceFlashlight { get; set; }
+        public ForcedSpinnerDirection SpinnerDirection { get; set; }
+        public SpinnerWrongDirectionBehaviour SpinnerWrongDirection { get; set; }
+        public SpinnerDirectionIndicator SpinnerIndicator { get; set; }
         public float FlashlightRadius { get; set; } = float.NaN;
         public bool EnableGradualFlashlightRadiusChange { get; set; }
         public bool EnableGradualFlashlightFadeIn { get; set; }
