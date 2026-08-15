@@ -12,6 +12,7 @@ using osu.Framework.Testing;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.GitHub;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Changelog;
 
@@ -24,6 +25,9 @@ namespace osu.Game.Tests.Visual.Online
 
         private readonly Dictionary<string, APIUpdateStream> streams;
         private readonly Dictionary<string, APIChangelogBuild> builds;
+
+        private readonly List<GitHubRelease> releases;
+        private readonly APIUpdateStream deltaStream;
 
         private APIChangelogBuild requestedBuild;
         private TestChangelogOverlay changelog;
@@ -48,6 +52,21 @@ namespace osu.Game.Tests.Visual.Online
 
             foreach (var stream in streams.Values)
                 stream.LatestBuild = builds[stream.Name];
+
+            releases = new List<GitHubRelease>
+            {
+                new GitHubRelease
+                {
+                    Id = 1,
+                    TagName = version,
+                    Name = version,
+                    Body = "Some release notes.",
+                    HtmlUrl = $"https://github.com/{GitHubChangelog.REPOSITORY}/releases/tag/{version}",
+                    PublishedAt = DateTimeOffset.Now,
+                },
+            };
+
+            deltaStream = GitHubChangelog.ToIndex(releases).Streams.Single();
         }
 
         [SetUp]
@@ -59,13 +78,8 @@ namespace osu.Game.Tests.Visual.Online
             {
                 switch (request)
                 {
-                    case GetChangelogRequest changelogRequest:
-                        var changelogResponse = new APIChangelogIndex
-                        {
-                            Streams = streams.Values.ToList(),
-                            Builds = builds.Values.ToList()
-                        };
-                        changelogRequest.TriggerSuccess(changelogResponse);
+                    case GetGitHubChangelogRequest changelogRequest:
+                        changelogRequest.TriggerSuccess(releases);
                         return true;
 
                     case GetChangelogBuildRequest buildRequest:
@@ -107,7 +121,7 @@ namespace osu.Game.Tests.Visual.Online
             {
                 Version = "2018.712.0",
                 DisplayVersion = "2018.712.0",
-                UpdateStream = streams["lazer"],
+                UpdateStream = deltaStream,
                 CreatedAt = new DateTime(2018, 7, 12),
                 ChangelogEntries = new List<APIChangelogEntry>
                 {
@@ -167,7 +181,7 @@ namespace osu.Game.Tests.Visual.Online
 
             AddUntilStep(@"wait for streams", () => changelog.Streams?.Count > 0);
             AddAssert(@"correct build displayed", () => changelog.Current.Value.Version == "2018.712.0");
-            AddAssert(@"correct stream selected", () => changelog.Header.Streams.Current.Value.Id == 5);
+            AddAssert(@"correct stream selected", () => changelog.Header.Streams.Current.Value.Id == deltaStream.Id);
             AddUntilStep(@"wait for content load", () => changelog.ChildrenOfType<ChangelogSupporterPromo>().Any());
             AddAssert(@"supporter promo showed", () => changelog.ChildrenOfType<ChangelogSupporterPromo>().First().Alpha == (isSupporter ? 0 : 1));
         }

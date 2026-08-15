@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
@@ -32,34 +31,9 @@ namespace osu.Game.Overlays.Changelog
         }
 
         [BackgroundDependencyLoader]
-        private void load(CancellationToken? cancellation, IAPIProvider api, OverlayColourProvider colourProvider)
+        private void load(IAPIProvider api, OverlayColourProvider colourProvider)
         {
-            bool complete = false;
-
-            APIChangelogBuild? onlineBuildDetails = null;
-
-            var req = new GetChangelogBuildRequest(build.UpdateStream.Name, build.Version);
-            req.Success += res =>
-            {
-                onlineBuildDetails = res;
-                complete = true;
-            };
-            req.Failure += _ => complete = true;
-
-            api.PerformAsync(req);
-
-            while (!complete)
-            {
-                if (cancellation?.IsCancellationRequested == true)
-                {
-                    req.Cancel();
-                    return;
-                }
-
-                Thread.Sleep(10);
-            }
-
-            if (onlineBuildDetails == null) return;
+            APIChangelogBuild onlineBuildDetails = build;
 
             CommentsContainer comments;
 
