@@ -15,7 +15,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Input.Bindings;
-using osu.Game.Online.API.Requests;
+using osu.Game.Online.GitHub;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.Changelog;
 using osuTK.Graphics;
@@ -154,13 +154,11 @@ namespace osu.Game.Overlays
             {
                 var tcs = new TaskCompletionSource<bool>();
 
-                var req = new GetChangelogRequest();
+                var req = new GetGitHubChangelogRequest();
 
-                req.Success += res => Schedule(() =>
+                req.Success += releases => Schedule(() =>
                 {
-                    // remap streams to builds to ensure model equality
-                    res.Builds.ForEach(b => b.UpdateStream = res.Streams.Find(s => s.Id == b.UpdateStream.Id));
-                    res.Streams.ForEach(s => s.LatestBuild.UpdateStream = res.Streams.Find(s2 => s2.Id == s.LatestBuild.UpdateStream.Id));
+                    var res = GitHubChangelog.ToIndex(releases);
 
                     builds = res.Builds;
                     Streams = res.Streams;
