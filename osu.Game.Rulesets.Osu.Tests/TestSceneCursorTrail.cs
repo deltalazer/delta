@@ -20,7 +20,7 @@ using osu.Framework.Testing.Input;
 using osu.Game.Audio;
 using osu.Game.Rulesets.Osu.Skinning;
 using osu.Game.Rulesets.Osu.Skinning.Legacy;
-using osu.Game.Rulesets.Osu.UI.Cursor;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Skinning;
 using osu.Game.Tests.Visual;
 using osuTK;

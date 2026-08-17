@@ -22,7 +22,7 @@ using osuTK;
 using osuTK.Graphics;
 using osuTK.Graphics.ES30;
 
-namespace osu.Game.Rulesets.Osu.UI.Cursor
+namespace osu.Game.Graphics.Cursor
 {
     [DrawVisualiserHidden]
     public partial class CursorTrail : Drawable, IRequireHighFrequencyMousePosition
