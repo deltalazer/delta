@@ -19,7 +19,6 @@ using osu.Game.Overlays.Settings;
 using osu.Game.Resources.Localisation.Web;
 using osuTK;
 using osu.Game.Localisation;
-using osu.Framework.Graphics.Shapes;
 
 
 namespace osu.Game.Overlays.Login
@@ -38,7 +37,7 @@ namespace osu.Game.Overlays.Login
         public override bool AcceptsFocus => true;
 
         [BackgroundDependencyLoader(permitNulls: true)]
-        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation, GameHost host, OsuColour colours)
+        private void load(OsuConfigManager config, AccountCreationOverlay accountCreation, GameHost host)
         {
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
@@ -82,34 +81,6 @@ namespace osu.Game.Overlays.Login
                             RelativeSizeAxes = Axes.X,
                             TabbableContentContainer = this,
                         },
-                        new Container
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Masking = true,
-                            CornerRadius = 5,
-                            Margin = new MarginPadding { Top = 5 },
-                            Children = new Drawable[]
-                            {
-                                new Box
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = colours.CarmineDark
-                                },
-                                new OsuTextFlowContainer(t =>
-                                {
-                                    t.Font = OsuFont.Default.With(size: 14, weight: FontWeight.SemiBold);
-                                    t.Colour = Colour4.White;
-                                })
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y,
-                                    Padding = new MarginPadding(10),
-                                    Text = "Logins are currently disabled, as this client still connects to servers upstream. \nDeltaLazer contains features that make it incompatible with the game's current infrastructure, with Bancho blocking score uploads through modified clients \nSorry! :P"
-                                }
-                            }
-                        },
-
                         errorText = new ErrorTextFlowContainer
                         {
                             RelativeSizeAxes = Axes.X,
@@ -147,7 +118,7 @@ namespace osu.Game.Overlays.Login
                             Child = new SettingsButton
                             {
                                 Text = UsersStrings.LoginButton,
-                                Action = null, // Standard Action: `performLogin`
+                                Action = performLogin,
                             },
                         }
                     }
@@ -155,23 +126,19 @@ namespace osu.Game.Overlays.Login
                 new SettingsButton
                 {
                     Text = LoginPanelStrings.Register,
-                    Action = null,
-                    /* Defailt Action:
                     Action = () =>
                     {
                         RequestHide?.Invoke();
                         accountCreation.Show();
-                    }
-                    */
+                    },
                 }
             };
 
 
             accountHeaderFlow.AddText($"{LoginPanelStrings.Account.ToUpper()} - ");
-            accountHeaderFlow.AddLink($"Delta Server", () => host.OpenUrlExternally("https://deltalazer.vercel.app/"), "Go to Delta Lazer's homepage");
+            accountHeaderFlow.AddLink($"Delta Server", () => host.OpenUrlExternally(api.Endpoints.WebsiteUrl), "Go to Delta Lazer's homepage");
 
-            // forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
-            // Remove comment if you wish to re-activate this!
+            forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
 
             password.OnCommit += (_, _) => performLogin();
 
