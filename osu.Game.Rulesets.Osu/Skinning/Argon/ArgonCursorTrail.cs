@@ -4,7 +4,7 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Textures;
-using osu.Game.Rulesets.Osu.UI.Cursor;
+using osu.Game.Graphics.Cursor;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Skinning.Argon

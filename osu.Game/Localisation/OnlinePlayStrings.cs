@@ -10,9 +10,9 @@ namespace osu.Game.Localisation
         private const string prefix = @"osu.Game.Resources.Localisation.OnlinePlay";
 
         /// <summary>
-        /// "Playlist durations longer than 2 weeks require an active osu!supporter tag."
+        /// "Playlist durations longer than 2 weeks require a starred deltalazer repository."
         /// </summary>
-        public static LocalisableString SupporterOnlyDurationNotice => new TranslatableString(getKey(@"supporter_only_duration_notice"), @"Playlist durations longer than 2 weeks require an active osu!supporter tag.");
+        public static LocalisableString SupporterOnlyDurationNotice => new TranslatableString(getKey(@"supporter_only_duration_notice"), @"Playlist durations longer than 2 weeks require a starred deltalazer repository.");
 
         /// <summary>
         /// "Can&#39;t invite this user as you have blocked them or they have blocked you."
@@ -38,11 +38,6 @@ namespace osu.Game.Localisation
         /// "Freestyle"
         /// </summary>
         public static LocalisableString FooterButtonFreestyle => new TranslatableString(getKey(@"footer_button_freestyle"), @"Freestyle");
-
-        /// <summary>
-        /// "{0} item(s)"
-        /// </summary>
-        public static LocalisableString PlaylistTrayItems(int count) => new TranslatableString(getKey(@"playlist_tray_items"), @"{0} item(s)", count);
 
         /// <summary>
         /// "Manage items on previous screen"
@@ -73,6 +68,11 @@ namespace osu.Game.Localisation
         /// "Chat"
         /// </summary>
         public static LocalisableString Chat => new TranslatableString(getKey(@"chat"), @"Chat");
+
+        /// <summary>
+        /// "Close playlist"
+        /// </summary>
+        public static LocalisableString ClosePlaylist => new TranslatableString(getKey(@"close_playlist"), @"Close playlist");
 
         private static string getKey(string key) => $@"{prefix}:{key}";
     }

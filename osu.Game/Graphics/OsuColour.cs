@@ -374,6 +374,7 @@ namespace osu.Game.Graphics
         public readonly Color4 GreyVioletDarker = Color4Extensions.FromHex(@"201823");
 
         public readonly Color4 Carmine = Color4Extensions.FromHex(@"ff0542");
+        public readonly Color4 CarmineDark = Color4Extensions.FromHex(@"#c40030"); // DELTA LAZER SPECIFIC, WIP
         public readonly Color4 GreyCarmineLighter = Color4Extensions.FromHex(@"deaab4");
         public readonly Color4 GreyCarmineLight = Color4Extensions.FromHex(@"644f53");
         public readonly Color4 GreyCarmine = Color4Extensions.FromHex(@"342b2d");
