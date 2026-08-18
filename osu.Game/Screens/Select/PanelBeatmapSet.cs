@@ -278,9 +278,36 @@ namespace osu.Game.Screens.Select
                 if (beatmapSet.Beatmaps.Any(b => b.Hidden))
                     items.Add(new OsuMenuItem(SongSelectStrings.RestoreAllHidden, MenuItemType.Standard, () => songSelect?.RestoreAllHidden(beatmapSet)));
 
+                if (beatmapSet.OnlineID > 0 || beatmapSet.Beatmaps.Any(b => b.OnlineID > 0))
+                    items.Add(new OsuMenuItem(@"Wipe IDs", MenuItemType.Destructive, () => wipeOnlineIds(beatmapSet)));
+
                 items.Add(new OsuMenuItem(CommonStrings.DeleteWithConfirmation, MenuItemType.Destructive, () => songSelect?.Delete(beatmapSet)));
                 return items.ToArray();
             }
+        }
+
+        private void wipeOnlineIds(BeatmapSetInfo beatmapSet)
+        {
+            realm.Write(r =>
+            {
+                var managed = r.Find<BeatmapSetInfo>(beatmapSet.ID);
+
+                if (managed == null)
+                    return;
+
+                managed.OnlineID = -1;
+
+                foreach (var beatmap in managed.Beatmaps)
+                    beatmap.ResetOnlineInfo();
+            });
+
+            var wiped = realm.Run(r => r.Find<BeatmapSetInfo>(beatmapSet.ID)?.Detach());
+
+            if (wiped == null)
+                return;
+
+            foreach (var beatmapInfo in wiped.Beatmaps)
+                beatmaps.Save(beatmapInfo, beatmaps.GetWorkingBeatmap(beatmapInfo).Beatmap);
         }
 
         private MenuItem createCollectionMenuItem(BeatmapCollection collection)
