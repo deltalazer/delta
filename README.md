@@ -119,6 +119,8 @@ publish release builds:
 dotnet publish osu.Desktop/osu.Desktop.csproj -c Release -r win-x64 --self-contained false -o ../builds/windows-release-v2
 dotnet publish osu.Desktop/osu.Desktop.csproj -c Release -r linux-x64 --self-contained false -o ../builds/linux-release-v2
 
+```
+
 ## Bug Reports
 
 If your issue is replicable in the standard client, Please [open an issue upstream instead.](https://github.com/ppy/osu/issues/new/choose)
