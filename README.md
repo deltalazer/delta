@@ -86,10 +86,6 @@ All Overrides:
 - upstream project: https://github.com/ppy/osu
 - this repository tracks and extends upstream osu!lazer behavior
 
-## important server note
-
-We have temporarily disabled logins as this client still connects to osu! servers.
-When bypassed, osu!bancho prohibits score submission as this client is modified.
 
 ## Build Instructions (desktop)
 
@@ -106,7 +102,22 @@ publish debug builds:
 ```bash
 dotnet publish osu.Desktop/osu.Desktop.csproj -c Debug -r win-x64 --self-contained false -o ../builds/windows-debug-v2
 dotnet publish osu.Desktop/osu.Desktop.csproj -c Debug -r linux-x64 --self-contained false -o ../builds/linux-debug-v2
+
+
 ```
+
+Release Builds
+    Building from `root` of this repository:
+
+```bash
+  dotnet build osu.Desktop/osu.Desktop.csproj -c Release
+```
+
+publish release builds:
+
+```bash
+dotnet publish osu.Desktop/osu.Desktop.csproj -c Release -r win-x64 --self-contained false -o ../builds/windows-release-v2
+dotnet publish osu.Desktop/osu.Desktop.csproj -c Release -r linux-x64 --self-contained false -o ../builds/linux-release-v2
 
 ## Bug Reports
 
@@ -121,10 +132,11 @@ If your issue is NOT replicable by the standard client, you may report the issue
 
 ### Please include:
 
-- Your beatmap file and exact section/hitobject settings used
+- Your beatmap file and exact section/hitobject settings used, or a link to the map (delta.mikuuu.xyz) if it is uploaded.
 - The expected behavior compared to the actual behavior
 - Your client's crash logs/stack trace if available
 - Your build type [Debug or Release]
+- The version of delta!lazer you are on.
 
 ## Contributing
 
