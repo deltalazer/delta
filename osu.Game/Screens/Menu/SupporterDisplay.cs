@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
@@ -17,6 +17,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Chat;
 using osuTK;
 using osuTK.Graphics;
 
@@ -72,7 +73,7 @@ namespace osu.Game.Screens.Menu
                 },
             };
 
-            const string url = @"https://osu.ppy.sh/home/support";
+            const string url = @"https://github.com/deltalazer/delta";
             considerBecomingASupporterText = localisation.GetLocalisedBindableString(SupporterDisplayStrings.ConsiderBecomingASupporter(url));
         }
 
