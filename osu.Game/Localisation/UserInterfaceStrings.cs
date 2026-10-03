@@ -25,6 +25,46 @@ namespace osu.Game.Localisation
         public static LocalisableString MenuCursorSize => new TranslatableString(getKey(@"menu_cursor_size"), @"Menu cursor size");
 
         /// <summary>
+        /// "Use skin cursor in menus"
+        /// </summary>
+        public static LocalisableString MenuCursorFromSkin => new TranslatableString(getKey(@"menu_cursor_from_skin"), @"Use skin cursor in menus");
+
+        /// <summary>
+        /// "Argon is not supported as its textures are generated procedurally. Use a different skin."
+        /// </summary>
+        public static LocalisableString MenuCursorFromSkinUnsupported => new TranslatableString(getKey(@"menu_cursor_from_skin_unsupported"), @"Argon is not supported as its textures are generated procedurally. Use a different skin.");
+
+        /// <summary>
+        /// "Are you sure you want to turn custom cursors on?"
+        /// </summary>
+        public static LocalisableString MenuCursorFromSkinConfirmation => new TranslatableString(getKey(@"menu_cursor_from_skin_confirmation"), @"Are you sure you want to turn custom cursors on?");
+
+        /// <summary>
+        /// "You will need to resize your cursor in the settings for a good experience."
+        /// </summary>
+        public static LocalisableString MenuCursorFromSkinConfirmationInfo => new TranslatableString(getKey(@"menu_cursor_from_skin_confirmation_info"), @"You will need to resize your cursor in the settings for a good experience.");
+
+        /// <summary>
+        /// "Show skin cursor trail in menus"
+        /// </summary>
+        public static LocalisableString MenuCursorTrail => new TranslatableString(getKey(@"menu_cursor_trail"), @"Show skin cursor trail in menus");
+
+        /// <summary>
+        /// "Skin cursor size"
+        /// </summary>
+        public static LocalisableString MenuCursorFromSkinSize => new TranslatableString(getKey(@"menu_cursor_from_skin_size"), @"Skin cursor size");
+
+        /// <summary>
+        /// "Menu cursor horizontal scale"
+        /// </summary>
+        public static LocalisableString MenuCursorScaleX => new TranslatableString(getKey(@"menu_cursor_scale_x"), @"Menu cursor horizontal scale");
+
+        /// <summary>
+        /// "Menu cursor vertical scale"
+        /// </summary>
+        public static LocalisableString MenuCursorScaleY => new TranslatableString(getKey(@"menu_cursor_scale_y"), @"Menu cursor vertical scale");
+
+        /// <summary>
         /// "Menu tips"
         /// </summary>
         public static LocalisableString ShowMenuTips => new TranslatableString(getKey(@"show_menu_tips"), @"Menu tips");
@@ -75,9 +115,9 @@ namespace osu.Game.Localisation
         public static LocalisableString SeasonalBackgrounds => new TranslatableString(getKey(@"seasonal_backgrounds"), @"Seasonal backgrounds");
 
         /// <summary>
-        /// "Changes to this setting will only apply with an active osu!supporter tag."
+        /// "Changes to this setting will only apply once you have starred deltalazer."
         /// </summary>
-        public static LocalisableString NotSupporterNote => new TranslatableString(getKey(@"not_supporter_note"), @"Changes to this setting will only apply with an active osu!supporter tag.");
+        public static LocalisableString NotSupporterNote => new TranslatableString(getKey(@"not_supporter_note"), @"Changes to this setting will only apply once you have starred deltalazer.");
 
         /// <summary>
         /// "Song Select"

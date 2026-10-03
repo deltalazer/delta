@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Rulesets.UI;
 using osu.Game.Skinning;
