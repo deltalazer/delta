@@ -15,7 +15,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
@@ -161,9 +160,9 @@ namespace osu.Game.Rulesets.Osu.UI
                 return settings.FlashlightRadius;
 
             double progress = Math.Clamp((currentTime - section.StartTime) / (gradualEnd - section.StartTime), 0, 1);
-            const float defaultRadius = 125f;
-            const float shrinkStartRadius = 400f;
-            float startRadius = settings.EnableGradualFlashlightRadiusChange ? shrinkStartRadius : defaultRadius;
+            const float default_radius = 125f;
+            const float shrink_start_radius = 400f;
+            float startRadius = settings.EnableGradualFlashlightRadiusChange ? shrink_start_radius : default_radius;
 
             return (float)(startRadius + (settings.FlashlightRadius - startRadius) * progress);
         }

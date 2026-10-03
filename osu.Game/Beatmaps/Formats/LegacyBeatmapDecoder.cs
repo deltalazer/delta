@@ -11,8 +11,8 @@ using osu.Framework.Logging;
 using osu.Game.Audio;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.HitObjectGimmicks;
-using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps.Legacy;
+using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps.Timing;
 using osu.Game.IO;
 using osu.Game.Rulesets;
@@ -21,7 +21,6 @@ using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Screens.Edit;
 using osu.Game.Utils;
-using osuTK.Graphics;
 using Color4 = osuTK.Graphics.Color4;
 
 namespace osu.Game.Beatmaps.Formats

@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using osu.Framework.Graphics.Colour;
 using osu.Game.Audio;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.HitObjectGimmicks;
@@ -18,7 +17,6 @@ using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Skinning;
 using osuTK;
-using osuTK.Graphics;
 using Color4 = osuTK.Graphics.Color4;
 
 namespace osu.Game.Beatmaps.Formats

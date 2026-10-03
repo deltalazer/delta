@@ -3,7 +3,6 @@
 
 using NUnit.Framework;
 using osu.Game.Beatmaps.SectionGimmicks;
-using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Judgements;
