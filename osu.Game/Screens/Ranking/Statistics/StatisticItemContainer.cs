@@ -1,7 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
@@ -32,15 +31,16 @@ namespace osu.Game.Screens.Ranking.Statistics
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
                 Masking = true,
-                CornerRadius = 10,
+                CornerRadius = 6,
                 Children = new Drawable[]
                 {
                     new Box
                     {
                         Colour = ColourInfo.GradientVertical(
-                            OsuColour.Gray(0.25f).Opacity(0.8f),
-                            OsuColour.Gray(0.18f).Opacity(0.95f)
+                            OsuColour.Gray(0.25f),
+                            OsuColour.Gray(0.18f)
                         ),
+                        Alpha = 0.95f,
                         RelativeSizeAxes = Axes.Both,
                     },
                     new Container
@@ -57,7 +57,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
-                                Padding = new MarginPadding(20) { Top = 45 },
+                                Padding = new MarginPadding(10) { Top = 30 },
                                 Child = item.CreateContent()
                             }
                         }

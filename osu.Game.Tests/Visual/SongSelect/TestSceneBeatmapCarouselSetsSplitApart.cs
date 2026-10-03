@@ -51,7 +51,6 @@ namespace osu.Game.Tests.Visual.SongSelect
         }
 
         [Test]
-        [FlakyTest]
         public void TestSetTraversal()
         {
             AddBeatmaps(3, splitApart: true);

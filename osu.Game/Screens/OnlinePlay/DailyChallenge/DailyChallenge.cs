@@ -21,10 +21,8 @@ using osu.Framework.Screens;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
-using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
@@ -138,7 +136,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                     {
                         RelativeSizeAxes = Axes.Both,
                     },
-                    createHeader(),
+                    new Header(ButtonSystemStrings.DailyChallenge.ToSentence(), null),
                     new PopoverContainer
                     {
                         RelativeSizeAxes = Axes.Both,
@@ -317,7 +315,6 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
             {
                 Beatmap = { BindTarget = Beatmap },
                 SelectedMods = { BindTarget = userMods },
-                Ruleset = { BindTarget = Ruleset },
                 IsValidMod = _ => false
             });
 
@@ -325,7 +322,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
             {
                 footerButtons.Insert(-1, new UserModSelectButton
                 {
-                    Text = OnlinePlayStrings.FooterButtonFreemods,
+                    Text = "Free mods",
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     RelativeSizeAxes = Axes.Y,
@@ -377,68 +374,6 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                         Scheduler.AddOnce(() => leaderboard.RefetchScores());
                 });
             });
-        }
-
-        private Container createHeader()
-        {
-            var titleFlow = new FillFlowContainer
-            {
-                Anchor = Anchor.CentreLeft,
-                Origin = Anchor.CentreLeft,
-                AutoSizeAxes = Axes.Both,
-                Direction = FillDirection.Horizontal,
-                Spacing = new Vector2(6, 0),
-                Children = new Drawable[]
-                {
-                    new OsuHoverContainer
-                    {
-                        AutoSizeAxes = Axes.Both,
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        Action = () => game?.ShowWiki(@"Gameplay/Daily_challenge"),
-                        Child = new OsuSpriteText
-                        {
-                            Font = OsuFont.TorusAlternate.With(size: 24),
-                            Text = ButtonSystemStrings.DailyChallenge.ToSentence(),
-                        }
-                    }
-                }
-            };
-
-            if (!string.IsNullOrEmpty(room.Description))
-            {
-                var subtitleFont = OsuFont.TorusAlternate.With(size: 16);
-
-                titleFlow.AddRange(new Drawable[]
-                {
-                    new OsuSpriteText
-                    {
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        Font = subtitleFont,
-                        Text = "·",
-                        Colour = colourProvider.Content2,
-                        Margin = new MarginPadding { Bottom = 3 },
-                    },
-                    new TruncatingSpriteText
-                    {
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        Font = subtitleFont,
-                        Text = room.Description,
-                        Colour = colourProvider.Content2,
-                        Margin = new MarginPadding { Bottom = 3 },
-                    }
-                });
-            }
-
-            return new Container
-            {
-                RelativeSizeAxes = Axes.X,
-                Height = Header.HEIGHT,
-                Padding = new MarginPadding { Left = WaveOverlayContainer.WIDTH_PADDING },
-                Child = titleFlow,
-            };
         }
 
         protected override void LoadComplete()

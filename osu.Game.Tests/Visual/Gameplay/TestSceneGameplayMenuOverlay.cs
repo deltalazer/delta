@@ -7,8 +7,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
-using osu.Framework.Testing;
-using osu.Framework.Utils;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Input.Bindings;
 using osu.Game.Screens.Play;
@@ -30,10 +28,7 @@ namespace osu.Game.Tests.Visual.Gameplay
         [BackgroundDependencyLoader]
         private void load(OsuGameBase game)
         {
-            Children = new Drawable[]
-            {
-                globalActionContainer = new GlobalActionContainer(game)
-            };
+            Child = globalActionContainer = new GlobalActionContainer(game);
         }
 
         [SetUp]
@@ -63,19 +58,6 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             InputManager.MoveMouseTo(Vector2.Zero);
         });
-
-        [SetUpSteps]
-        public void SetUpSteps()
-        {
-            AddStep("random background", () =>
-                ChangeBackgroundColour(new Colour4(RNG.NextSingle(), RNG.NextSingle(), RNG.NextSingle(), 1)));
-        }
-
-        [Test]
-        public void TestBasic()
-        {
-            showOverlay();
-        }
 
         [Test]
         public void TestAdjustRetryCount()

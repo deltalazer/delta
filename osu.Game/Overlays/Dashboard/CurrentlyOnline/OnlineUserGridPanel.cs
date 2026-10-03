@@ -4,7 +4,6 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Localisation;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Screens.OnlinePlay.Match.Components;
 using osu.Game.Users;
@@ -42,7 +41,7 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                         new PurpleRoundedButton
                         {
                             RelativeSizeAxes = Axes.X,
-                            Text = ContextMenuStrings.SpectatePlayer,
+                            Text = "Spectate",
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
                             Action = BeginSpectating,

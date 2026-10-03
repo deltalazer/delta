@@ -3,7 +3,6 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Extensions;
-using osu.Framework.Localisation;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Scoring;
 
@@ -21,7 +20,7 @@ namespace osu.Game.Screens.Select
         [BackgroundDependencyLoader]
         private void load(ScoreManager scoreManager)
         {
-            BodyText = LocalisableString.Interpolate($"{score.User} ({score.DisplayAccuracy}, {score.Rank.GetLocalisableDescription()})");
+            BodyText = $"{score.User} ({score.DisplayAccuracy}, {score.Rank.GetLocalisableDescription()})";
             DangerousAction = () => scoreManager.Delete(score);
         }
     }

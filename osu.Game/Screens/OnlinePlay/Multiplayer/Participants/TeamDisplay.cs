@@ -22,15 +22,15 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Participants
 {
-    internal partial class TeamDisplay : CompositeDrawable, IHasCurrentValue<Slot>
+    internal partial class TeamDisplay : CompositeDrawable, IHasCurrentValue<MultiplayerRoomUser>
     {
-        public Bindable<Slot> Current
+        public Bindable<MultiplayerRoomUser> Current
         {
             get => current.Current;
             set => current.Current = value;
         }
 
-        private readonly BindableWithCurrent<Slot> current = new BindableWithCurrent<Slot>(Slot.FromUser(new MultiplayerRoomUser(-1)));
+        private readonly BindableWithCurrent<MultiplayerRoomUser> current = new BindableWithCurrent<MultiplayerRoomUser>(new MultiplayerRoomUser(-1));
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
@@ -116,12 +116,12 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Participants
         {
             // we don't have a way of knowing when an individual user's state has updated, so just handle on RoomUpdated for now.
 
-            var slot = current.Value;
-            var userRoomState = slot.IsEmpty ? null : client.Room?.Users.FirstOrDefault(u => u.Equals(slot.User))?.MatchState;
+            var user = current.Value;
+            var userRoomState = client.Room?.Users.FirstOrDefault(u => u.Equals(user))?.MatchState;
 
             bool roomLocked = (client.Room?.MatchState as TeamVersusRoomState)?.Locked == true;
 
-            if (!slot.IsEmpty && client.LocalUser?.Equals(slot.User) == true && !roomLocked)
+            if (client.LocalUser?.Equals(user) == true && !roomLocked)
             {
                 clickableContent.Action = changeTeam;
                 clickableContent.TooltipText = "Change team";

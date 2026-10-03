@@ -59,6 +59,8 @@ namespace osu.Game.Tests.Mods
 
         public abstract class TestModCustomisable : Mod, IApplicableMod
         {
+            public override double ScoreMultiplier => 1.0;
+
             public override LocalisableString Description => "This is a customisable test mod.";
 
             public override ModType Type => ModType.Conversion;

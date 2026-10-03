@@ -7,7 +7,6 @@ using System;
 using System.Threading;
 using NUnit.Framework;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Testing;
@@ -17,11 +16,9 @@ using osu.Game.Overlays.Dialog;
 namespace osu.Game.Tests.Visual.UserInterface
 {
     [TestFixture]
-    public partial class TestSceneDialogOverlay : OsuTestScene, IOverlayManager
+    public partial class TestSceneDialogOverlay : OsuTestScene
     {
         private DialogOverlay overlay;
-
-        private readonly Bindable<OverlayActivation> overlayActivationMode = new Bindable<OverlayActivation>(OverlayActivation.All);
 
         [SetUpSteps]
         public void SetUpSteps()
@@ -102,8 +99,7 @@ namespace osu.Game.Tests.Visual.UserInterface
             {
                 Icon = FontAwesome.Regular.TrashAlt,
                 HeaderText = @"Confirm deletion ofConfirm deletion ofConfirm deletion ofConfirm deletion ofConfirm deletion ofConfirm deletion of",
-                BodyText =
-                    @"Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver. ",
+                BodyText = @"Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver.Ayase Rie - Yuima-ru*World TVver. ",
                 Buttons = new PopupDialogButton[]
                 {
                     new PopupDialogOkButton
@@ -118,64 +114,6 @@ namespace osu.Game.Tests.Visual.UserInterface
                     },
                 },
             }));
-        }
-
-        [Test]
-        public void TestPushWhileOverlayActivationDisabled()
-        {
-            PopupDialog dialog = null;
-
-            AddStep("set activation mode disabled", () => overlayActivationMode.Value = OverlayActivation.Disabled);
-
-            AddStep("push dialog", () =>
-            {
-                overlay.Push(dialog = new TestPopupDialog
-                {
-                    Buttons = new PopupDialogButton[]
-                    {
-                        new PopupDialogOkButton { Text = @"OK" },
-                    },
-                });
-            });
-
-            AddUntilStep("overlay not visible", () => overlay.State.Value, () => Is.EqualTo(Visibility.Hidden));
-
-            AddStep("set activation mode enabled", () => overlayActivationMode.Value = OverlayActivation.All);
-
-            AddUntilStep("overlay visible", () => overlay.State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddUntilStep("dialog displayed", () => dialog.State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddStep("set activation mode disabled", () => overlayActivationMode.Value = OverlayActivation.Disabled);
-
-            AddUntilStep("dialog hidden", () => dialog.State.Value, () => Is.EqualTo(Visibility.Hidden));
-            AddAssert("dialog dismissed", () => overlay.CurrentDialog, () => Is.Null);
-        }
-
-        [Test]
-        public void TestPushWhileOverlayActivationUserTriggered()
-        {
-            PopupDialog dialog = null;
-
-            AddStep("set activation mode user triggered", () => overlayActivationMode.Value = OverlayActivation.UserTriggered);
-
-            AddUntilStep("overlay not visible", () => overlay.State.Value, () => Is.EqualTo(Visibility.Hidden));
-
-            AddStep("push dialog", () =>
-            {
-                overlay.Push(dialog = new TestPopupDialog
-                {
-                    Buttons = new PopupDialogButton[]
-                    {
-                        new PopupDialogOkButton { Text = @"OK" },
-                    },
-                });
-            });
-
-            AddUntilStep("overlay visible", () => overlay.State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddUntilStep("dialog displayed", () => dialog.State.Value, () => Is.EqualTo(Visibility.Visible));
-
-            AddStep("set activation mode disabled", () => overlayActivationMode.Value = OverlayActivation.Disabled);
-            AddUntilStep("dialog hidden", () => dialog.State.Value, () => Is.EqualTo(Visibility.Hidden));
-            AddAssert("dialog dismissed", () => overlay.CurrentDialog, () => Is.Null);
         }
 
         [Test]
@@ -254,18 +192,6 @@ namespace osu.Game.Tests.Visual.UserInterface
         }
 
         private partial class TestPopupDialog : PopupDialog
-        {
-        }
-
-        public IBindable<OverlayActivation> OverlayActivationMode => overlayActivationMode;
-
-        public IDisposable RegisterBlockingOverlay(OverlayContainer overlayContainer) => throw new NotImplementedException();
-
-        public void ShowBlockingOverlay(OverlayContainer overlay)
-        {
-        }
-
-        public void HideBlockingOverlay(OverlayContainer overlay)
         {
         }
     }

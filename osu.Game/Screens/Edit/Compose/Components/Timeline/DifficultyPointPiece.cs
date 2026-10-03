@@ -15,7 +15,6 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
@@ -60,7 +59,7 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
         {
             private readonly HitObject hitObject;
 
-            private SliderVelocityAdjustmentControl adjustmentControl;
+            private IndeterminateSliderWithTextBoxInput<double> sliderVelocitySlider;
 
             [Resolved(canBeNull: true)]
             private EditorBeatmap beatmap { get; set; }
@@ -75,27 +74,32 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
             {
                 Children = new Drawable[]
                 {
-                    new OsuContextMenuContainer // required for `SliderVelocityAdjustmentControl`'s context menus to work when right-clicking velocity presets
+                    new FillFlowContainer
                     {
-                        Width = 250,
+                        Width = 200,
+                        Direction = FillDirection.Vertical,
                         AutoSizeAxes = Axes.Y,
-                        Child = new FillFlowContainer
+                        Spacing = new Vector2(0, 15),
+                        Children = new Drawable[]
                         {
-                            Direction = FillDirection.Vertical,
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Spacing = new Vector2(0, 15),
-                            Children = new Drawable[]
+                            sliderVelocitySlider = new IndeterminateSliderWithTextBoxInput<double>("Velocity", new BindableDouble(1)
                             {
-                                adjustmentControl = new SliderVelocityAdjustmentControl(),
-                                new OsuTextFlowContainer
-                                {
-                                    AutoSizeAxes = Axes.Y,
-                                    RelativeSizeAxes = Axes.X,
-                                    Text = "Hold shift while dragging the end of an object to adjust velocity while snapping."
-                                },
-                                new SliderVelocityInspector(adjustmentControl.Current),
-                            }
+                                Precision = 0.01,
+                                MinValue = 0,
+                                // Avoid using unbounded max (double.MaxValue): slider proportional calculations can overflow
+                                // bindable decimal math on drag start. This is effectively uncapped vs old 10x cap.
+                                MaxValue = 1000
+                            })
+                            {
+                                KeyboardStep = 0.1f
+                            },
+                            new OsuTextFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Y,
+                                RelativeSizeAxes = Axes.X,
+                                Text = "Hold shift while dragging the end of an object to adjust velocity while snapping."
+                            },
+                            new SliderVelocityInspector(sliderVelocitySlider.Current),
                         }
                     }
                 };
@@ -104,23 +108,49 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
                 // if the piece belongs to an unselected object, operate on that object alone, independently of the selection.
                 var relevantObjects = (beatmap.SelectedHitObjects.Contains(hitObject) ? beatmap.SelectedHitObjects : hitObject.Yield()).Where(o => o is IHasSliderVelocity).ToArray();
 
-                adjustmentControl.ObjectsToAdjust.Clear();
-                adjustmentControl.ObjectsToAdjust.AddRange(relevantObjects);
+                // even if there are multiple objects selected, we can still display a value if they all have the same value.
+                var selectedPointBindable = relevantObjects.Select(point => ((IHasSliderVelocity)point).SliderVelocityMultiplier).Distinct().Count() == 1
+                    ? ((IHasSliderVelocity)relevantObjects.First()).SliderVelocityMultiplierBindable
+                    : null;
+
+                if (selectedPointBindable != null)
+                {
+                    // there may be legacy control points, which contain infinite precision for compatibility reasons (see LegacyDifficultyControlPoint).
+                    // generally that level of precision could only be set by externally editing the .osu file, so at the point
+                    // a user is looking to update this within the editor it should be safe to obliterate this additional precision.
+                    sliderVelocitySlider.Current.Value = selectedPointBindable.Value;
+                }
+
+                sliderVelocitySlider.Current.BindValueChanged(val =>
+                {
+                    if (val.NewValue == null)
+                        return;
+
+                    beatmap.BeginChange();
+
+                    foreach (var h in relevantObjects)
+                    {
+                        ((IHasSliderVelocity)h).SliderVelocityMultiplier = val.NewValue.Value;
+                        beatmap.Update(h);
+                    }
+
+                    beatmap.EndChange();
+                });
             }
 
             protected override void LoadComplete()
             {
                 base.LoadComplete();
-                ScheduleAfterChildren(() => adjustmentControl.TakeFocus());
+                ScheduleAfterChildren(() => GetContainingFocusManager()!.ChangeFocus(sliderVelocitySlider));
             }
         }
     }
 
     internal partial class SliderVelocityInspector : EditorInspector
     {
-        private readonly IBindable<double> current;
+        private readonly Bindable<double?> current;
 
-        public SliderVelocityInspector(IBindable<double> current)
+        public SliderVelocityInspector(Bindable<double?> current)
         {
             this.current = current;
         }

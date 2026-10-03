@@ -132,7 +132,6 @@ namespace osu.Game.Tests.Visual.Ranking
         }
 
         [Test]
-        [FlakyTest]
         public void TestOnlineLeaderboardWithLessThan50Scores()
         {
             ScoreInfo localScore = null!;

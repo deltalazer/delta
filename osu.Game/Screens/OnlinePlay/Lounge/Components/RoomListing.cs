@@ -31,7 +31,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
         /// <summary>
         /// The current filter criteria. Should be managed externally.
         /// </summary>
-        public readonly Bindable<LoungeFilterCriteria?> Filter = new Bindable<LoungeFilterCriteria?>();
+        public readonly Bindable<FilterCriteria?> Filter = new Bindable<FilterCriteria?>();
 
         /// <summary>
         /// The currently user-selected room.
@@ -87,7 +87,7 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
             Filter.BindValueChanged(criteria => applyFilterCriteria(criteria.NewValue), true);
         }
 
-        private void applyFilterCriteria(LoungeFilterCriteria? criteria)
+        private void applyFilterCriteria(FilterCriteria? criteria)
         {
             roomFlow.Children.ForEach(r =>
             {

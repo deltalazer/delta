@@ -345,14 +345,14 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
         private partial class NoTabletMessage : CompositeDrawable
         {
-            private IBindable<string> noTabletDetectedText = new Bindable<string>();
+            private readonly Bindable<Language> currentLanguage = new Bindable<Language>();
             private LinkFlowContainer linkContainer;
 
             [Resolved]
             private LocalisationManager localisation { get; set; }
 
             [BackgroundDependencyLoader]
-            private void load(OsuColour colours, OverlayColourProvider colourProvider)
+            private void load(OsuGameBase game, OsuColour colours, OverlayColourProvider colourProvider)
             {
                 RelativeSizeAxes = Axes.X;
                 AutoSizeAxes = Axes.Y;
@@ -406,23 +406,26 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                     },
                 };
 
-                const string url = @"https://opentabletdriver.net/Wiki/FAQ/General";
-                noTabletDetectedText = localisation.GetLocalisedBindableString(TabletSettingsStrings.NoTabletDetectedDescription(url));
+                if (game != null)
+                    currentLanguage.BindTo(game.CurrentLanguage);
             }
 
             protected override void LoadComplete()
             {
                 base.LoadComplete();
 
-                noTabletDetectedText.BindValueChanged(_ =>
-                {
-                    linkContainer.Clear();
-                    linkContainer.NewLine();
+                currentLanguage.BindValueChanged(_ =>
+                    // schedule required because `LocalisationManager` won't have new language set correctly yet.
+                    Schedule(() =>
+                    {
+                        linkContainer.Clear();
+                        linkContainer.NewLine();
 
-                    var formattedSource = MessageFormatter.FormatText(noTabletDetectedText.Value);
+                        const string url = @"https://opentabletdriver.net/Wiki/FAQ/General";
+                        var formattedSource = MessageFormatter.FormatText(localisation.GetLocalisedString(TabletSettingsStrings.NoTabletDetectedDescription(url)));
 
-                    linkContainer.AddLinks(formattedSource.Text, formattedSource.Links);
-                }, true);
+                        linkContainer.AddLinks(formattedSource.Text, formattedSource.Links);
+                    }), true);
             }
         }
     }

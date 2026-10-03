@@ -10,14 +10,14 @@
       "rollForward": false
     },
     "codefilesanity": {
-      "version": "0.0.41",
+      "version": "0.0.37",
       "commands": [
         "CodeFileSanity"
       ],
       "rollForward": false
     },
     "ppy.localisationanalyser.tools": {
-      "version": "2026.611.0",
+      "version": "2025.1208.0",
       "commands": [
         "localisation"
       ],

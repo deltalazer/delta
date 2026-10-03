@@ -34,6 +34,8 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         public override LocalisableString Description => "Don't let their popping distract you!";
 
+        public override double ScoreMultiplier => 1;
+
         public override IconUsage? Icon => OsuIcon.ModBubbles;
 
         public override ModType Type => ModType.Fun;

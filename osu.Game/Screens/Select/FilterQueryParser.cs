@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using osu.Framework.Logging;
 using osu.Game.Screens.Select.Filter;
 
 namespace osu.Game.Screens.Select
@@ -22,21 +21,14 @@ namespace osu.Game.Screens.Select
 
         internal static void ApplyQueries(FilterCriteria criteria, string query)
         {
-            try
+            foreach (Match match in query_syntax_regex.Matches(query))
             {
-                foreach (Match match in query_syntax_regex.Matches(query))
-                {
-                    string key = match.Groups["key"].Value.ToLowerInvariant();
-                    var op = parseOperator(match.Groups["op"].Value);
-                    string value = match.Groups["value"].Value;
+                string key = match.Groups["key"].Value.ToLowerInvariant();
+                var op = parseOperator(match.Groups["op"].Value);
+                string value = match.Groups["value"].Value;
 
-                    if (tryParseKeywordCriteria(criteria, key, value, op))
-                        query = query.Replace(match.ToString(), "");
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"Failed to parse query ({e.Message})", level: LogLevel.Important);
+                if (tryParseKeywordCriteria(criteria, key, value, op))
+                    query = query.Replace(match.ToString(), "");
             }
 
             criteria.SearchText = query;
@@ -220,16 +212,10 @@ namespace osu.Game.Screens.Select
 
         private static GroupCollection? tryMatchRegex(string value, string regex)
         {
-            try
-            {
-                Match matches = Regex.Match(value, regex);
-                if (matches.Success)
-                    return matches.Groups;
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"Failed to parse query ({e.Message})", level: LogLevel.Important);
-            }
+            Match matches = Regex.Match(value, regex);
+
+            if (matches.Success)
+                return matches.Groups;
 
             return null;
         }

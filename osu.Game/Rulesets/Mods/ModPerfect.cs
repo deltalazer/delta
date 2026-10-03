@@ -17,6 +17,7 @@ namespace osu.Game.Rulesets.Mods
         public override string Acronym => "PF";
         public override IconUsage? Icon => OsuIcon.ModPerfect;
         public override ModType Type => ModType.DifficultyIncrease;
+        public override double ScoreMultiplier => 1;
         public override LocalisableString Description => "SS or quit.";
         public override bool Ranked => true;
         public override bool ValidForFreestyleAsRequiredMod => true;

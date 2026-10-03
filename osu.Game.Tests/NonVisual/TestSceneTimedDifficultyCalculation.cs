@@ -15,7 +15,6 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.UI;
 using osu.Game.Tests.Beatmaps;
-using osu.Game.Utils;
 
 namespace osu.Game.Tests.NonVisual
 {
@@ -173,14 +172,12 @@ namespace osu.Game.Tests.NonVisual
             {
             }
 
-            protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills)
+            protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
                 => new TestDifficultyAttributes { Objects = beatmap.HitObjects.ToArray() };
 
-            protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, Mod[] mods)
+            protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
             {
-                List<DifficultyHitObject> objects = new List<DifficultyHitObject>(beatmap.HitObjects.Count);
-
-                double clockRate = ModUtils.CalculateRateWithMods(mods);
+                List<DifficultyHitObject> objects = new List<DifficultyHitObject>();
 
                 foreach (var obj in beatmap.HitObjects.OfType<TestHitObject>())
                 {
@@ -194,7 +191,7 @@ namespace osu.Game.Tests.NonVisual
                 return objects;
             }
 
-            protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods) => new Skill[] { new PassThroughSkill(mods) };
+            protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate) => new Skill[] { new PassThroughSkill(mods) };
 
             private class PassThroughSkill : Skill
             {
@@ -203,9 +200,8 @@ namespace osu.Game.Tests.NonVisual
                 {
                 }
 
-                protected override double ProcessInternal(DifficultyHitObject current)
+                public override void Process(DifficultyHitObject current)
                 {
-                    return 0;
                 }
 
                 public override double DifficultyValue() => 1;

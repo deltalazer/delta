@@ -34,10 +34,8 @@ namespace osu.Game.Storyboards.Commands
 
         public override string ToString() => $"{loopStartTime} x{TotalIterations}";
 
-        private class StoryboardLoopingCommand<T> : StoryboardCommand<T>, IStoryboardLoopingCommand
+        private class StoryboardLoopingCommand<T> : StoryboardCommand<T>
         {
-            IStoryboardCommand IStoryboardLoopingCommand.OriginalCommand => command;
-
             private readonly StoryboardCommand<T> command;
             private readonly StoryboardLoopingGroup loopingGroup;
 

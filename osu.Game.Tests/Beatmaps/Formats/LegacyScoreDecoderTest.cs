@@ -525,10 +525,9 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 new OsuModDoubleTime { SpeedChange = { Value = 1.1 } }
             };
             scoreInfo.OnlineID = 123123;
-            scoreInfo.ClientVersion = "2026.1221.0";
-            scoreInfo.TotalScoreVersion = 30000017;
+            scoreInfo.ClientVersion = "2023.1221.0";
             scoreInfo.TotalScoreWithoutMods = 1_000_000;
-            scoreInfo.TotalScore = 1_036_000;
+            scoreInfo.TotalScore = 1_020_000;
 
             var beatmap = new TestBeatmap(ruleset);
             var score = new Score
@@ -548,12 +547,12 @@ namespace osu.Game.Tests.Beatmaps.Formats
             Assert.Multiple(() =>
             {
                 Assert.That(decodedAfterEncode.ScoreInfo.TotalScoreWithoutMods, Is.EqualTo(1_000_000));
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(1_036_000));
+                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(1_020_000));
             });
         }
 
         [Test]
-        public void TestTotalScoreWithoutModsBackwardsPopulatedFromCorrectHistoricalMultipliersIfMissing()
+        public void TestTotalScoreWithoutModsBackwardsPopulatedIfMissing()
         {
             var ruleset = new OsuRuleset().RulesetInfo;
 
@@ -564,7 +563,6 @@ namespace osu.Game.Tests.Beatmaps.Formats
             };
             scoreInfo.OnlineID = 123123;
             scoreInfo.ClientVersion = "2023.1221.0";
-            scoreInfo.TotalScoreVersion = 30000016;
             scoreInfo.TotalScoreWithoutMods = 0;
             scoreInfo.TotalScore = 1_020_000;
 
@@ -586,83 +584,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
             Assert.Multiple(() =>
             {
                 Assert.That(decodedAfterEncode.ScoreInfo.TotalScoreWithoutMods, Is.EqualTo(1_000_000));
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(1_036_000));
-            });
-        }
-
-        [Test]
-        public void TestTotalScoreWithoutModsUsedToCorrectTotalScoreIfPresent()
-        {
-            var ruleset = new OsuRuleset().RulesetInfo;
-
-            var scoreInfo = TestResources.CreateTestScoreInfo(ruleset);
-            scoreInfo.Mods = new Mod[]
-            {
-                new OsuModDoubleTime { SpeedChange = { Value = 1.1 } }
-            };
-            scoreInfo.OnlineID = 123123;
-            scoreInfo.ClientVersion = "2026.522.1-tachyon";
-            scoreInfo.TotalScoreWithoutMods = 1_000_000;
-            scoreInfo.TotalScore = 1_020_000;
-            scoreInfo.TotalScoreVersion = 30000016;
-
-            var beatmap = new TestBeatmap(ruleset);
-            var score = new Score
-            {
-                ScoreInfo = scoreInfo,
-                Replay = new Replay
-                {
-                    Frames = new List<ReplayFrame>
-                    {
-                        new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
-                    }
-                }
-            };
-
-            var decodedAfterEncode = encodeThenDecode(LegacyBeatmapDecoder.LATEST_VERSION, score, beatmap);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScoreWithoutMods, Is.EqualTo(1_000_000));
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(1_036_000));
-            });
-        }
-
-        [Test]
-        public void TestTotalScoreWithoutModsUsedToCorrectTotalScoreIfPresent_DifficultyAdjust()
-        {
-            var ruleset = new OsuRuleset().RulesetInfo;
-
-            var scoreInfo = TestResources.CreateTestScoreInfo(ruleset);
-            scoreInfo.Mods = new Mod[]
-            {
-                new OsuModDifficultyAdjust { CircleSize = { Value = 3.5f } }
-            };
-            scoreInfo.OnlineID = 123123;
-            scoreInfo.ClientVersion = "2026.522.1-tachyon";
-            scoreInfo.TotalScoreWithoutMods = 1_000_000;
-            scoreInfo.TotalScore = 500_000;
-            scoreInfo.TotalScoreVersion = 30000016;
-
-            var beatmap = new TestBeatmap(ruleset);
-            var score = new Score
-            {
-                ScoreInfo = scoreInfo,
-                Replay = new Replay
-                {
-                    Frames = new List<ReplayFrame>
-                    {
-                        new OsuReplayFrame(2000, OsuPlayfield.BASE_SIZE / 2, OsuAction.LeftButton)
-                    }
-                }
-            };
-
-            var decodedAfterEncode = encodeThenDecode(LegacyBeatmapDecoder.LATEST_VERSION, score, beatmap);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScoreWithoutMods, Is.EqualTo(1_000_000));
-                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(750_000));
+                Assert.That(decodedAfterEncode.ScoreInfo.TotalScore, Is.EqualTo(1_020_000));
             });
         }
 
@@ -711,13 +633,7 @@ namespace osu.Game.Tests.Beatmaps.Formats
                 {
                     MD5Hash = md5Hash,
                     Ruleset = new OsuRuleset().RulesetInfo,
-                    Difficulty = new BeatmapDifficulty
-                    {
-                        ApproachRate = 3,
-                        CircleSize = 4,
-                        DrainRate = 5,
-                        OverallDifficulty = 6,
-                    },
+                    Difficulty = new BeatmapDifficulty(),
                 },
                 // needs to have at least one object so that `StandardisedScoreMigrationTools` doesn't die
                 // when trying to recompute total score.

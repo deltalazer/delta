@@ -13,7 +13,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Graphics;
 using osu.Game.Localisation;
-using osu.Game.Localisation.Catch;
 using osu.Game.Rulesets.Catch.Beatmaps;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Catch.Edit;
@@ -156,7 +155,6 @@ namespace osu.Game.Rulesets.Catch
                         new CatchModMuted(),
                         new CatchModNoScope(),
                         new CatchModMovingFast(),
-                        new CatchModSynesthesia(),
                     };
 
                 case ModType.System:
@@ -169,8 +167,6 @@ namespace osu.Game.Rulesets.Catch
                     return Array.Empty<Mod>();
             }
         }
-
-        public override ScoreMultiplierCalculator CreateScoreMultiplierCalculator(ScoreMultiplierContext context) => new CatchScoreMultiplierCalculator(context);
 
         public override string Description => "osu!catch";
 
@@ -298,23 +294,23 @@ namespace osu.Game.Rulesets.Catch
 
             yield return new RulesetBeatmapAttribute(SongSelectStrings.CircleSize, @"CS", originalDifficulty.CircleSize, effectiveDifficulty.CircleSize, 10)
             {
-                Description = CatchRulesetStrings.CircleSizeDescription,
+                Description = "Affects the size of fruits.",
                 AdditionalMetrics =
                 [
-                    new RulesetBeatmapAttribute.AdditionalMetric(CatchRulesetStrings.FruitRadius, (CatchHitObject.OBJECT_RADIUS * LegacyRulesetExtensions.CalculateScaleFromCircleSize(effectiveDifficulty.CircleSize)).ToLocalisableString("0.#"))
+                    new RulesetBeatmapAttribute.AdditionalMetric("Hit circle radius", (CatchHitObject.OBJECT_RADIUS * LegacyRulesetExtensions.CalculateScaleFromCircleSize(effectiveDifficulty.CircleSize)).ToLocalisableString("0.#"))
                 ]
             };
             yield return new RulesetBeatmapAttribute(SongSelectStrings.ApproachRate, @"AR", originalDifficulty.ApproachRate, effectiveDifficulty.ApproachRate, 10)
             {
-                Description = CatchRulesetStrings.ApproachRateDescription,
+                Description = "Affects how early fruits fade in on the screen.",
                 AdditionalMetrics =
                 [
-                    new RulesetBeatmapAttribute.AdditionalMetric(CatchRulesetStrings.FadeInTime, LocalisableString.Interpolate($@"{IBeatmapDifficultyInfo.DifficultyRangeInt(effectiveDifficulty.ApproachRate, CatchHitObject.PREEMPT_RANGE):#,0.##} ms"))
+                    new RulesetBeatmapAttribute.AdditionalMetric("Fade-in time", LocalisableString.Interpolate($@"{IBeatmapDifficultyInfo.DifficultyRangeInt(effectiveDifficulty.ApproachRate, CatchHitObject.PREEMPT_RANGE):#,0.##} ms"))
                 ]
             };
             yield return new RulesetBeatmapAttribute(SongSelectStrings.HPDrain, @"HP", originalDifficulty.DrainRate, effectiveDifficulty.DrainRate, 10)
             {
-                Description = SongSelectStrings.HPDrainDescription
+                Description = "Affects the harshness of health drain and the health penalties for missing."
             };
         }
 

@@ -136,17 +136,9 @@ namespace osu.Game.Tests.Visual.Metadata
             dailyChallengeInfo.Value = null;
         }
 
-        public override Task Reconnect()
+        public void Reconnect()
         {
             isConnected.Value = true;
-
-            return Task.CompletedTask;
-        }
-
-        protected override Task DisconnectInternal()
-        {
-            Disconnect();
-            return Task.CompletedTask;
         }
     }
 }

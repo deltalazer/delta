@@ -3,10 +3,8 @@
 
 using System;
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Localisation;
 using osu.Game.Screens.Footer;
 
 namespace osu.Game.Graphics.UserInterface
@@ -26,7 +24,7 @@ namespace osu.Game.Graphics.UserInterface
             {
                 Anchor = Anchor.TopLeft,
                 Origin = Anchor.TopLeft,
-                Text = CommonStrings.Back.ToLower(),
+                Text = @"back",
                 Icon = OsuIcon.LeftCircle,
                 Action = () => Action?.Invoke()
             };

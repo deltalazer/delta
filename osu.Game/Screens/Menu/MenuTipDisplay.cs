@@ -118,7 +118,7 @@ namespace osu.Game.Screens.Menu
                 .FadeOutFromOne(2000, Easing.OutQuint);
         }
 
-        private const int available_tips = 31;
+        private const int available_tips = 30;
 
         private LocalisableString getRandomTip()
         {
@@ -223,9 +223,6 @@ namespace osu.Game.Screens.Menu
 
                 case 29:
                     return MenuTipStrings.ShiftClickInBeatmapOverlay;
-
-                case 30:
-                    return MenuTipStrings.DeltaLazerLogoCut;
             }
 
             return string.Empty;

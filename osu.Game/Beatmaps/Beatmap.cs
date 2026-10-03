@@ -67,6 +67,8 @@ namespace osu.Game.Beatmaps
 
         public SortedList<BreakPeriod> Breaks { get; set; } = new SortedList<BreakPeriod>(Comparer<BreakPeriod>.Default);
 
+        public List<string> UnhandledEventLines { get; set; } = new List<string>();
+
         [JsonIgnore]
         public double TotalBreakTime => Breaks.Sum(b => b.Duration);
 
@@ -148,12 +150,9 @@ namespace osu.Game.Beatmaps
 
         public int[] Bookmarks { get; set; } = Array.Empty<int>();
 
-        public double[] SliderVelocityPresets { get; set; } = [0.75, 1, 1.5];
-
         public BeatmapSectionGimmicks SectionGimmicks { get; set; } = new BeatmapSectionGimmicks();
 
         public BeatmapHitObjectGimmicks HitObjectGimmicks { get; set; } = new BeatmapHitObjectGimmicks();
-
 
         public int BeatmapVersion { get; set; } = LegacyBeatmapEncoder.FIRST_LAZER_VERSION;
 

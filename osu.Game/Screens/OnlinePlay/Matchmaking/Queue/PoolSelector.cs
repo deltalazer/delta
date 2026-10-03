@@ -24,36 +24,25 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
     {
         private const float icon_size = 34;
 
-        public readonly Bindable<MatchmakingPool[]?> AvailablePools = new Bindable<MatchmakingPool[]?>([]);
+        public readonly Bindable<MatchmakingPool[]> AvailablePools = new Bindable<MatchmakingPool[]>([]);
         public readonly Bindable<MatchmakingPool?> SelectedPool = new Bindable<MatchmakingPool?>();
 
         private FillFlowContainer<SelectorButton> poolFlow = null!;
-        private LoadingSpinner loading = null!;
 
         public PoolSelector()
         {
-            AutoSizeAxes = Axes.X;
-            Height = SelectorButton.SIZE.Y + 10;
+            AutoSizeAxes = Axes.Both;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            InternalChildren = new Drawable[]
+            InternalChild = poolFlow = new FillFlowContainer<SelectorButton>
             {
-                poolFlow = new FillFlowContainer<SelectorButton>
-                {
-                    AutoSizeAxes = Axes.X,
-                    RelativeSizeAxes = Axes.Y,
-                    Direction = FillDirection.Horizontal,
-                    Spacing = new Vector2(5),
-                },
-                loading = new LoadingSpinner(withBox: true)
-                {
-                    Size = new Vector2(50),
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                }
+                AutoSizeAxes = Axes.X,
+                Height = SelectorButton.SIZE.Y + 10,
+                Direction = FillDirection.Horizontal,
+                Spacing = new Vector2(5),
             };
         }
 
@@ -64,14 +53,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             AvailablePools.BindValueChanged(pools =>
             {
                 poolFlow.Clear();
-
-                if (pools.NewValue == null)
-                {
-                    loading.Show();
-                    return;
-                }
-
-                loading.Hide();
 
                 foreach (var p in pools.NewValue)
                 {

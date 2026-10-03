@@ -2,11 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Game.Configuration;
 using osuTK;
+using osu.Framework.Bindables;
+using osu.Game.Configuration;
 
 namespace osu.Game.Overlays.Dashboard.Friends
 {
@@ -19,11 +19,10 @@ namespace osu.Game.Overlays.Dashboard.Friends
         private readonly Bindable<OverlayPanelDisplayStyle> configDisplayStyle = new Bindable<OverlayPanelDisplayStyle>();
 
         private readonly bool supportsBrickMode;
-
         private readonly UserSortTabControl sortControl;
         private readonly OverlayPanelDisplayStyleControl styleControl;
 
-        public UserListToolbar(bool supportsBrickMode = true, bool supportsSort = true)
+        public UserListToolbar(bool supportsBrickMode)
         {
             this.supportsBrickMode = supportsBrickMode;
 
@@ -38,7 +37,6 @@ namespace osu.Game.Overlays.Dashboard.Friends
                 {
                     sortControl = new UserSortTabControl
                     {
-                        Alpha = supportsSort ? 1 : 0,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                     },

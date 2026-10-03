@@ -6,18 +6,17 @@ namespace osu.Game.Screens.Play
     public enum LocalUserPlayingState
     {
         /// <summary>
-        /// The local player is not currently in gameplay or has failed but still at the gameplay screen.
-        /// If watching a replay, gameplay always remains in this state.
+        /// The local player is not current in gameplay. If watching a replay, gameplay always remains in this state.
         /// </summary>
         NotPlaying,
 
         /// <summary>
-        /// The local player is in a break or paused.
+        /// The local player is in a break, paused, or failed but still at the gameplay screen.
         /// </summary>
         Break,
 
         /// <summary>
-        /// The local player is in active gameplay.
+        /// The local user is in active gameplay.
         /// </summary>
         Playing,
     }

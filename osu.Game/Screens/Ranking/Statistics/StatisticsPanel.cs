@@ -68,10 +68,10 @@ namespace osu.Game.Screens.Ranking.Statistics
                 RelativeSizeAxes = Axes.Both,
                 Padding = new MarginPadding
                 {
-                    Left = ScorePanel.EXPANDED_WIDTH + SIDE_PADDING * 2,
+                    Left = ScorePanel.EXPANDED_WIDTH + SIDE_PADDING * 3,
                     Right = SIDE_PADDING,
-                    Top = ScorePanel.EXPANDED_TOP_LAYER_HEIGHT,
-                    Bottom = 15 // Approximate padding to the bottom of the score panel.
+                    Top = SIDE_PADDING,
+                    Bottom = 50 // Approximate padding to the bottom of the score panel.
                 },
                 Children = new Drawable[]
                 {
@@ -156,7 +156,7 @@ namespace osu.Game.Screens.Ranking.Statistics
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
-                                Spacing = new Vector2(30, 10),
+                                Spacing = new Vector2(30, 15),
                                 Direction = FillDirection.Full,
                             }
                         }

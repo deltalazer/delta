@@ -26,8 +26,6 @@ namespace osu.Game.Skinning
         /// </summary>
         public decimal? LegacyVersion { get; internal set; }
 
-        internal bool IsLatestVersion;
-
         public enum LegacySetting
         {
             Version,

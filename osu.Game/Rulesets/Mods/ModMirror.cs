@@ -12,5 +12,6 @@ namespace osu.Game.Rulesets.Mods
         public override string Acronym => "MR";
         public override IconUsage? Icon => OsuIcon.ModMirror;
         public override ModType Type => ModType.Conversion;
+        public override double ScoreMultiplier => 1;
     }
 }

@@ -82,7 +82,11 @@ namespace osu.Game.Tests.Visual.Gameplay
         {
             base.Update();
 
-            drawablePath.Vertices = path.CalculatedPath;
+            List<Vector2> vertices = new List<Vector2>();
+
+            path.GetPathToProgress(vertices, 0, 1);
+
+            drawablePath.Vertices = vertices;
             controlPointDrawablePath.Vertices = path.ControlPoints.Select(o => o.Position).ToList();
 
             if (controlPointDrawablePath.Vertices.Count > 0)
@@ -91,7 +95,11 @@ namespace osu.Game.Tests.Visual.Gameplay
                     drawablePath.PositionInBoundingBox(drawablePath.Vertices[0]) - controlPointDrawablePath.PositionInBoundingBox(controlPointDrawablePath.Vertices[0]);
             }
 
-            convertedDrawablePath.Vertices = convertedPath.CalculatedPath;
+            vertices.Clear();
+
+            convertedPath.GetPathToProgress(vertices, 0, 1);
+
+            convertedDrawablePath.Vertices = vertices;
             convertedControlPointDrawablePath.Vertices = convertedPath.ControlPoints.Select(o => o.Position).ToList();
 
             if (convertedControlPointDrawablePath.Vertices.Count > 0)

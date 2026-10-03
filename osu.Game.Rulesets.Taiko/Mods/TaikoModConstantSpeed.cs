@@ -16,6 +16,7 @@ namespace osu.Game.Rulesets.Taiko.Mods
     {
         public override string Name => "Constant Speed";
         public override string Acronym => "CS";
+        public override double ScoreMultiplier => 0.9;
         public override LocalisableString Description => "No more tricky speed changes!";
         public override IconUsage? Icon => OsuIcon.ModConstantSpeed;
         public override ModType Type => ModType.Conversion;

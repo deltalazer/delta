@@ -14,7 +14,6 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Localisation;
 using osu.Game.Online.Metadata;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
@@ -37,7 +36,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
         {
             InternalChildren = new Drawable[]
             {
-                new SectionHeader(DailyChallengeStrings.SectionScoreBreakdown),
+                new SectionHeader("Score breakdown"),
                 barsContainer = new FillFlowContainer<Bar>
                 {
                     Direction = FillDirection.Horizontal,
@@ -216,7 +215,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
                             Colour = colours.Orange1,
-                            Text = DailyChallengeStrings.You,
+                            Text = "You",
                             Font = OsuFont.Default.With(weight: FontWeight.Bold),
                             Alpha = 0,
                             RelativePositionAxes = Axes.Y,
@@ -286,7 +285,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                     flashLayer.FadeOutFromOne(600, Easing.OutQuint);
             }
 
-            public LocalisableString TooltipText => DailyChallengeStrings.ScoreBreakdownBarTooltip(count, BinStart, BinEnd);
+            public LocalisableString TooltipText => LocalisableString.Format("{0:N0} passes in {1:N0} - {2:N0} range", count, BinStart, BinEnd);
         }
     }
 }

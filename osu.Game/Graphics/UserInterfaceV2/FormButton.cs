@@ -158,7 +158,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
         {
             if (Enabled.Value)
             {
-                background.FlashOnCommit();
+                background.Flash();
                 button.TriggerClick();
             }
 

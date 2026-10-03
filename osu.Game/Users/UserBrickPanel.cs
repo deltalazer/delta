@@ -4,23 +4,20 @@
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Online.API.Requests.Responses;
-using osu.Game.Users.Drawables;
 using osuTK;
 
 namespace osu.Game.Users
 {
-    public partial class UserBrickPanel : UserPanel, IHasCustomTooltip<APIUser?>
+    public partial class UserBrickPanel : UserPanel
     {
         public UserBrickPanel(APIUser user)
             : base(user)
         {
             AutoSizeAxes = Axes.Both;
             CornerRadius = 6;
-            TooltipContent = user;
         }
 
         // Matches osu!web styling.
@@ -61,8 +58,5 @@ namespace osu.Game.Users
                 })
             }
         };
-
-        public ITooltip<APIUser?> GetCustomTooltip() => new UserCardTooltip();
-        public APIUser? TooltipContent { get; }
     }
 }

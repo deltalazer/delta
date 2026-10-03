@@ -5,7 +5,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Localisation;
 using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 
@@ -49,7 +48,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Buttons
 
             if (available && allowNavigationToBeatmap)
             {
-                TooltipText = CommonStrings.GoToBeatmap;
+                TooltipText = "Go to beatmap";
                 Enabled.Value = true;
                 alpha = 1f;
             }

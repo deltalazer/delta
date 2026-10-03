@@ -9,7 +9,6 @@ using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Multiplayer.MatchTypes.RankedPlay;
 using osu.Game.Online.Rooms;
-using osu.Game.Rulesets;
 using osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay;
 using osu.Game.Tests.Resources;
 using osu.Game.Tests.Visual.Multiplayer;
@@ -19,26 +18,14 @@ namespace osu.Game.Tests.Visual.RankedPlay
     public abstract partial class RankedPlayTestScene : MultiplayerTestScene
     {
         /// <summary>
-        /// Returns 5 sample of the chosen ruleset <see cref="APIBeatmap"/>s.
+        /// Returns 5 sample <see cref="APIBeatmap"/>s.
         /// </summary>
-        protected static APIBeatmap[] GetSampleBeatmaps(RulesetInfo ruleset)
+        protected static APIBeatmap[] GetSampleBeatmaps()
         {
-            switch (ruleset.OnlineID)
-            {
-                case 3:
-                {
-                    using var resourceStream = TestResources.OpenResource("Requests/api-beatmaps-rankedplay-mania4k.json");
-                    using var reader = new StreamReader(resourceStream);
-                    return JsonConvert.DeserializeObject<APIBeatmap[]>(reader.ReadToEnd())!;
-                }
+            using var resourceStream = TestResources.OpenResource("Requests/api-beatmaps-rankedplay.json");
+            using var reader = new StreamReader(resourceStream);
 
-                default:
-                {
-                    using var resourceStream = TestResources.OpenResource("Requests/api-beatmaps-rankedplay.json");
-                    using var reader = new StreamReader(resourceStream);
-                    return JsonConvert.DeserializeObject<APIBeatmap[]>(reader.ReadToEnd())!;
-                }
-            }
+            return JsonConvert.DeserializeObject<APIBeatmap[]>(reader.ReadToEnd())!;
         }
 
         /// <summary>
@@ -46,12 +33,7 @@ namespace osu.Game.Tests.Visual.RankedPlay
         /// </summary>
         public class BeatmapRequestHandler
         {
-            public APIBeatmap[] Beatmaps;
-
-            public BeatmapRequestHandler(RulesetInfo ruleset)
-            {
-                Beatmaps = GetSampleBeatmaps(ruleset);
-            }
+            public readonly APIBeatmap[] Beatmaps = GetSampleBeatmaps();
 
             public bool HandleRequest(APIRequest request)
             {

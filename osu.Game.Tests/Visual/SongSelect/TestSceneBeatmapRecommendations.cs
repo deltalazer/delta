@@ -127,7 +127,6 @@ namespace osu.Game.Tests.Visual.SongSelect
         }
 
         [Test]
-        [FlakyTest]
         public void TestBestRulesetIsRecommended()
         {
             BeatmapSetInfo osuSet = null, mixedSet = null;

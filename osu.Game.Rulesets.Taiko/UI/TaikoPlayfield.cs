@@ -5,21 +5,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
+using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Rulesets.Taiko.Configuration;
-using osu.Game.Rulesets.Taiko.Judgements;
-using osu.Game.Rulesets.Taiko.Objects;
-using osu.Game.Rulesets.Taiko.Objects.Drawables;
-using osu.Game.Rulesets.Taiko.Scoring;
 using osu.Game.Rulesets.UI;
 using osu.Game.Rulesets.UI.Scrolling;
+using osu.Game.Rulesets.Taiko.Objects.Drawables;
+using osu.Game.Rulesets.Taiko.Judgements;
+using osu.Game.Rulesets.Taiko.Objects;
+using osu.Game.Rulesets.Taiko.Scoring;
 using osu.Game.Skinning;
 
 namespace osu.Game.Rulesets.Taiko.UI
@@ -41,8 +39,6 @@ namespace osu.Game.Rulesets.Taiko.UI
         private ScrollingHitObjectContainer drumRollHitContainer = null!;
         internal Drawable HitTarget = null!;
 
-        private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
-
         private JudgementPooler<DrawableTaikoJudgement> judgementPooler = null!;
         private readonly IDictionary<HitResult, HitExplosionPool> explosionPools = new Dictionary<HitResult, HitExplosionPool>();
 
@@ -55,11 +51,9 @@ namespace osu.Game.Rulesets.Taiko.UI
         /// </remarks>
         private BarLinePlayfield barLinePlayfield = null!;
 
-        [BackgroundDependencyLoader(true)]
-        private void load(OsuColour colours, TaikoRulesetConfigManager? config)
+        [BackgroundDependencyLoader]
+        private void load(OsuColour colours)
         {
-            config?.BindWith(TaikoRulesetSetting.HitAnimations, hitAnimations);
-
             const float hit_target_width = BASE_HEIGHT;
             const float hit_target_offset = -24f;
 
@@ -335,13 +329,8 @@ namespace osu.Game.Rulesets.Taiko.UI
             }
         }
 
-        private void addDrumRollHit(DrawableDrumRollTick drawableTick)
-        {
-            if (!hitAnimations.Value)
-                return;
-
+        private void addDrumRollHit(DrawableDrumRollTick drawableTick) =>
             drumRollHitContainer.Add(new DrawableFlyingHit(drawableTick));
-        }
 
         private void addExplosion(DrawableHitObject drawableObject, HitResult result, HitType type)
         {

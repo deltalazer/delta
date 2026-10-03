@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.ComponentModel;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Localisation;
@@ -28,10 +29,7 @@ namespace osu.Game.Overlays.Dashboard
         [LocalisableDescription(typeof(FriendsStrings), nameof(FriendsStrings.TitleCompact))]
         Friends,
 
-        [LocalisableDescription(typeof(UserInterfaceStrings), nameof(UserInterfaceStrings.CurrentlyOnline))]
-        CurrentlyPlaying,
-
-        [LocalisableDescription(typeof(UserInterfaceStrings), nameof(UserInterfaceStrings.UserSearch))]
-        UserSearch
+        [Description("Currently online")]
+        CurrentlyPlaying
     }
 }

@@ -25,7 +25,7 @@ namespace osu.Game.Rulesets.Catch.Edit
                 if (precedingObject != null && precedingObject is not BananaShower)
                 {
                     double previousSnap = snapProvider.ReadCurrentDistanceSnap(precedingObject, firstSelectedHitObject);
-                    AddHeader("From previous");
+                    AddHeader("To previous");
                     AddValue($"{previousSnap:#,0.##}x");
                 }
 

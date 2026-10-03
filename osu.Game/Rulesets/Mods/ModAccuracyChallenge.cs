@@ -30,6 +30,8 @@ namespace osu.Game.Rulesets.Mods
 
         public override ModType Type => ModType.DifficultyIncrease;
 
+        public override double ScoreMultiplier => 1.0;
+
         public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(ModEasyWithExtraLives), typeof(ModPerfect) }).ToArray();
 
         public override bool RequiresConfiguration => false;
@@ -41,7 +43,7 @@ namespace osu.Game.Rulesets.Mods
             get
             {
                 if (!MinimumAccuracy.IsDefault)
-                    yield return ("Minimum accuracy", MinimumAccuracy.Value.ToLocalisableString(@"P1"));
+                    yield return ("Minimum accuracy", $"{MinimumAccuracy.Value:##%}");
 
                 if (!AccuracyJudgeMode.IsDefault)
                     yield return ("Accuracy mode", AccuracyJudgeMode.Value.ToLocalisableString());
@@ -106,7 +108,7 @@ namespace osu.Game.Rulesets.Mods
     {
         public MinimumAccuracySlider()
         {
-            KeyboardStep = 0.001f;
+            KeyboardStep = 0.01f;
         }
     }
 }

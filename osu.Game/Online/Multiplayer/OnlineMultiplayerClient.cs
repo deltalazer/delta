@@ -10,15 +10,13 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Game.Localisation;
 using osu.Game.Online.API;
-using osu.Game.Online.Matchmaking;
-using osu.Game.Online.Matchmaking.Requests;
-using osu.Game.Online.Matchmaking.Responses;
-using osu.Game.Online.Multiplayer.MatchTypes.RankedPlay;
-using osu.Game.Online.RankedPlay;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays.Notifications;
+using osu.Game.Localisation;
+using osu.Game.Online.Matchmaking;
+using osu.Game.Online.Multiplayer.MatchTypes.RankedPlay;
+using osu.Game.Online.RankedPlay;
 
 namespace osu.Game.Online.Multiplayer
 {
@@ -80,7 +78,6 @@ namespace osu.Game.Online.Multiplayer
                     connection.On(nameof(IMatchmakingClient.MatchmakingQueueJoined), ((IMatchmakingClient)this).MatchmakingQueueJoined);
                     connection.On(nameof(IMatchmakingClient.MatchmakingQueueLeft), ((IMatchmakingClient)this).MatchmakingQueueLeft);
                     connection.On<MatchmakingRoomInvitationParams>(nameof(IMatchmakingClient.MatchmakingRoomInvitedWithParams), ((IMatchmakingClient)this).MatchmakingRoomInvitedWithParams);
-                    connection.On<MatchmakingDuelIssuedParams>(nameof(IMatchmakingClient.MatchmakingDuelIssued), ((IMatchmakingClient)this).MatchmakingDuelIssued);
                     connection.On<long, string>(nameof(IMatchmakingClient.MatchmakingRoomReady), ((IMatchmakingClient)this).MatchmakingRoomReady);
                     connection.On<MatchmakingLobbyStatus>(nameof(IMatchmakingClient.MatchmakingLobbyStatusChanged), ((IMatchmakingClient)this).MatchmakingLobbyStatusChanged);
                     connection.On<MatchmakingQueueStatus>(nameof(IMatchmakingClient.MatchmakingQueueStatusChanged), ((IMatchmakingClient)this).MatchmakingQueueStatusChanged);
@@ -92,8 +89,7 @@ namespace osu.Game.Online.Multiplayer
                     connection.On<RankedPlayCardItem, MultiplayerPlaylistItem>(nameof(IRankedPlayClient.RankedPlayCardRevealed), ((IRankedPlayClient)this).RankedPlayCardRevealed);
                     connection.On<RankedPlayCardItem>(nameof(IRankedPlayClient.RankedPlayCardPlayed), ((IRankedPlayClient)this).RankedPlayCardPlayed);
 
-                    connection.On(nameof(IStatefulUserHubClient.DisconnectRequested), ((IStatefulUserHubClient)this).DisconnectRequested);
-                    connection.On(nameof(IStatefulUserHubClient.ServerShuttingDown), ((IStatefulUserHubClient)this).ServerShuttingDown);
+                    connection.On(nameof(IStatefulUserHubClient.DisconnectRequested), ((IMultiplayerClient)this).DisconnectRequested);
                 };
 
                 IsConnected.BindTo(connector.IsConnected);
@@ -336,6 +332,14 @@ namespace osu.Game.Online.Multiplayer
             return connection.InvokeAsync(nameof(IMultiplayerServer.VoteToSkipIntro));
         }
 
+        public override Task DisconnectInternal()
+        {
+            if (connector == null)
+                return Task.CompletedTask;
+
+            return connector.Disconnect();
+        }
+
         public override Task DiscardCards(RankedPlayCardItem[] cards)
         {
             if (!IsConnected.Value)
@@ -365,13 +369,13 @@ namespace osu.Game.Online.Multiplayer
             return connection.InvokeAsync<MatchmakingPool[]>(nameof(IMatchmakingServer.GetMatchmakingPoolsOfType), type);
         }
 
-        public override Task<MatchmakingJoinLobbyResponse> MatchmakingJoinLobbyWithParams(MatchmakingJoinLobbyRequest request)
+        public override Task MatchmakingJoinLobby()
         {
             if (!IsConnected.Value)
-                return Task.FromResult(new MatchmakingJoinLobbyResponse());
+                return Task.CompletedTask;
 
             Debug.Assert(connection != null);
-            return connection.InvokeAsync<MatchmakingJoinLobbyResponse>(nameof(IMatchmakingServer.MatchmakingJoinLobbyWithParams), request);
+            return connection.InvokeAsync(nameof(IMatchmakingServer.MatchmakingJoinLobby));
         }
 
         public override Task MatchmakingLeaveLobby()
@@ -410,24 +414,6 @@ namespace osu.Game.Online.Multiplayer
             return connection.InvokeAsync(nameof(IMatchmakingServer.MatchmakingAcceptInvitation));
         }
 
-        public override Task<MatchmakingIssueDuelResponse> MatchmakingIssueDuel(MatchmakingIssueDuelRequest request)
-        {
-            if (!IsConnected.Value)
-                return Task.FromResult(new MatchmakingIssueDuelResponse());
-
-            Debug.Assert(connection != null);
-            return connection.InvokeAsync<MatchmakingIssueDuelResponse>(nameof(IMatchmakingServer.MatchmakingIssueDuel), request);
-        }
-
-        public override Task<MatchmakingAcceptDuelResponse> MatchmakingAcceptDuel(MatchmakingAcceptDuelRequest request)
-        {
-            if (!IsConnected.Value)
-                return Task.FromResult(new MatchmakingAcceptDuelResponse());
-
-            Debug.Assert(connection != null);
-            return connection.InvokeAsync<MatchmakingAcceptDuelResponse>(nameof(IMatchmakingServer.MatchmakingAcceptDuel), request);
-        }
-
         public override Task MatchmakingDeclineInvitation()
         {
             if (!IsConnected.Value)
@@ -459,18 +445,6 @@ namespace osu.Game.Online.Multiplayer
         {
             base.Dispose(isDisposing);
             connector?.Dispose();
-        }
-
-        public override async Task Reconnect()
-        {
-            if (connector != null)
-                await connector.Reconnect().ConfigureAwait(false);
-        }
-
-        protected override async Task DisconnectInternal()
-        {
-            if (connector != null)
-                await connector.Disconnect().ConfigureAwait(false);
         }
     }
 }

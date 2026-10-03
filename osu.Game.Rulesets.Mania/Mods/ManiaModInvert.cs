@@ -20,6 +20,7 @@ namespace osu.Game.Rulesets.Mania.Mods
         public override string Name => "Invert";
 
         public override string Acronym => "IN";
+        public override double ScoreMultiplier => 1;
 
         public override LocalisableString Description => "Hold the keys. To the beat.";
 
@@ -27,7 +28,7 @@ namespace osu.Game.Rulesets.Mania.Mods
 
         public override ModType Type => ModType.Conversion;
 
-        public override Type[] IncompatibleMods => new[] { typeof(ManiaModHoldOff), typeof(ManiaModNoRelease) };
+        public override Type[] IncompatibleMods => new[] { typeof(ManiaModHoldOff) };
 
         public void ApplyToBeatmap(IBeatmap beatmap)
         {

@@ -35,7 +35,6 @@ namespace osu.Game.Graphics.UserInterfaceV2
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
         private readonly Box box;
-        private readonly Box flashLayer;
 
         private readonly HoverSounds sounds;
 
@@ -45,7 +44,6 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
             Masking = true;
             CornerRadius = 5;
-            CornerExponent = 2.5f;
 
             CornerExponent = CORNER_EXPONENT;
             BorderThickness = BORDER_THICKNESS;
@@ -55,11 +53,6 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 box = new Box
                 {
                     Colour = Color4.White,
-                    RelativeSizeAxes = Axes.Both,
-                },
-                flashLayer = new Box
-                {
-                    Colour = Colour4.Transparent,
                     RelativeSizeAxes = Axes.Both,
                 },
                 sounds = new HoverSounds(),
@@ -74,21 +67,10 @@ namespace osu.Game.Graphics.UserInterfaceV2
             FinishTransforms(true);
         }
 
-        private void flash(Colour4 flashColour, double duration)
+        public void Flash()
         {
-            flashLayer.Colour = ColourInfo.GradientVertical(flashColour.Opacity(0), flashColour);
-            flashLayer.FadeOutFromOne(duration, Easing.OutQuint);
+            box.FlashColour(ColourInfo.GradientVertical(colourProvider.Background5, colourProvider.Dark2), 800, Easing.OutQuint);
         }
-
-        /// <summary>
-        /// Use when indicating that a change in value or a definitive action has occurred.
-        /// </summary>
-        public void FlashOnCommit() => flash(colourProvider.Dark2, 800);
-
-        /// <summary>
-        /// Use when rejecting the user's input as incorrect.
-        /// </summary>
-        public void FlashOnInputError() => flash(Colour4.Red, 200);
 
         private void updateStyle()
         {

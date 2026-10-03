@@ -33,23 +33,17 @@ namespace osu.Game.Screens.Edit.Compose.Components
             };
         }
 
-        protected void AddHeader(string header)
+        protected void AddHeader(string header) => InspectorText.AddParagraph($"{header}: ", s =>
         {
-            InspectorText.AddParagraph($"{header}", s =>
-            {
-                s.Font = OsuFont.Style.Caption2;
-                s.Colour = colourProvider.Content2;
-            });
-        }
+            s.Font = OsuFont.Style.Caption1;
+            s.Colour = colourProvider.Content2;
+        });
 
-        protected void AddValue(string value)
+        protected void AddValue(string value) => InspectorText.AddParagraph(value, s =>
         {
-            InspectorText.NewLine();
-            InspectorText.AddText(value, s =>
-            {
-                s.Font = OsuFont.Style.Caption2.With(weight: FontWeight.SemiBold);
-                s.Colour = colourProvider.Content1;
-            });
-        }
+            s.Padding = new MarginPadding { Top = -5 };
+            s.Font = OsuFont.Style.Body;
+            s.Colour = colourProvider.Content1;
+        });
     }
 }

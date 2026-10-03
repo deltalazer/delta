@@ -221,7 +221,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                         [HitResult.Miss] = 0,
                         [HitResult.Meh] = 0,
                         [HitResult.Great] = 0
-                    }, new ScoreProcessorStatistics(), DateTimeOffset.Now, [], 0, []);
+                    }, new ScoreProcessorStatistics(), DateTimeOffset.Now);
                 }
 
                 switch (RNG.Next(0, 3))

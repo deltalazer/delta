@@ -21,8 +21,6 @@ namespace osu.Game.Overlays.Profile.Header.Components
 {
     public partial class MainDetails : CompositeDrawable
     {
-        public const float BADGE_HEIGHT = 36;
-
         private readonly Dictionary<ScoreRank, ScoreRankInfo> scoreRankInfos = new Dictionary<ScoreRank, ScoreRankInfo>();
         private ProfileValueDisplay medalInfo = null!;
         private ProfileValueDisplay ppInfo = null!;
@@ -72,24 +70,11 @@ namespace osu.Game.Overlays.Profile.Header.Components
                                 {
                                     Title = UsersStrings.ShowRankCountrySimple,
                                 },
-                                new FillFlowContainer
+                                new DailyChallengeStatsDisplay
                                 {
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
-                                    Spacing = new Vector2(20),
-                                    Direction = FillDirection.Horizontal,
-                                    AutoSizeAxes = Axes.Both,
-                                    Children = new Drawable[]
-                                    {
-                                        new MatchmakingStatsDisplay
-                                        {
-                                            User = { BindTarget = User }
-                                        },
-                                        new DailyChallengeStatsDisplay
-                                        {
-                                            User = { BindTarget = User },
-                                        }
-                                    }
+                                    User = { BindTarget = User },
                                 }
                             }
                         }

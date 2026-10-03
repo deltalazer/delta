@@ -1022,9 +1022,29 @@ namespace osu.Game.Database
                 case 29:
                 case 30:
                 {
-                    // purposefully emptied 20260608
-                    // this previously contained score recalculation logic that is no longer really relevant at this time,
-                    // and thus has been dropped to simplify things
+                    var scores = migration.NewRealm
+                                          .All<ScoreInfo>()
+                                          .Where(s => !s.IsLegacyScore);
+
+                    foreach (var score in scores)
+                    {
+                        try
+                        {
+                            if (StandardisedScoreMigrationTools.ShouldMigrateToNewStandardised(score))
+                            {
+                                try
+                                {
+                                    long calculatedNew = StandardisedScoreMigrationTools.GetNewStandardised(score);
+                                    score.TotalScore = calculatedNew;
+                                }
+                                catch
+                                {
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+
                     break;
                 }
 
@@ -1041,7 +1061,7 @@ namespace osu.Game.Database
                             score.LegacyTotalScore = score.TotalScore;
                         }
                         else
-                            score.TotalScoreVersion = 30000003; // `LATEST_VERSION` at time of migration
+                            score.TotalScoreVersion = LegacyScoreEncoder.LATEST_VERSION;
                     }
 
                     break;

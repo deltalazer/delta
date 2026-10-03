@@ -3,7 +3,6 @@
 
 using System;
 using MessagePack;
-using osuTK;
 
 namespace osu.Game.Online.RankedPlay
 {
@@ -19,28 +18,5 @@ namespace osu.Game.Online.RankedPlay
 
         [Key(2)]
         public required bool Selected { get; init; }
-
-        [Key(3)]
-        public required bool Dragged { get; init; }
-
-        [Key(4)]
-        public required int Order { get; init; }
-
-        [Key(5)]
-        public float DragX { get; init; }
-
-        [Key(6)]
-        public float DragY { get; init; }
-
-        [IgnoreMember]
-        public Vector2 DragPosition
-        {
-            get => new Vector2(DragX, DragY);
-            init
-            {
-                DragX = value.X;
-                DragY = value.Y;
-            }
-        }
     }
 }

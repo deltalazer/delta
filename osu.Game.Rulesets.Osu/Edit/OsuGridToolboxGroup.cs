@@ -125,23 +125,13 @@ namespace osu.Game.Rulesets.Osu.Edit
             {
                 startPositionXSlider = new ExpandableSlider<float>
                 {
-                    Current = new BindableFloat
-                    {
-                        MinValue = -OsuPlayfield.BASE_SIZE.X / 2,
-                        MaxValue = OsuPlayfield.BASE_SIZE.X / 2,
-                        Precision = 0.1f,
-                    },
+                    Current = StartPositionX,
                     KeyboardStep = 1,
                     ExpandedLabelText = "X offset",
                 },
                 startPositionYSlider = new ExpandableSlider<float>
                 {
-                    Current = new BindableFloat
-                    {
-                        MinValue = -OsuPlayfield.BASE_SIZE.Y / 2,
-                        MaxValue = OsuPlayfield.BASE_SIZE.Y / 2,
-                        Precision = 0.1f,
-                    },
+                    Current = StartPositionY,
                     KeyboardStep = 1,
                     ExpandedLabelText = "Y offset",
                 },
@@ -196,26 +186,14 @@ namespace osu.Game.Rulesets.Osu.Edit
             StartPositionX.BindValueChanged(x =>
             {
                 startPositionXSlider.ContractedLabelText = $"X: {x.NewValue:#,0.##}";
-                startPositionXSlider.Current.Value = x.NewValue - OsuPlayfield.BASE_SIZE.X / 2;
                 StartPosition.Value = new Vector2(x.NewValue, StartPosition.Value.Y);
             }, true);
 
             StartPositionY.BindValueChanged(y =>
             {
                 startPositionYSlider.ContractedLabelText = $"Y: {y.NewValue:#,0.##}";
-                startPositionYSlider.Current.Value = y.NewValue - OsuPlayfield.BASE_SIZE.Y / 2;
                 StartPosition.Value = new Vector2(StartPosition.Value.X, y.NewValue);
             }, true);
-
-            startPositionXSlider.Current.BindValueChanged(x =>
-            {
-                StartPositionX.Value = x.NewValue + OsuPlayfield.BASE_SIZE.X / 2;
-            });
-
-            startPositionYSlider.Current.BindValueChanged(y =>
-            {
-                StartPositionY.Value = y.NewValue + OsuPlayfield.BASE_SIZE.Y / 2;
-            });
 
             StartPosition.BindValueChanged(pos =>
             {

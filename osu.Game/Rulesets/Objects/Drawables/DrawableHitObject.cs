@@ -156,10 +156,6 @@ namespace osu.Game.Rulesets.Objects.Drawables
         [Resolved(CanBeNull = true)]
         private IPooledHitObjectProvider pooledObjectProvider { get; set; }
 
-        [Resolved(CanBeNull = true)]
-        [CanBeNull]
-        private GameplayState gameplayState { get; set; }
-
         /// <summary>
         /// Whether the initialization logic in <see cref="Playfield" /> has applied.
         /// </summary>
@@ -619,7 +615,6 @@ namespace osu.Game.Rulesets.Objects.Drawables
             {
                 Samples.Balance.Value = CalculateSamplePlaybackBalance(SamplePlaybackPosition);
                 Samples.Play();
-                gameplayState?.ApplySamples(Samples.Samples);
             }
         }
 

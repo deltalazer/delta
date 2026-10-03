@@ -41,9 +41,13 @@ namespace osu.Game.Rulesets.Mods
         private readonly BindableNumber<double> tempoAdjust = new BindableDouble(1);
         private readonly BindableNumber<double> freqAdjust = new BindableDouble(1);
 
+        private readonly RateAdjustModHelper rateAdjustHelper;
+
         protected ModNightcore()
         {
-            // intentionally not using `RateAdjustModHelper`
+            rateAdjustHelper = new RateAdjustModHelper(SpeedChange);
+
+            // intentionally not deferring the speed change handling to `RateAdjustModHelper`
             // as the expected result of operation is not the same (nightcore should preserve constant pitch).
             SpeedChange.BindValueChanged(val =>
             {
@@ -57,6 +61,8 @@ namespace osu.Game.Rulesets.Mods
             track.AddAdjustment(AdjustableProperty.Frequency, freqAdjust);
             track.AddAdjustment(AdjustableProperty.Tempo, tempoAdjust);
         }
+
+        public override double ScoreMultiplier => rateAdjustHelper.ScoreMultiplier;
     }
 
     public abstract partial class ModNightcore<TObject> : ModNightcore, IApplicableToDrawableRuleset<TObject>

@@ -39,7 +39,6 @@ namespace osu.Game.Screens.OnlinePlay
         {
             Beatmap = { BindTarget = Beatmap },
             ActiveMods = { BindTarget = ActiveMods },
-            Ruleset = { BindTarget = Ruleset },
         };
 
         public partial class FreeModSelectFooterContent : ModSelectFooterContent

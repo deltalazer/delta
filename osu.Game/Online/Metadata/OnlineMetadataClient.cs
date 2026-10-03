@@ -69,8 +69,7 @@ namespace osu.Game.Online.Metadata
                     connection.On<int, UserPresence?>(nameof(IMetadataClient.FriendPresenceUpdated), ((IMetadataClient)this).FriendPresenceUpdated);
                     connection.On<DailyChallengeInfo?>(nameof(IMetadataClient.DailyChallengeUpdated), ((IMetadataClient)this).DailyChallengeUpdated);
                     connection.On<MultiplayerRoomScoreSetEvent>(nameof(IMetadataClient.MultiplayerRoomScoreSet), ((IMetadataClient)this).MultiplayerRoomScoreSet);
-                    connection.On(nameof(IStatefulUserHubClient.DisconnectRequested), ((IStatefulUserHubClient)this).DisconnectRequested);
-                    connection.On(nameof(IStatefulUserHubClient.ServerShuttingDown), ((IStatefulUserHubClient)this).ServerShuttingDown);
+                    connection.On(nameof(IStatefulUserHubClient.DisconnectRequested), ((IMetadataClient)this).DisconnectRequested);
                 };
 
                 IsConnected.BindTo(connector.IsConnected);
@@ -110,7 +109,6 @@ namespace osu.Game.Online.Metadata
                 {
                     userPresences.Clear();
                     friendPresences.Clear();
-                    WatchedRooms.Clear();
                     dailyChallengeInfo.Value = null;
                     localUserPresence = default;
                 });
@@ -274,8 +272,6 @@ namespace osu.Game.Online.Metadata
             if (connector?.IsConnected.Value != true)
                 throw new OperationCanceledException();
 
-            WatchedRooms.Add(id);
-
             Debug.Assert(connection != null);
             var result = await connection.InvokeAsync<MultiplayerPlaylistItemStats[]>(nameof(IMetadataServer.BeginWatchingMultiplayerRoom), id).ConfigureAwait(false);
             Logger.Log($@"{nameof(OnlineMetadataClient)} began watching multiplayer room with ID {id}", LoggingTarget.Network);
@@ -286,8 +282,6 @@ namespace osu.Game.Online.Metadata
         {
             if (connector?.IsConnected.Value != true)
                 throw new OperationCanceledException();
-
-            WatchedRooms.Remove(id);
 
             Debug.Assert(connection != null);
             await connection.InvokeAsync(nameof(IMetadataServer.EndWatchingMultiplayerRoom), id).ConfigureAwait(false);
@@ -303,22 +297,17 @@ namespace osu.Game.Online.Metadata
             await connection.InvokeAsync(nameof(IMetadataServer.RefreshFriends)).ConfigureAwait(false);
         }
 
+        public override async Task DisconnectRequested()
+        {
+            await base.DisconnectRequested().ConfigureAwait(false);
+            if (connector != null)
+                await connector.Disconnect().ConfigureAwait(false);
+        }
+
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
             connector?.Dispose();
-        }
-
-        public override async Task Reconnect()
-        {
-            if (connector != null)
-                await connector.Reconnect().ConfigureAwait(false);
-        }
-
-        protected override async Task DisconnectInternal()
-        {
-            if (connector != null)
-                await connector.Disconnect().ConfigureAwait(false);
         }
     }
 }

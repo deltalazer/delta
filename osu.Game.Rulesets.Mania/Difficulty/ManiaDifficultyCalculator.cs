@@ -19,7 +19,6 @@ using osu.Game.Rulesets.Mania.Scoring;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Scoring;
-using osu.Game.Utils;
 
 namespace osu.Game.Rulesets.Mania.Difficulty
 {
@@ -37,7 +36,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty
             isForCurrentRuleset = beatmap.BeatmapInfo.Ruleset.MatchesOnlineID(ruleset);
         }
 
-        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills)
+        protected override DifficultyAttributes CreateDifficultyAttributes(IBeatmap beatmap, Mod[] mods, Skill[] skills, double clockRate)
         {
             if (beatmap.HitObjects.Count == 0)
                 return new ManiaDifficultyAttributes { Mods = mods };
@@ -63,16 +62,14 @@ namespace osu.Game.Rulesets.Mania.Difficulty
             return 1;
         }
 
-        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, Mod[] mods)
+        protected override IEnumerable<DifficultyHitObject> CreateDifficultyHitObjects(IBeatmap beatmap, double clockRate)
         {
             var sortedObjects = beatmap.HitObjects.ToArray();
             int totalColumns = ((ManiaBeatmap)beatmap).TotalColumns;
 
-            double clockRate = ModUtils.CalculateRateWithMods(mods);
-
             LegacySortHelper<HitObject>.Sort(sortedObjects, Comparer<HitObject>.Create((a, b) => (int)Math.Round(a.StartTime) - (int)Math.Round(b.StartTime)));
 
-            List<DifficultyHitObject> objects = new List<DifficultyHitObject>(beatmap.HitObjects.Count);
+            List<DifficultyHitObject> objects = new List<DifficultyHitObject>();
             List<DifficultyHitObject>[] perColumnObjects = new List<DifficultyHitObject>[totalColumns];
 
             for (int column = 0; column < totalColumns; column++)
@@ -91,7 +88,7 @@ namespace osu.Game.Rulesets.Mania.Difficulty
         // Sorting is done in CreateDifficultyHitObjects, since the full list of hitobjects is required.
         protected override IEnumerable<DifficultyHitObject> SortObjects(IEnumerable<DifficultyHitObject> input) => input;
 
-        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods) => new Skill[]
+        protected override Skill[] CreateSkills(IBeatmap beatmap, Mod[] mods, double clockRate) => new Skill[]
         {
             new Strain(mods, ((ManiaBeatmap)Beatmap).TotalColumns)
         };

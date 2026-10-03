@@ -44,11 +44,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
             set => selectionOutline.FadeTo(value ? 1 : 0, 50);
         }
 
-        public bool PlayAudioPreview
-        {
-            set => songPreviewContainer.CardHovered.Value = value;
-        }
-
         public float Elevation;
 
         public bool PreviewTrackLoaded => songPreviewContainer.TrackLoaded;
@@ -102,11 +97,10 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
                         Origin = Anchor.Centre,
                         Children =
                         [
-                            new RankedPlayCardBackSide(),
                             cardContent = new Container
                             {
                                 RelativeSizeAxes = Axes.Both,
-                                Child = Empty(),
+                                Child = new RankedPlayCardBackSide()
                             },
                             selectionOutline = new SelectionOutline
                             {
@@ -129,7 +123,9 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
         {
             base.LoadComplete();
 
-            playlistItem.BindValueChanged(e => onPlaylistItemChanged(e.NewValue), true);
+            playlistItem.BindValueChanged(e => onPlaylistItemChanged(e.NewValue));
+            if (playlistItem.Value != null)
+                loadCardContent(playlistItem.Value, false);
         }
 
         protected override void UpdateAfterChildren()
@@ -151,14 +147,14 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
         {
             if (playlistItem == null)
             {
-                SetContent(null);
+                SetContent(new RankedPlayCardBackSide(), true);
                 return;
             }
 
-            loadCardContentAsync(playlistItem);
+            loadCardContent(playlistItem, true);
         }
 
-        private void loadCardContentAsync(MultiplayerPlaylistItem playlistItem) => Task.Run(async () =>
+        private void loadCardContent(MultiplayerPlaylistItem playlistItem, bool flip) => Task.Run(async () =>
         {
             var beatmap = await beatmapLookupCache.GetBeatmapAsync(playlistItem.BeatmapID).ConfigureAwait(false);
 
@@ -172,22 +168,22 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
 
             Schedule(() =>
             {
-                SetContent(new RankedPlayCardContent(beatmap));
+                SetContent(new RankedPlayCardContent(beatmap), flip);
                 songPreviewContainer.LoadPreview(beatmap);
             });
         });
 
-        private bool hasContent;
-
-        public void SetContent(Drawable? newContent)
+        public void SetContent(Drawable newContent, bool flip)
         {
-            if (newContent == null && !hasContent)
+            if (!flip)
+            {
+                cardContent.Child = newContent;
                 return;
+            }
 
-            hasContent = newContent != null;
             content.ScaleTo(new Vector2(0, 1), 100, Easing.In)
                    .Then()
-                   .Schedule(() => cardContent.Child = newContent ?? Empty())
+                   .Schedule(() => cardContent.Child = newContent)
                    .ScaleTo(new Vector2(1), 300, Easing.OutElasticQuarter);
 
             SamplePlaybackHelper.PlayWithRandomPitch(cardFlipSample);

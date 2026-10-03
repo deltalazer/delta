@@ -4,6 +4,7 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
@@ -128,25 +129,25 @@ namespace osu.Game.Tests.Visual.Editing
 
         private void assertOnScreenAt(EditorScreenMode screen, double time)
         {
-            AddAssert("screen is correct", () => editor!.Mode.Value, () => Is.EqualTo(screen));
-            AddAssert("time is correct", () => editorClock.CurrentTime, () => Is.EqualTo(time));
+            AddAssert($"stayed on {screen} at {time}", () =>
+                editor!.Mode.Value == screen
+                && editorClock.CurrentTime == time
+            );
         }
 
-        private void assertMovedScreenTo(EditorScreenMode screen) =>
-            AddAssert("screen is correct", () => editor!.Mode.Value, () => Is.EqualTo(screen));
+        private void assertMovedScreenTo(EditorScreenMode screen, string text = "moved to") =>
+            AddAssert($"{text} {screen}", () => editor!.Mode.Value == screen);
 
         private void setUpEditor(RulesetInfo ruleset)
         {
-            BeatmapSetInfo? beatmapSet = null;
+            BeatmapSetInfo beatmapSet = null!;
 
             AddStep("Import test beatmap", () =>
                 Game.BeatmapManager.Import(TestResources.GetTestBeatmapForImport()).WaitSafely()
             );
-            AddUntilStep("Retrieve beatmap", () =>
-            {
-                beatmapSet = Game.BeatmapManager.QueryBeatmapSet(set => !set.Protected)?.Value.Detach();
-                return beatmapSet != null;
-            });
+            AddStep("Retrieve beatmap", () =>
+                beatmapSet = Game.BeatmapManager.QueryBeatmapSet(set => !set.Protected).AsNonNull().Value.Detach()
+            );
             AddStep("Present beatmap", () => Game.PresentBeatmap(beatmapSet));
             AddUntilStep("Wait for song select", () =>
                 Game.Beatmap.Value.BeatmapSetInfo.Equals(beatmapSet)
@@ -156,7 +157,7 @@ namespace osu.Game.Tests.Visual.Editing
             AddStep("Switch ruleset", () => Game.Ruleset.Value = ruleset);
             AddStep("Open editor for ruleset", () =>
                 ((SoloSongSelect)Game.ScreenStack.CurrentScreen)
-                .Edit(beatmapSet!.Beatmaps.Last(beatmap => beatmap.Ruleset.Name == ruleset.Name))
+                .Edit(beatmapSet.Beatmaps.Last(beatmap => beatmap.Ruleset.Name == ruleset.Name))
             );
             AddUntilStep("Wait for editor open", () => editor?.ReadyForUse == true);
         }

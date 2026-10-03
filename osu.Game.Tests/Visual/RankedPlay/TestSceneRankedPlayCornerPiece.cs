@@ -6,7 +6,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Testing;
-using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay;
 using osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Components;
 using osu.Game.Tests.Visual.Multiplayer;
@@ -25,18 +24,18 @@ namespace osu.Game.Tests.Visual.RankedPlay
             {
                 Children =
                 [
-                    new RankedPlayCornerPiece(RankedPlayColourScheme.BLUE, Anchor.BottomLeft)
+                    new RankedPlayCornerPiece(RankedPlayColourScheme.Blue, Anchor.BottomLeft)
                     {
                         State = { BindTarget = visibility },
-                        Child = new RankedPlayUserDisplay(new APIUser { Id = 2, Username = "peppy" }, Anchor.BottomLeft, RankedPlayColourScheme.BLUE)
+                        Child = new RankedPlayUserDisplay(2, Anchor.BottomLeft, RankedPlayColourScheme.Blue)
                         {
                             RelativeSizeAxes = Axes.Both,
                         }
                     },
-                    new RankedPlayCornerPiece(RankedPlayColourScheme.RED, Anchor.TopRight)
+                    new RankedPlayCornerPiece(RankedPlayColourScheme.Red, Anchor.TopRight)
                     {
                         State = { BindTarget = visibility },
-                        Child = new RankedPlayUserDisplay(new APIUser { Id = 2, Username = "peppy" }, Anchor.TopRight, RankedPlayColourScheme.RED)
+                        Child = new RankedPlayUserDisplay(2, Anchor.TopRight, RankedPlayColourScheme.Red)
                         {
                             RelativeSizeAxes = Axes.Both,
                         }

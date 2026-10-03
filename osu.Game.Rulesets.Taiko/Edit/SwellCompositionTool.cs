@@ -2,8 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Sprites;
-using osu.Game.Graphics;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Edit.Tools;
 using osu.Game.Rulesets.Taiko.Edit.Blueprints;
@@ -18,7 +17,7 @@ namespace osu.Game.Rulesets.Taiko.Edit
         {
         }
 
-        public override Drawable CreateIcon() => new SpriteIcon { Icon = OsuIcon.EditorSwell };
+        public override Drawable CreateIcon() => new BeatmapStatisticIcon(BeatmapStatisticsIconType.Spinners);
 
         public override HitObjectPlacementBlueprint CreatePlacementBlueprint() => new SwellPlacementBlueprint();
     }

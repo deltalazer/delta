@@ -1,15 +1,14 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.ComponentModel;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Lists;
-using osu.Framework.Localisation;
 using osu.Game.Input.Bindings;
-using osu.Game.Localisation.Osu;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
@@ -106,13 +105,13 @@ namespace osu.Game.Rulesets.Osu
 
     public enum OsuAction
     {
-        [LocalisableDescription(typeof(ActionStrings), nameof(ActionStrings.LeftButton))]
+        [Description("Left button")]
         LeftButton,
 
-        [LocalisableDescription(typeof(ActionStrings), nameof(ActionStrings.RightButton))]
+        [Description("Right button")]
         RightButton,
 
-        [LocalisableDescription(typeof(ActionStrings), nameof(ActionStrings.Smoke))]
+        [Description("Smoke")]
         Smoke,
     }
 }

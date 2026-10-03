@@ -12,8 +12,6 @@ namespace osu.Game.Database
 {
     public partial class BeatmapLookupCache : OnlineLookupCache<int, APIBeatmap, GetBeatmapsRequest>
     {
-        protected override bool CacheNullValues => false;
-
         /// <summary>
         /// Perform an API lookup on the specified beatmap, populating a <see cref="APIBeatmap"/> model.
         /// </summary>

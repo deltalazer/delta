@@ -74,15 +74,6 @@ namespace osu.Game.Tests.Visual.Gameplay
         }
 
         [Test]
-        public void TestDisplayModes()
-        {
-            AddStep("create counter", () => Child = counterDisplay = new TestJudgementCounterDisplay());
-
-            foreach (JudgementCounterDisplay.DisplayMode mode in Enum.GetValues<JudgementCounterDisplay.DisplayMode>())
-                AddStep($"Change mode to {mode}", () => counterDisplay.Mode.Value = mode);
-        }
-
-        [Test]
         public void TestAddJudgementsToCounters()
         {
             AddStep("create counter", () => Child = counterDisplay = new TestJudgementCounterDisplay());

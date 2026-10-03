@@ -5,10 +5,13 @@ using System;
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input;
@@ -74,19 +77,11 @@ namespace osu.Game.Graphics.UserInterfaceV2
         /// </summary>
         public LocalisableString PlaceholderText { get; init; }
 
-        /// <summary>
-        /// Maximum allowed length of text.
-        /// </summary>
-        public int? LengthLimit { get; init; }
-
-        public bool SelectAllOnFocus { get; init; }
-
         private FormControlBackground background = null!;
+        private Box flashLayer = null!;
         private InnerTextBox textBox = null!;
         private FormFieldCaption caption = null!;
         private IFocusManager focusManager = null!;
-
-        protected Container CaptionContainer { get; private set; } = null!;
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
@@ -100,6 +95,11 @@ namespace osu.Game.Graphics.UserInterfaceV2
             InternalChildren = new Drawable[]
             {
                 background = new FormControlBackground(),
+                flashLayer = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = Colour4.Transparent,
+                },
                 new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
@@ -108,30 +108,18 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     Spacing = new Vector2(0, 4),
                     Children = new Drawable[]
                     {
-                        CaptionContainer = new Container
+                        caption = new FormFieldCaption
                         {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
                             Anchor = Anchor.TopLeft,
                             Origin = Anchor.TopLeft,
-                            Children = new Drawable[]
-                            {
-                                caption = new FormFieldCaption
-                                {
-                                    Anchor = Anchor.TopLeft,
-                                    Origin = Anchor.TopLeft,
-                                    Caption = Caption,
-                                    TooltipText = HintText,
-                                },
-                            },
+                            Caption = Caption,
+                            TooltipText = HintText,
                         },
                         textBox = CreateTextBox().With(t =>
                         {
                             t.RelativeSizeAxes = Axes.X;
                             t.Width = 1;
                             t.PlaceholderText = PlaceholderText;
-                            t.LengthLimit = LengthLimit;
-                            t.SelectAllOnFocus = SelectAllOnFocus;
                             t.Current = Current;
                             t.CommitOnFocusLost = true;
                             t.OnCommit += (textBox, newText) =>
@@ -139,9 +127,16 @@ namespace osu.Game.Graphics.UserInterfaceV2
                                 OnCommit?.Invoke(textBox, newText);
 
                                 if (!current.Disabled && !ReadOnly)
-                                    background.FlashOnCommit();
+                                {
+                                    flashLayer.Colour = ColourInfo.GradientVertical(colourProvider.Dark2.Opacity(0), colourProvider.Dark2);
+                                    flashLayer.FadeOutFromOne(800, Easing.OutQuint);
+                                }
                             };
-                            t.OnInputError = () => background.FlashOnInputError();
+                            t.OnInputError = () =>
+                            {
+                                flashLayer.Colour = ColourInfo.GradientVertical(colours.Red3.Opacity(0), colours.Red3);
+                                flashLayer.FadeOutFromOne(200, Easing.OutQuint);
+                            };
                             t.TabbableContentContainer = tabbableContentContainer;
                         }),
                     },

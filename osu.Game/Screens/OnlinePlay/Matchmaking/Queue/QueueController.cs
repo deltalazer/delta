@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics;
-using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
@@ -12,12 +11,8 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Screens;
-using osu.Game.Database;
 using osu.Game.Graphics;
-using osu.Game.Localisation;
-using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Matchmaking;
-using osu.Game.Online.Matchmaking.Requests;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
@@ -32,31 +27,21 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
     ///
     /// Includes support for deferring to background.
     /// </summary>
+    /// <remarks>
+    /// This is initialised and cached in the <see cref="ScreenQueue"/> but can be used throughout the system via DI.</remarks>
     public partial class QueueController : Component
     {
         public readonly Bindable<ScreenQueue.MatchmakingScreenState> CurrentState = new Bindable<ScreenQueue.MatchmakingScreenState>();
-        public readonly Bindable<MatchmakingPool?> SelectedPool = new Bindable<MatchmakingPool?>();
-
-        /// <summary>
-        /// Timer since the queue was joined.
-        /// </summary>
-        public readonly Stopwatch QueueTimer = new Stopwatch();
 
         [Resolved]
         private MultiplayerClient client { get; set; } = null!;
 
         [Resolved]
-        private UserLookupCache users { get; set; } = null!;
-
-        [Resolved]
         private INotificationOverlay? notifications { get; set; }
 
         private BackgroundQueueNotification? backgroundNotification;
-
-        private bool isBackgrounded = true;
-
-        private int? lastDuelUser;
-        private MatchmakingPool? lastDuelPool;
+        private bool isBackgrounded;
+        private MatchmakingPool? lastJoinedPool;
 
         protected override void LoadComplete()
         {
@@ -67,7 +52,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             client.MatchmakingQueueLeft += onMatchmakingQueueLeft;
             client.MatchmakingRoomInvited += onMatchmakingRoomInvited;
             client.MatchmakingRoomReady += onMatchmakingRoomReady;
-            client.MatchmakingDuelIssued += onMatchmakingDuelIssued;
         }
 
         /// <summary>
@@ -76,11 +60,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
         /// <param name="pool">The pool to join.</param>
         public void JoinQueue(MatchmakingPool pool)
         {
-            lastDuelUser = null;
-            lastDuelPool = null;
-            QueueTimer.Restart();
-
             client.MatchmakingJoinQueue(pool.Id).FireAndForget();
+            lastJoinedPool = pool;
         }
 
         /// <summary>
@@ -88,37 +69,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
         /// </summary>
         public void LeaveQueue()
         {
-            lastDuelUser = null;
-            lastDuelPool = null;
-
             client.MatchmakingLeaveQueue().FireAndForget();
-        }
-
-        public void IssueDuel(MatchmakingPool pool, int userId)
-        {
-            if (client.Room?.Settings.MatchType.IsMatchmakingType() == true)
-                return;
-
-            lastDuelUser = userId;
-            lastDuelPool = pool;
-            QueueTimer.Restart();
-
-            client.MatchmakingIssueDuel(new MatchmakingIssueDuelRequest
-            {
-                PoolId = pool.Id,
-                UserId = userId
-            }).FireAndForget();
-        }
-
-        public void AcceptDuel(MatchmakingDuelIssuedParams duel)
-        {
-            lastDuelUser = duel.UserId;
-            lastDuelPool = duel.Pool;
-
-            client.MatchmakingAcceptDuel(new MatchmakingAcceptDuelRequest
-            {
-                Id = duel.Id
-            }).FireAndForget();
         }
 
         /// <summary>
@@ -126,10 +77,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
         /// </summary>
         public void RejoinQueue()
         {
-            if (lastDuelUser != null && lastDuelPool != null)
-                IssueDuel(lastDuelPool, lastDuelUser.Value);
-            else if (SelectedPool.Value != null)
-                JoinQueue(SelectedPool.Value);
+            if (lastJoinedPool != null)
+                JoinQueue(lastJoinedPool);
         }
 
         /// <summary>
@@ -153,7 +102,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                 return;
 
             isBackgrounded = false;
-            closeNotification();
+            closeNotifications();
         }
 
         private void onRoomUpdated() => Scheduler.Add(() =>
@@ -166,70 +115,55 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
         {
             CurrentState.Value = ScreenQueue.MatchmakingScreenState.Queueing;
 
-            postNotification();
+            if (isBackgrounded)
+            {
+                closeNotifications();
+                postNotification();
+            }
         });
 
         private void onMatchmakingQueueLeft() => Scheduler.Add(() =>
         {
-            CurrentState.Value = ScreenQueue.MatchmakingScreenState.Idle;
+            if (CurrentState.Value != ScreenQueue.MatchmakingScreenState.InRoom)
+                CurrentState.Value = ScreenQueue.MatchmakingScreenState.Idle;
 
-            closeNotification();
+            closeNotifications();
         });
 
         private void onMatchmakingRoomInvited(MatchmakingRoomInvitationParams invitation) => Scheduler.Add(() =>
         {
             CurrentState.Value = ScreenQueue.MatchmakingScreenState.PendingAccept;
 
-            postNotification();
             backgroundNotification?.Complete(invitation);
+            backgroundNotification = null;
         });
 
         private void onMatchmakingRoomReady(long roomId, string password) => Scheduler.Add(() =>
         {
-            CurrentState.Value = ScreenQueue.MatchmakingScreenState.InRoom;
-
-            client.JoinRoom(new Room { RoomID = roomId }, password).FireAndForget();
+            client.JoinRoom(new Room { RoomID = roomId }, password)
+                  .FireAndForget(() => Scheduler.Add(() =>
+                  {
+                      CurrentState.Value = ScreenQueue.MatchmakingScreenState.InRoom;
+                  }));
         });
-
-        private void onMatchmakingDuelIssued(MatchmakingDuelIssuedParams duel)
-        {
-            Task.Run(async () =>
-            {
-                APIUser? user = await users.GetUserAsync(duel.UserId).ConfigureAwait(false);
-
-                if (user == null)
-                    return;
-
-                Scheduler.Add(() => notifications?.Post(new DuelNotification(this, user, duel)));
-            }).FireAndForget();
-        }
 
         private void postNotification()
         {
-            // Check if we can re-use an existing notification.
-            if (backgroundNotification?.State == ProgressNotificationState.Active || backgroundNotification?.State == ProgressNotificationState.Queued)
+            if (backgroundNotification != null)
                 return;
 
-            // Existing notification could be in a post-completion state.
-            closeNotification();
-
-            if (!isBackgrounded)
-                return;
-
-            if (CurrentState.Value != ScreenQueue.MatchmakingScreenState.Queueing)
-                return;
-
-            notifications?.Post(backgroundNotification = new BackgroundQueueNotification(this));
+            Debug.Assert(lastJoinedPool != null);
+            notifications?.Post(backgroundNotification = new BackgroundQueueNotification(this, lastJoinedPool.Type));
         }
 
-        private void closeNotification()
+        private void closeNotifications()
         {
-            if (backgroundNotification == null)
-                return;
-
-            backgroundNotification.State = ProgressNotificationState.Cancelled;
-            backgroundNotification.CloseAll();
-            backgroundNotification = null;
+            if (backgroundNotification != null)
+            {
+                backgroundNotification.State = ProgressNotificationState.Cancelled;
+                backgroundNotification.CloseAll();
+                backgroundNotification = null;
+            }
         }
 
         protected override void Dispose(bool isDisposing)
@@ -243,7 +177,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                 client.MatchmakingQueueLeft -= onMatchmakingQueueLeft;
                 client.MatchmakingRoomInvited -= onMatchmakingRoomInvited;
                 client.MatchmakingRoomReady -= onMatchmakingRoomReady;
-                client.MatchmakingDuelIssued -= onMatchmakingDuelIssued;
             }
         }
 
@@ -256,19 +189,21 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             private MultiplayerClient client { get; set; } = null!;
 
             private readonly QueueController controller;
+            private readonly MatchmakingPoolType poolType;
 
             private Notification? foundNotification;
             private Sample? matchFoundSample;
 
-            public BackgroundQueueNotification(QueueController controller)
+            public BackgroundQueueNotification(QueueController controller, MatchmakingPoolType poolType)
             {
                 this.controller = controller;
+                this.poolType = poolType;
             }
 
             [BackgroundDependencyLoader]
             private void load(AudioManager audio)
             {
-                Text = MultiplayerMatchStrings.SearchingForOpponents;
+                Text = "Searching for opponents...";
 
                 Activated = () =>
                 {
@@ -277,7 +212,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                         if (s is ScreenIntro || s is ScreenQueue)
                             return;
 
-                        s.Push(new ScreenIntro(MatchmakingPoolType.RankedPlay));
+                        s.Push(new ScreenIntro(poolType));
                     }, [typeof(ScreenIntro), typeof(ScreenQueue)]);
 
                     // Closed when appropriate by SearchInForeground().
@@ -295,21 +230,12 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
 
             public void Complete(MatchmakingRoomInvitationParams invitation)
             {
-                if (State != ProgressNotificationState.Active && State != ProgressNotificationState.Queued)
-                    return;
-
                 CompletionClickAction = () =>
                 {
-                    performer?.PerformFromScreen(s =>
-                    {
-                        client.MatchmakingAcceptInvitation().FireAndForget();
-                        controller.CurrentState.Value = ScreenQueue.MatchmakingScreenState.AcceptedWaitingForRoom;
+                    client.MatchmakingAcceptInvitation().FireAndForget();
+                    controller.CurrentState.Value = ScreenQueue.MatchmakingScreenState.AcceptedWaitingForRoom;
 
-                        if (s is ScreenIntro || s is ScreenQueue)
-                            return;
-
-                        s.Push(new ScreenIntro(invitation.Type));
-                    }, [typeof(ScreenIntro), typeof(ScreenQueue)]);
+                    performer?.PerformFromScreen(s => s.Push(new ScreenIntro(invitation.Type)));
 
                     Close(false);
                     return true;
@@ -329,7 +255,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                 return foundNotification = new MatchFoundNotification
                 {
                     Activated = CompletionClickAction,
-                    Text = MultiplayerMatchStrings.MatchIsReady,
+                    Text = "Your match is ready! Click to join.",
                 };
             }
 
@@ -354,20 +280,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                     Icon = FontAwesome.Solid.Bolt;
                     IconContent.Colour = ColourInfo.GradientVertical(colours.YellowDark, colours.YellowLight);
                 }
-            }
-        }
-
-        private partial class DuelNotification : SimpleNotification
-        {
-            public DuelNotification(QueueController controller, APIUser user, MatchmakingDuelIssuedParams duel)
-            {
-                Text = $"{user.Username} challenged you to a duel ({duel.Pool.DisplayName}). Click to accept.";
-
-                Activated = () =>
-                {
-                    controller.AcceptDuel(duel);
-                    return true;
-                };
             }
         }
     }

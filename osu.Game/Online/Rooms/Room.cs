@@ -37,15 +37,6 @@ namespace osu.Game.Online.Rooms
         }
 
         /// <summary>
-        /// An optional description of the room.
-        /// </summary>
-        public string? Description
-        {
-            get => description;
-            set => SetField(ref description, value);
-        }
-
-        /// <summary>
         /// Sets the room password. Will be <c>null</c> after the room is created.
         /// </summary>
         /// <remarks>
@@ -128,7 +119,7 @@ namespace osu.Game.Online.Rooms
         /// <summary>
         /// The maximum number of users allowed in the room.
         /// </summary>
-        public byte? MaxParticipants
+        public int? MaxParticipants
         {
             get => maxParticipants;
             set => SetField(ref maxParticipants, value);
@@ -284,9 +275,6 @@ namespace osu.Game.Online.Rooms
         [JsonProperty("name")]
         private string name = string.Empty;
 
-        [JsonProperty("description")]
-        private string? description;
-
         [JsonProperty("password")]
         private string? password;
 
@@ -309,8 +297,8 @@ namespace osu.Game.Online.Rooms
         [JsonProperty("ends_at")]
         private DateTimeOffset? endDate;
 
-        [JsonProperty("max_participants")]
-        private byte? maxParticipants;
+        // Not yet serialised (not implemented).
+        private int? maxParticipants;
 
         [JsonProperty("participant_count")]
         private int participantCount;
@@ -377,7 +365,6 @@ namespace osu.Game.Online.Rooms
             QueueMode = room.Settings.QueueMode;
             AutoStartDuration = room.Settings.AutoStartDuration;
             AutoSkip = room.Settings.AutoSkip;
-            MaxParticipants = room.Settings.MaxParticipants;
             Host = room.Host != null ? new APIUser { Id = room.Host.UserID } : null;
             Playlist = room.Playlist.Select(p => new PlaylistItem(p)).ToArray();
         }
@@ -393,7 +380,6 @@ namespace osu.Game.Online.Rooms
         {
             RoomID = other.RoomID;
             Name = other.Name;
-            Description = other.Description;
             Category = other.Category;
             Host = other.Host;
             ChannelId = other.ChannelId;

@@ -20,6 +20,8 @@ namespace osu.Game.Rulesets.Mania.Mods
 
         public override LocalisableString Description => @"Decrease the playfield's viewing area.";
 
+        public override double ScoreMultiplier => 1;
+
         protected override CoverExpandDirection ExpandDirection => Direction.Value;
 
         public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[]

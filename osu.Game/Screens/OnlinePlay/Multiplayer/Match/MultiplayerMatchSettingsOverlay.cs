@@ -52,13 +52,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
 
         protected partial class MatchSettings : CompositeDrawable
         {
+            private const float disabled_alpha = 0.2f;
+
             public override bool IsPresent => base.IsPresent || Scheduler.HasPendingTasks;
 
             public Action? SettingsApplied;
 
             public OsuTextBox NameField = null!;
-            private FormSliderBar<byte> maximumParticipantsSliderBar = null!;
-            private FormCheckBox maximumParticipantsCheckbox = null!;
+            public OsuTextBox MaxParticipantsField = null!;
             public MatchTypePicker TypePicker = null!;
             public OsuEnumDropdown<QueueMode> QueueModeDropdown = null!;
             public OsuTextBox PasswordTextBox = null!;
@@ -220,26 +221,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                                                             Padding = new MarginPadding { Left = FIELD_PADDING / 2 },
                                                             Children = new[]
                                                             {
-                                                                new Section("Player count")
+                                                                new Section("Max participants")
                                                                 {
-                                                                    Children = new Drawable[]
+                                                                    Alpha = disabled_alpha,
+                                                                    Child = MaxParticipantsField = new OsuNumberBox
                                                                     {
-                                                                        maximumParticipantsCheckbox = new FormCheckBox
-                                                                        {
-                                                                            Caption = "Limited slots",
-                                                                            HintText = "When enabled, total players allowed in a room will be limited. Unlimited when disabled."
-                                                                        },
-                                                                        maximumParticipantsSliderBar = new FormSliderBar<byte>
-                                                                        {
-                                                                            Caption = "Slot count",
-                                                                            RelativeSizeAxes = Axes.X,
-                                                                            Margin = new MarginPadding { Top = 5 },
-                                                                            Current = new BindableNumber<byte>(16)
-                                                                            {
-                                                                                MinValue = 2,
-                                                                                MaxValue = 16,
-                                                                            }
-                                                                        },
+                                                                        RelativeSizeAxes = Axes.X,
+                                                                        TabbableContentContainer = this,
+                                                                        ReadOnly = true,
                                                                     },
                                                                 },
                                                                 new Section("Password (optional)")
@@ -248,13 +237,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                                                                     {
                                                                         RelativeSizeAxes = Axes.X,
                                                                         TabbableContentContainer = this,
-                                                                        // Set quite small to avoid hitting rich presence limits.
-                                                                        // Note that we use JSON encoding so this needs to be well below the 128 byte limit discord end.
-                                                                        // See https://github.com/Lachee/discord-rpc-csharp/blob/master/DiscordRPC/Entities/Secrets.cs#L26-L42
-                                                                        //
-                                                                        // Note that we need at least 36 characters for tournament rooms:
-                                                                        // https://github.com/ppy/osu-server-spectator/blob/406ed09d5825f2fe60c9d5ca08e69db94d873e28/osu.Server.Spectator/Hubs/Referee/RefereeHub.cs#L101
-                                                                        LengthLimit = 40,
+                                                                        LengthLimit = 255,
                                                                     },
                                                                 },
                                                                 new Section("Other")
@@ -376,11 +359,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                 updateRoomMaxParticipants();
                 updateRoomAutoStartDuration();
                 updateRoomPlaylist();
-
-                maximumParticipantsCheckbox.Current.BindValueChanged(enabled =>
-                {
-                    maximumParticipantsSliderBar.Alpha = enabled.NewValue ? 1 : 0;
-                }, true);
             }
 
             private void onRoomPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -437,15 +415,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                 => AutoSkipCheckbox.Current.Value = room.AutoSkip;
 
             private void updateRoomMaxParticipants()
-            {
-                if (room.MaxParticipants.HasValue)
-                {
-                    maximumParticipantsCheckbox.Current.Value = true;
-                    maximumParticipantsSliderBar.Current.Value = room.MaxParticipants.Value;
-                }
-                else
-                    maximumParticipantsCheckbox.Current.Value = false;
-            }
+                => MaxParticipantsField.Text = room.MaxParticipants?.ToString();
 
             private void updateRoomAutoStartDuration()
                 => startModeDropdown.Current.Value = (StartMode)room.AutoStartDuration.TotalSeconds;
@@ -466,8 +436,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                 if (!ApplyButton.Enabled.Value)
                     return;
 
-                byte? maxParticipants = maximumParticipantsCheckbox.Current.Value ? maximumParticipantsSliderBar.Current.Value : null;
-
                 ErrorText.FadeOut(50);
 
                 Debug.Assert(applyingSettingsOperation == null);
@@ -483,8 +451,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                               matchType: TypePicker.Current.Value,
                               queueMode: QueueModeDropdown.Current.Value,
                               autoStartDuration: TimeSpan.FromSeconds((int)startModeDropdown.Current.Value),
-                              autoSkip: AutoSkipCheckbox.Current.Value,
-                              maxParticipants: maxParticipants)
+                              autoSkip: AutoSkipCheckbox.Current.Value)
                           .ContinueWith(t => Schedule(() =>
                           {
                               if (t.IsCompletedSuccessfully)
@@ -502,7 +469,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                     room.AutoStartDuration = TimeSpan.FromSeconds((int)startModeDropdown.Current.Value);
                     room.AutoSkip = AutoSkipCheckbox.Current.Value;
                     room.Playlist = drawablePlaylist.Items.ToArray();
-                    room.MaxParticipants = maxParticipants;
 
                     client.CreateRoom(room).ContinueWith(t => Schedule(() =>
                     {

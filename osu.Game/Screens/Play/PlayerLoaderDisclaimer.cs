@@ -1,7 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -21,10 +20,6 @@ namespace osu.Game.Screens.Play
 
         private Box background = null!;
 
-        public bool IsImportant { get; init; }
-
-        public Action? Action { get; set; }
-
         public PlayerLoaderDisclaimer(LocalisableString title, LocalisableString content)
         {
             this.title = title;
@@ -39,18 +34,12 @@ namespace osu.Game.Screens.Play
             Masking = true;
             CornerRadius = 5;
 
-            if (IsImportant)
-            {
-                BorderColour = colours.Red2;
-                BorderThickness = 1.5f;
-            }
-
             InternalChildren = new Drawable[]
             {
                 background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = IsImportant ? colours.Red3 : colourProvider.Background4,
+                    Colour = colourProvider.Background4,
                     Alpha = 0.1f,
                 },
                 new Container
@@ -65,7 +54,7 @@ namespace osu.Game.Screens.Play
                             Width = 7,
                             Height = 15,
                             Margin = new MarginPadding { Top = 2 },
-                            Colour = IsImportant ? colours.Red1 : colours.Orange1,
+                            Colour = colours.Orange1,
                         },
                         new FillFlowContainer
                         {
@@ -93,25 +82,6 @@ namespace osu.Game.Screens.Play
                     }
                 }
             };
-        }
-
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            if (IsImportant)
-            {
-                background.FadeTo(0.6f, 600, Easing.Out)
-                          .Then()
-                          .FadeTo(0.1f, 300, Easing.Out)
-                          .Loop();
-            }
-        }
-
-        protected override bool OnClick(ClickEvent e)
-        {
-            Action?.Invoke();
-            return true;
         }
 
         protected override bool OnHover(HoverEvent e)

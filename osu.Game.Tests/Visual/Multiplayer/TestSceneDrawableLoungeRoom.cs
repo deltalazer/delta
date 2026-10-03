@@ -48,7 +48,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                     {
                         allowResponseCallback.Wait(10000);
                         allowResponseCallback.Reset();
-                        Schedule(() => d("Incorrect password", new InvalidPasswordException()));
+                        Schedule(() => d?.Invoke("Incorrect password", new InvalidPasswordException()));
                     });
                 });
 

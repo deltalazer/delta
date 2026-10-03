@@ -3,7 +3,6 @@
 
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Spectator;
-using osu.Game.Screens.OnlinePlay.Matchmaking.Queue;
 using osu.Game.Tests.Visual.OnlinePlay;
 using osu.Game.Tests.Visual.Spectator;
 
@@ -16,17 +15,14 @@ namespace osu.Game.Tests.Visual.Multiplayer
     {
         public TestMultiplayerClient MultiplayerClient { get; }
         public TestSpectatorClient SpectatorClient { get; }
-        public QueueController QueueController { get; }
 
         public MultiplayerTestSceneDependencies()
         {
             MultiplayerClient = new TestMultiplayerClient(RequestsHandler);
             SpectatorClient = CreateSpectatorClient();
-            QueueController = new QueueController();
 
             CacheAs<MultiplayerClient>(MultiplayerClient);
             CacheAs<SpectatorClient>(SpectatorClient);
-            CacheAs(QueueController);
         }
 
         protected virtual TestSpectatorClient CreateSpectatorClient() => new TestSpectatorClient();

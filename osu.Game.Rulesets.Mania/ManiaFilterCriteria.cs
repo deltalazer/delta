@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Formats;
 using osu.Game.Rulesets.Filter;
 using osu.Game.Rulesets.Mania.Beatmaps;
 using osu.Game.Rulesets.Mania.Mods;
@@ -18,9 +19,7 @@ namespace osu.Game.Rulesets.Mania
 {
     public class ManiaFilterCriteria : IRulesetFilterCriteria
     {
-        // using `2 * MAX_STAGE_KEYS` here instead of `LegacyBeatmapDecoder.MAX_MANIA_KEY_COUNT`,
-        // as the former is higher and achievable by engaging key mods (Dual Stages + 10K)
-        private readonly HashSet<int> includedKeyCounts = Enumerable.Range(1, 2 * ManiaRuleset.MAX_STAGE_KEYS).ToHashSet();
+        private readonly HashSet<int> includedKeyCounts = Enumerable.Range(1, LegacyBeatmapDecoder.MAX_MANIA_KEY_COUNT).ToHashSet();
         private FilterCriteria.OptionalRange<float> longNotePercentage;
 
         public bool Matches(BeatmapInfo beatmapInfo, FilterCriteria criteria)
@@ -99,9 +98,9 @@ namespace osu.Game.Rulesets.Mania
             return false;
         }
 
-        public bool FilterMayChangeFromMods(FilterCriteria criteria, ValueChangedEvent<IReadOnlyList<Mod>> mods)
+        public bool FilterMayChangeFromMods(ValueChangedEvent<IReadOnlyList<Mod>> mods)
         {
-            if (includedKeyCounts.Count != 2 * ManiaRuleset.MAX_STAGE_KEYS || criteria.Group == GroupMode.Variant)
+            if (includedKeyCounts.Count != LegacyBeatmapDecoder.MAX_MANIA_KEY_COUNT)
             {
                 // Interpreting as the Mod type is required for equality comparison.
                 HashSet<Mod> oldSet = mods.OldValue.OfType<ManiaKeyMod>().AsEnumerable<Mod>().ToHashSet();

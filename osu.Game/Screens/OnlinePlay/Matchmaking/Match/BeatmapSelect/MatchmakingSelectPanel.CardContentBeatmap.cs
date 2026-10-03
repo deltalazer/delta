@@ -307,10 +307,10 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Match.BeatmapSelect
                 };
 
                 if (beatmapSet.HasVideo)
-                    leftIconArea.Add(new VideoIconPill());
+                    leftIconArea.Add(new VideoIconPill { IconSize = new Vector2(16) });
 
                 if (beatmapSet.HasStoryboard)
-                    leftIconArea.Add(new StoryboardIconPill());
+                    leftIconArea.Add(new StoryboardIconPill { IconSize = new Vector2(16) });
 
                 if (beatmapSet.HasExplicitContent)
                 {

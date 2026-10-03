@@ -329,7 +329,7 @@ namespace osu.Game.Screens.Edit.Components
             }
 
             public Popover? GetPopover() => ActualFilename.Value == null
-                ? new FormFileSelector.FileChooserPopover(SupportedExtensions.AUDIO_EXTENSIONS, selectedFile, LastSelectedFileDirectory.Value?.FullName, allowClear: false)
+                ? new FormFileSelector.FileChooserPopover(SupportedExtensions.AUDIO_EXTENSIONS, selectedFile, LastSelectedFileDirectory.Value?.FullName)
                 : null;
 
             public MenuItem[]? ContextMenuItems =>

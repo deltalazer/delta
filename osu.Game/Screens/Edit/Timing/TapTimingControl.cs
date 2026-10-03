@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Configuration;
+using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
@@ -30,22 +31,14 @@ namespace osu.Game.Screens.Edit.Timing
         private OsuConfigManager configManager { get; set; } = null!;
 
         [Resolved]
-        private Bindable<ControlPointGroup?> selectedGroup { get; set; } = null!;
-
-        private readonly BindableNumberWithCurrent<double> currentBeatLength = new BindableNumberWithCurrent<double>(TimingControlPoint.DEFAULT_BEAT_LENGTH)
-        {
-            MinValue = 6,
-            MaxValue = 60000
-        };
+        private Bindable<ControlPointGroup> selectedGroup { get; set; } = null!;
 
         private readonly BindableBool isHandlingTapping = new BindableBool();
 
         private MetronomeDisplay metronome = null!;
-        private FormDiscreteAdjustmentControl<double> offsetControl = null!;
-        private FormDiscreteAdjustmentControl<double> bpmControl = null!;
 
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colourProvider)
+        private void load(OverlayColourProvider colourProvider, OsuColour colours)
         {
             const float padding = 10;
 
@@ -69,8 +62,7 @@ namespace osu.Game.Screens.Edit.Timing
                     RowDimensions = new[]
                     {
                         new Dimension(GridSizeMode.Absolute, 200),
-                        new Dimension(GridSizeMode.AutoSize),
-                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension(GridSizeMode.Absolute, 50),
                         new Dimension(GridSizeMode.Absolute, TapButton.SIZE + padding),
                     },
                     Content = new[]
@@ -102,22 +94,29 @@ namespace osu.Game.Screens.Edit.Timing
                         },
                         new Drawable[]
                         {
-                            offsetControl = new FormDiscreteAdjustmentControl<double>(1)
+                            new Container
                             {
-                                Caption = "Offset",
-                                Current = new BindableDouble
+                                RelativeSizeAxes = Axes.Both,
+                                Padding = new MarginPadding { Bottom = padding, Horizontal = padding },
+                                Children = new Drawable[]
                                 {
-                                    Precision = 1,
-                                },
-                                Margin = new MarginPadding { Bottom = padding },
-                            },
-                        },
-                        new Drawable[]
-                        {
-                            bpmControl = new FormDiscreteAdjustmentControl<double>(0.1)
-                            {
-                                Caption = "BPM",
-                                Margin = new MarginPadding { Bottom = padding },
+                                    new TimingAdjustButton(1)
+                                    {
+                                        Text = "Offset",
+                                        RelativeSizeAxes = Axes.Both,
+                                        Size = new Vector2(0.48f, 1),
+                                        Action = adjustOffset,
+                                    },
+                                    new TimingAdjustButton(0.1)
+                                    {
+                                        Anchor = Anchor.TopRight,
+                                        Origin = Anchor.TopRight,
+                                        Text = "BPM",
+                                        RelativeSizeAxes = Axes.Both,
+                                        Size = new Vector2(0.48f, 1),
+                                        Action = adjustBpm,
+                                    }
+                                }
                             },
                         },
                         new Drawable[]
@@ -169,11 +168,6 @@ namespace osu.Game.Screens.Edit.Timing
                     }
                 },
             };
-        }
-
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
 
             isHandlingTapping.BindValueChanged(handling =>
             {
@@ -182,28 +176,6 @@ namespace osu.Game.Screens.Edit.Timing
                 if (handling.NewValue)
                     start();
             }, true);
-
-            currentBeatLength.BindValueChanged(_ => bpmControl.Current.Value = 60000 / currentBeatLength.Value);
-            selectedGroup.BindValueChanged(_ => onGroupChanged(), true);
-
-            offsetControl.Current.BindValueChanged(setOffset);
-            bpmControl.Current.BindValueChanged(setBpm);
-        }
-
-        private bool changingGroup;
-
-        private void onGroupChanged()
-        {
-            if (selectedGroup.Value == null)
-                return;
-
-            changingGroup = true;
-
-            offsetControl.Current.Value = selectedGroup.Value.Time;
-            if (selectedGroup.Value.ControlPoints.OfType<TimingControlPoint>().FirstOrDefault() is TimingControlPoint timingControlPoint)
-                currentBeatLength.Current = timingControlPoint.BeatLengthBindable;
-
-            changingGroup = false;
         }
 
         private void start()
@@ -224,11 +196,8 @@ namespace osu.Game.Screens.Edit.Timing
             editorClock.Seek(selectedGroup.Value.Time);
         }
 
-        private void setOffset(ValueChangedEvent<double> offsetChange)
+        private void adjustOffset(double adjust)
         {
-            if (changingGroup)
-                return;
-
             if (selectedGroup.Value == null)
                 return;
 
@@ -240,13 +209,13 @@ namespace osu.Game.Screens.Edit.Timing
             beatmap.BeginChange();
             beatmap.ControlPointInfo.RemoveGroup(selectedGroup.Value);
 
-            double newOffset = offsetChange.NewValue;
+            double newOffset = selectedGroup.Value.Time + adjust;
 
             foreach (var cp in currentGroupItems)
             {
-                if (cp is TimingControlPoint tp && configManager.Get<bool>(OsuSetting.EditorAdjustExistingObjectsOnTimingChanges))
+                if (cp is TimingControlPoint tp)
                 {
-                    TimingSectionAdjustments.AdjustHitObjectOffset(beatmap, tp, offsetChange.NewValue - offsetChange.OldValue);
+                    TimingSectionAdjustments.AdjustHitObjectOffset(beatmap, tp, adjust);
                     beatmap.UpdateAllHitObjects();
                 }
 
@@ -261,18 +230,15 @@ namespace osu.Game.Screens.Edit.Timing
                 editorClock.Seek(newOffset);
         }
 
-        private void setBpm(ValueChangedEvent<double> bpmChange)
+        private void adjustBpm(double adjust)
         {
-            if (changingGroup)
-                return;
-
             var timing = selectedGroup.Value?.ControlPoints.OfType<TimingControlPoint>().FirstOrDefault();
 
             if (timing == null)
                 return;
 
             double oldBeatLength = timing.BeatLength;
-            timing.BeatLength = 60000 / bpmChange.NewValue;
+            timing.BeatLength = 60000 / (timing.BPM + adjust);
 
             if (configManager.Get<bool>(OsuSetting.EditorAdjustExistingObjectsOnTimingChanges))
             {
@@ -281,8 +247,6 @@ namespace osu.Game.Screens.Edit.Timing
                 beatmap.UpdateAllHitObjects();
                 beatmap.EndChange();
             }
-
-            beatmap.SaveState();
         }
 
         private partial class InlineButton : OsuButton

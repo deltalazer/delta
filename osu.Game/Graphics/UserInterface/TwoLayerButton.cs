@@ -10,7 +10,6 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
-using osu.Framework.Localisation;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -162,7 +161,7 @@ namespace osu.Game.Graphics.UserInterface
             set => bouncingIcon.Icon = value;
         }
 
-        public LocalisableString Text
+        public string Text
         {
             set => text.Text = value;
         }

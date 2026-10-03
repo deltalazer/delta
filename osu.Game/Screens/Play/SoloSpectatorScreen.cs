@@ -61,7 +61,7 @@ namespace osu.Game.Screens.Play
 
         private ScheduledDelegate? beatmapFetchCallback;
 
-        private APIBeatmap? beatmap;
+        private APIBeatmapSet? beatmapSet;
 
         public SoloSpectatorScreen(APIUser targetUser)
             : base(targetUser.Id)
@@ -100,7 +100,7 @@ namespace osu.Game.Screens.Play
                         {
                             new OsuSpriteText
                             {
-                                Text = SoloSpectatorScreenStrings.SpectatorMode,
+                                Text = "Spectator Mode",
                                 Font = OsuFont.Default.With(size: 30),
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
@@ -145,7 +145,7 @@ namespace osu.Game.Screens.Play
                             },
                             watchButton = new PurpleRoundedButton
                             {
-                                Text = SoloSpectatorScreenStrings.StartWatching,
+                                Text = "Start Watching",
                                 Width = 250,
                                 Anchor = Anchor.Centre,
                                 Origin = Anchor.Centre,
@@ -245,40 +245,35 @@ namespace osu.Game.Screens.Play
 
             beatmapLookupCache.GetBeatmapAsync(state.BeatmapID.Value).ContinueWith(t => beatmapFetchCallback = Schedule(() =>
             {
-                beatmap = t.GetResultSafely();
+                var beatmap = t.GetResultSafely();
 
                 if (beatmap?.BeatmapSet == null)
                     return;
 
-                beatmapPanelContainer.Child = new BeatmapCardNormal(beatmap.BeatmapSet, allowExpansion: false);
+                beatmapSet = beatmap.BeatmapSet;
+                beatmapPanelContainer.Child = new BeatmapCardNormal(beatmapSet, allowExpansion: false);
                 checkForAutomaticDownload();
             }));
         }
 
         private void checkForAutomaticDownload()
         {
-            if (beatmap?.BeatmapSet == null)
+            if (beatmapSet == null)
                 return;
 
             if (!automaticDownload.Current.Value)
                 return;
 
-            if (beatmaps.IsAvailableLocally(beatmap))
+            if (beatmaps.IsAvailableLocally(new BeatmapSetInfo { OnlineID = beatmapSet.OnlineID }))
                 return;
 
-            beatmapDownloader.Download(beatmap.BeatmapSet);
+            beatmapDownloader.Download(beatmapSet);
         }
 
         public override bool OnExiting(ScreenExitEvent e)
         {
             previewTrackManager.StopAnyPlaying(this);
             return base.OnExiting(e);
-        }
-
-        public override void OnSuspending(ScreenTransitionEvent e)
-        {
-            previewTrackManager.StopAnyPlaying(this);
-            base.OnSuspending(e);
         }
     }
 }

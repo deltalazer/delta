@@ -355,7 +355,6 @@ namespace osu.Game.Tests.Visual.Background
                 public double StartTime => double.MinValue;
                 public double EndTime => double.MaxValue;
                 public double EndTimeForDisplay => double.MaxValue;
-                public StoryboardElementSource Source => StoryboardElementSource.Beatmap;
 
                 public Drawable CreateDrawable() => new DrawableTestStoryboardElement();
             }

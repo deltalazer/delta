@@ -7,20 +7,22 @@ using MessagePack;
 namespace osu.Game.Online.Multiplayer.MatchTypes.TeamVersus
 {
     [MessagePackObject]
-    public class TeamVersusRoomState : StandardMatchRoomState
+    public class TeamVersusRoomState : MatchRoomState
     {
         [Key(0)]
         public List<MultiplayerTeam> Teams { get; set; } = new List<MultiplayerTeam>();
 
-        public static TeamVersusRoomState CreateDefault(byte? maxParticipants = null) =>
+        [Key(1)]
+        public bool Locked { get; set; }
+
+        public static TeamVersusRoomState CreateDefault() =>
             new TeamVersusRoomState
             {
                 Teams =
                 {
                     new MultiplayerTeam { ID = 0, Name = "Team Red" },
                     new MultiplayerTeam { ID = 1, Name = "Team Blue" },
-                },
-                Slots = maxParticipants == null ? null : new int?[maxParticipants.Value]
+                }
             };
     }
 }

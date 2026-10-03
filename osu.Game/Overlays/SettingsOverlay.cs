@@ -3,7 +3,6 @@
 
 #nullable disable
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -31,7 +30,7 @@ namespace osu.Game.Overlays
 
         protected override IEnumerable<SettingsSection> CreateSections()
         {
-            var sections = new List<SettingsSection>
+            return new List<SettingsSection>
             {
                 // This list should be kept in sync with ScreenBehaviour.
                 new GeneralSection(),
@@ -46,12 +45,6 @@ namespace osu.Game.Overlays
                 new MaintenanceSection(),
                 new DebugSection()
             };
-
-            var today = DateTimeOffset.Now;
-            if (today.Month == 4 && today.Day == 1)
-                sections.Insert(9, new AfToggleSection());
-
-            return sections;
         }
 
         private readonly List<SettingsSubPanel> subPanels = new List<SettingsSubPanel>();
