@@ -15,6 +15,7 @@ namespace osu.Game.Rulesets.Mods
         public override string Name => $"Unknown mod ({OriginalAcronym})";
         public override string Acronym => $"{OriginalAcronym}??";
         public override LocalisableString Description => "This mod could not be resolved by the game.";
+        public override double ScoreMultiplier => 0;
 
         public override bool UserPlayable => false;
         public override bool ValidForMultiplayer => false;

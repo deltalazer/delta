@@ -12,8 +12,6 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
-using osu.Game.Overlays;
-using osu.Game.Overlays.Notifications;
 using osu.Game.Resources.Localisation.Web;
 using osuTK;
 
@@ -35,9 +33,6 @@ namespace osu.Game.Screens.Ranking
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
-
-        [Resolved]
-        private INotificationOverlay? notifications { get; set; }
 
         public FavouriteButton(BeatmapSetInfo beatmapSetInfo)
             : base(FontAwesome.Regular.Heart)
@@ -118,11 +113,7 @@ namespace osu.Game.Screens.Ranking
             };
             favouriteRequest.Failure += e =>
             {
-                notifications?.Post(new SimpleNotification
-                {
-                    Text = e.Message,
-                    Icon = FontAwesome.Solid.Times,
-                });
+                Logger.Error(e, $"Failed to {actionType.ToString().ToLowerInvariant()} beatmap: {e.Message}");
 
                 Schedule(() =>
                 {

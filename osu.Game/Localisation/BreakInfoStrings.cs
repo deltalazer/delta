@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.Game.Localisation
 {
-    public static class BreakInfoStrings
+    public class BreakInfoStrings
     {
         private const string prefix = @"osu.Game.Resources.Localisation.BreakInfo";
 

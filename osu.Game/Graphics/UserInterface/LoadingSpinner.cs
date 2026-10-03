@@ -1,18 +1,14 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Diagnostics;
-using osu.Framework.Audio.Track;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.Backgrounds;
-using osu.Game.Graphics.Containers;
 using osuTK;
 using osuTK.Graphics;
 
@@ -37,12 +33,10 @@ namespace osu.Game.Graphics.UserInterface
 
         private readonly bool withBox;
 
-        private float targetRotation;
-
-        private const float spin_duration = 3150;
+        private const float spin_duration = 900;
 
         /// <summary>
-        /// Construct a new loading spinner.
+        /// Constuct a new loading spinner.
         /// </summary>
         /// <param name="withBox">Whether the spinner should have a surrounding black box for visibility.</param>
         /// <param name="inverted">Whether colours should be inverted (black spinner instead of white).</param>
@@ -148,8 +142,7 @@ namespace osu.Game.Graphics.UserInterface
         {
             base.LoadComplete();
 
-            spinner.Spin(spin_duration, RotationDirection.Clockwise);
-            AddInternal(new LoadingSpinnerBeatSyncer(onBeat));
+            rotate();
         }
 
         protected override void UpdateAfterChildren()
@@ -174,19 +167,11 @@ namespace osu.Game.Graphics.UserInterface
         protected override void PopIn()
         {
             if (Alpha < 0.5f)
-            {
                 // reset animation if the user can't see us.
-                targetRotation = 0;
-                MainContents.RotateTo(0);
-            }
+                rotate();
 
             MainContents.ScaleTo(1, TRANSITION_DURATION, Easing.OutQuint);
-
-            // Very slight delay to avoid spinner flickering briefly during minimal loads.
-            // Note that we still use fade in here because it is important for input blocking cases (see `LoadingLayer`).
-            this.FadeTo(0.01f, 50)
-                .Then()
-                .FadeIn(TRANSITION_DURATION, Easing.OutQuint);
+            this.FadeIn(TRANSITION_DURATION, Easing.OutQuint);
         }
 
         protected override void PopOut()
@@ -195,45 +180,16 @@ namespace osu.Game.Graphics.UserInterface
             this.FadeOut(TRANSITION_DURATION / 2, Easing.OutQuint);
         }
 
-        private void onBeat(double beatLength)
+        private void rotate()
         {
-            targetRotation += 90;
-            MainContents.RotateTo(targetRotation, beatLength, Easing.InOutQuart);
-        }
+            spinner.Spin(spin_duration * 3.5f, RotationDirection.Clockwise);
 
-        private partial class LoadingSpinnerBeatSyncer : BeatSyncedContainer
-        {
-            private readonly Action<double> onBeat;
-
-            public LoadingSpinnerBeatSyncer(Action<double> onBeat)
-            {
-                AllowMistimedEventFiring = false;
-
-                this.onBeat = onBeat;
-            }
-
-            protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, ChannelAmplitudes amplitudes)
-            {
-                base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
-
-                double beatLength = timingPoint.BeatLength;
-                int beatsPerStep = 1;
-
-                // Ensure rotation duration is long enough to be visually smooth at 100+ BPM.
-                while (beatLength < 600)
-                {
-                    beatLength *= 2;
-                    beatsPerStep *= 2;
-                }
-
-                EarlyActivationMilliseconds = beatLength / 3;
-
-                // Skip beats that don't align with the current step.
-                if (beatIndex % beatsPerStep != 0)
-                    return;
-
-                onBeat(beatLength);
-            }
+            MainContents.RotateTo(0).Then()
+                        .RotateTo(90, spin_duration, Easing.InOutQuart).Then()
+                        .RotateTo(180, spin_duration, Easing.InOutQuart).Then()
+                        .RotateTo(270, spin_duration, Easing.InOutQuart).Then()
+                        .RotateTo(360, spin_duration, Easing.InOutQuart).Then()
+                        .Loop();
         }
     }
 }

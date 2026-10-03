@@ -97,7 +97,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
                                 },
                             ]
                         },
-                        .. ruleset.GetBeatmapAttributesForRankedPlayCard(beatmap, []).Select(attribute => new AttributeRow(attribute))
+                        ..ruleset.GetBeatmapAttributesForDisplay(beatmap, [])
+                                 .Select(attribute => new AttributeRow(attribute))
                     ]
                 };
             }
@@ -125,9 +126,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
                     new OsuSpriteText
                     {
                         RelativePositionAxes = Axes.X,
-                        Text = string.IsNullOrEmpty(attribute.ValueFormat)
-                            ? attribute.AdjustedValue.ToStandardFormattedString(maxDecimalDigits: 1)
-                            : attribute.AdjustedValue.ToString(attribute.ValueFormat),
+                        Text = attribute.AdjustedValue.ToStandardFormattedString(maxDecimalDigits: 1),
                         Font = OsuFont.GetFont(size: 9, weight: FontWeight.SemiBold),
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreRight,

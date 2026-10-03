@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -194,7 +193,6 @@ namespace osu.Game.Screens.Select
                                         {
                                             Origin = Anchor.CentreLeft,
                                             Anchor = Anchor.CentreLeft,
-                                            Selected = { BindTarget = Selected },
                                         }
                                     },
                                 }
@@ -215,6 +213,7 @@ namespace osu.Game.Screens.Select
             Selected.BindValueChanged(s =>
             {
                 Expanded.Value = s.NewValue;
+                spreadDisplay.Enabled.Value = s.NewValue;
             }, true);
         }
 
@@ -302,15 +301,15 @@ namespace osu.Game.Screens.Select
             if (Item == null)
                 return;
 
-            var rulesetInstance = ruleset.Value.CreateInstance();
-
-            if (rulesetInstance.AvailableVariants.Count() > 1)
+            if (ruleset.Value.OnlineID == 3)
             {
-                int variant = rulesetInstance.GetVariantForBeatmap(beatmap, mods.Value);
-                var variantName = rulesetInstance.GetVariantName(variant);
+                // Account for mania differences locally for now.
+                // Eventually this should be handled in a more modular way, allowing rulesets to add more information to the panel.
+                ILegacyRuleset legacyRuleset = (ILegacyRuleset)ruleset.Value.CreateInstance();
+                int keyCount = legacyRuleset.GetKeyCount(beatmap, mods.Value);
 
                 keyCountText.Alpha = 1;
-                keyCountText.Text = LocalisableString.Interpolate($"[{variantName}] ");
+                keyCountText.Text = $"[{keyCount}K] ";
             }
             else
                 keyCountText.Alpha = 0;

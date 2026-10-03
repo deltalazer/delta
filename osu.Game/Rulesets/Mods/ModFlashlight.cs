@@ -118,14 +118,13 @@ namespace osu.Game.Rulesets.Mods
 
             private DrawInfo playfieldDrawInfo => PlayfieldDrawInfoTracker.DrawInfo;
 
-            protected readonly float DefaultFlashlightSize;
-
+            private readonly float defaultFlashlightSize;
             private readonly float sizeMultiplier;
             private readonly bool comboBasedSize;
 
             protected Flashlight(ModFlashlight modFlashlight)
             {
-                DefaultFlashlightSize = modFlashlight.DefaultFlashlightSize;
+                defaultFlashlightSize = modFlashlight.DefaultFlashlightSize;
                 sizeMultiplier = modFlashlight.SizeMultiplier.Value;
                 comboBasedSize = modFlashlight.ComboBasedSize.Value;
             }
@@ -150,17 +149,8 @@ namespace osu.Game.Rulesets.Mods
                 if (player != null)
                 {
                     isBreakTime.BindTo(player.IsBreakTime);
-                    isBreakTime.BindValueChanged(val =>
-                    {
-                        // `player.IsBreakTime` will exit out of break *before* the actual specified time instant in the .osu
-                        // see `BreakTracker.Breaks_set`
-                        // to match stable, delay the animation in case of exiting break to the exact time specified in the .osu
-                        double delay = val.NewValue ? 0 : BreakOverlay.BREAK_FADE_DURATION;
-                        Scheduler.AddDelayed(() => UpdateFlashlightSize(GetSize()), delay);
-                    });
+                    isBreakTime.BindValueChanged(_ => UpdateFlashlightSize(GetSize()), true);
                 }
-
-                UpdateFlashlightSize(GetSize());
 
                 PlayfieldDrawInfoTracker.OnDrawInfoInvalidate += () => Invalidate(Invalidation.DrawNode);
             }
@@ -171,28 +161,22 @@ namespace osu.Game.Rulesets.Mods
 
             public float GetSize()
             {
-                float size = DefaultFlashlightSize * sizeMultiplier;
+                float size = defaultFlashlightSize * sizeMultiplier;
 
                 if (isBreakTime.Value)
-                    size *= BreakTimeScale;
+                    size *= 2.5f;
                 else if (comboBasedSize)
                     size *= GetComboScaleFor(Combo.Value);
 
                 return size;
             }
 
-            // all sizings here match stable as per
-            // https://github.com/peppy/osu-stable-reference/blob/baa8705f782c0de2b10a7387d78014c61c8b17fb/osu!/GameModes/Play/Rulesets/Ruleset.cs#L520-L530
-            // all "scale" quantities below are relative to the `targetScale` of the flashlight effect at 0 combo
-
-            protected virtual float BreakTimeScale => 2.5f; // = 8.0 / 3.2
-
             protected virtual float GetComboScaleFor(int combo)
             {
                 if (combo >= 200)
-                    return 0.625f; // = 2.0 / 3.2
+                    return 0.625f;
                 if (combo >= 100)
-                    return 0.8125f; // = 2.6 / 3.2
+                    return 0.8125f;
 
                 return 1.0f;
             }

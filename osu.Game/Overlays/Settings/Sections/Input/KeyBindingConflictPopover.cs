@@ -5,7 +5,6 @@ using System;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -201,7 +200,11 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                     Masking = true,
                     Children = new Drawable[]
                     {
-                        new FormControlBackground(),
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = colourProvider.Background5
+                        },
                         new GridContainer
                         {
                             RelativeSizeAxes = Axes.X,
@@ -216,10 +219,10 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                             {
                                 new Drawable[]
                                 {
-                                    new FormFieldCaption
+                                    new OsuSpriteText
                                     {
-                                        Caption = action.GetLocalisableDescription(),
-                                        Margin = new MarginPadding(9),
+                                        Text = action.GetLocalisableDescription(),
+                                        Margin = new MarginPadding(7.5f),
                                     },
                                     new Container
                                     {
@@ -236,13 +239,13 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                                                 RelativeSizeAxes = Axes.Both,
                                                 Colour = colourProvider.Background6
                                             },
-                                            Empty().With(d => d.Width = 60), // poor man's min-width
+                                            Empty().With(d => d.Width = 80), // poor man's min-width
                                             newBindingText = new OsuSpriteText
                                             {
-                                                Font = OsuFont.Default.With(size: 14, weight: FontWeight.Bold),
+                                                Font = OsuFont.Numeric.With(size: 10),
                                                 Margin = new MarginPadding(5),
                                                 Anchor = Anchor.Centre,
-                                                Origin = Anchor.Centre,
+                                                Origin = Anchor.Centre
                                             }
                                         }
                                     },
@@ -285,7 +288,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                 if (LocalisableString.IsNullOrEmpty(keyCombinationText))
                     keyCombinationText = InputSettingsStrings.ActionHasNoKeyBinding;
 
-                newBindingText.Text = keyCombinationText.ToUpper();
+                newBindingText.Text = keyCombinationText;
             }
         }
 

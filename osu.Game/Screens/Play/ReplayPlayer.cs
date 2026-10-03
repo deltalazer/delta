@@ -17,7 +17,6 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Input.Bindings;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
-using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Play.Leaderboards;
 using osu.Game.Screens.Play.PlayerSettings;
 using osu.Game.Screens.Ranking;
@@ -45,12 +44,8 @@ namespace osu.Game.Screens.Play
 
         private double? lastFrameTime;
 
-        private double userPlaybackRateBeforeFastForward;
-
         private ReplayFailIndicator? failIndicator;
         private PlaybackSettings? playbackSettings;
-
-        public ReplayOverlay ReplayOverlay { get; private set; } = null!;
 
         protected override bool CheckModsAllowFailure()
         {
@@ -85,7 +80,7 @@ namespace osu.Game.Screens.Play
         /// Add a settings group to the HUD overlay. Intended to be used by rulesets to add replay-specific settings.
         /// </summary>
         /// <param name="settings">The settings group to be shown.</param>
-        public void AddSettings(PlayerSettingsGroup settings) => Schedule(() => ReplayOverlay.Settings.Add(settings));
+        public void AddSettings(PlayerSettingsGroup settings) => Schedule(() => HUDOverlay.PlayerSettingsOverlay.Add(settings));
 
         [BackgroundDependencyLoader]
         private void load(OsuConfigManager config)
@@ -94,8 +89,6 @@ namespace osu.Game.Screens.Play
                 return;
 
             AddInternal(leaderboardProvider);
-
-            GameplayClockContainer.Add(ReplayOverlay = new ReplayOverlay());
 
             playbackSettings = new PlaybackSettings
             {
@@ -106,28 +99,9 @@ namespace osu.Game.Screens.Play
             if (GameplayClockContainer is MasterGameplayClockContainer master)
                 playbackSettings.UserPlaybackRate.BindTo(master.UserPlaybackRate);
 
-            ReplayOverlay.Settings.AddAtStart(playbackSettings);
+            HUDOverlay.PlayerSettingsOverlay.AddAtStart(playbackSettings);
 
-            OsuTextFlowContainer message = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Style.Body) { AutoSizeAxes = Axes.Both };
-            message.AddText("Watching ");
-            message.AddText(Score.ScoreInfo.User.Username, s => s.Font = s.Font.With(weight: FontWeight.SemiBold));
-            message.AddText(" play ");
-            message.AddText(Beatmap.Value.BeatmapInfo.GetDisplayTitleRomanisable(), s => s.Font = s.Font.With(weight: FontWeight.SemiBold));
-            message.AddText(" on ");
-            message.AddArbitraryDrawable(new PlayedOnText(Score.ScoreInfo.Date, false)
-            {
-                Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold),
-            });
-
-            ReplayOverlay.SetMessage(new ScrollingMessage(message)
-            {
-                Y = 96,
-                Anchor = Anchor.TopCentre,
-                Origin = Anchor.TopCentre,
-            });
-
-            RulesetSkinProvidingContainer rulesetSkinProvider;
-            AddInternal(rulesetSkinProvider = new RulesetSkinProvidingContainer(GameplayState.Ruleset, GameplayState.Beatmap, Beatmap.Value.Skin)
+            AddInternal(new RulesetSkinProvidingContainer(GameplayState.Ruleset, GameplayState.Beatmap, Beatmap.Value.Skin)
             {
                 Child = failIndicator = new ReplayFailIndicator(GameplayClockContainer)
                 {
@@ -141,9 +115,27 @@ namespace osu.Game.Screens.Play
                     }
                 }
             });
-            config.BindWith(OsuSetting.BeatmapSkins, rulesetSkinProvider.BeatmapSkins);
-            config.BindWith(OsuSetting.BeatmapColours, rulesetSkinProvider.BeatmapColours);
-            config.BindWith(OsuSetting.BeatmapHitsounds, rulesetSkinProvider.BeatmapHitsounds);
+        }
+
+        protected override Drawable CreateOverlayComponents()
+        {
+            OsuTextFlowContainer message = new OsuTextFlowContainer(cp => cp.Font = OsuFont.Style.Body) { AutoSizeAxes = Axes.Both };
+            message.AddText("Watching ");
+            message.AddText(Score.ScoreInfo.User.Username, s => s.Font = s.Font.With(weight: FontWeight.SemiBold));
+            message.AddText(" play ");
+            message.AddText(Beatmap.Value.BeatmapInfo.GetDisplayTitleRomanisable(), s => s.Font = s.Font.With(weight: FontWeight.SemiBold));
+            message.AddText(" on ");
+            message.AddArbitraryDrawable(new PlayedOnText(Score.ScoreInfo.Date, false)
+            {
+                Font = OsuFont.Style.Body.With(weight: FontWeight.SemiBold),
+            });
+
+            return new ScrollingMessage(message)
+            {
+                Y = 100,
+                Anchor = Anchor.TopCentre,
+                Origin = Anchor.TopCentre,
+            };
         }
 
         protected override void PrepareReplay()
@@ -193,13 +185,6 @@ namespace osu.Game.Screens.Play
                     else
                         GameplayClockContainer.Stop();
                     return true;
-
-                case GlobalAction.FastForwardReplay:
-                    if (e.Repeat) return false;
-
-                    userPlaybackRateBeforeFastForward = playbackSettings!.UserPlaybackRate.Value;
-                    playbackSettings!.UserPlaybackRate.Value *= 2;
-                    return true;
             }
 
             return false;
@@ -229,12 +214,6 @@ namespace osu.Game.Screens.Play
 
         public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
         {
-            switch (e.Action)
-            {
-                case GlobalAction.FastForwardReplay:
-                    playbackSettings!.UserPlaybackRate.Value = userPlaybackRateBeforeFastForward;
-                    return;
-            }
         }
 
         protected override void PerformFail()

@@ -186,19 +186,6 @@ namespace osu.Game.Rulesets.Mania.Tests
         }
 
         [TestCase]
-        public void TestTwentyKeys()
-        {
-            var criteria = new ManiaFilterCriteria();
-
-            Assert.That(criteria.Matches(
-                new BeatmapInfo(new RulesetInfo { OnlineID = 0 }, new BeatmapDifficulty { CircleSize = 4 }),
-                new FilterCriteria
-                {
-                    Mods = [new ManiaModKey10(), new ManiaModDualStages()]
-                }), Is.True);
-        }
-
-        [TestCase]
         public void TestLnsEqual()
         {
             var criteria = new ManiaFilterCriteria();

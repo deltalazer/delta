@@ -2,8 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Threading.Tasks;
-using osu.Game.Online.Matchmaking.Requests;
-using osu.Game.Online.Matchmaking.Responses;
 
 namespace osu.Game.Online.Matchmaking
 {
@@ -18,7 +16,7 @@ namespace osu.Game.Online.Matchmaking
         /// <summary>
         /// Joins the matchmaking lobby, allowing the local user to receive status updates.
         /// </summary>
-        Task<MatchmakingJoinLobbyResponse> MatchmakingJoinLobbyWithParams(MatchmakingJoinLobbyRequest request);
+        Task MatchmakingJoinLobby();
 
         /// <summary>
         /// Leaves the matchmaking lobby.
@@ -39,18 +37,6 @@ namespace osu.Game.Online.Matchmaking
         /// Accepts a matchmaking room invitation.
         /// </summary>
         Task MatchmakingAcceptInvitation();
-
-        /// <summary>
-        /// Issues a matchmaking duel.
-        /// </summary>
-        /// <param name="request">Describes the duel.</param>
-        Task<MatchmakingIssueDuelResponse> MatchmakingIssueDuel(MatchmakingIssueDuelRequest request);
-
-        /// <summary>
-        /// Accepts a matchmaking duel invitation.
-        /// </summary>
-        /// <param name="request">Describes the duel.</param>
-        Task<MatchmakingAcceptDuelResponse> MatchmakingAcceptDuel(MatchmakingAcceptDuelRequest request);
 
         /// <summary>
         /// Declines a matchmaking room invitation.

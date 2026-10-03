@@ -4,6 +4,7 @@
 using System;
 using osu.Framework.Logging;
 using osu.Framework.Timing;
+using osu.Game.Screens.Play;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
@@ -15,9 +16,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         /// <summary>
         /// The catch up rate.
         /// </summary>
-        public const double CATCHUP_RATE = 2;
+        private const double catchup_rate = 2;
 
-        private readonly IFrameBasedClock masterClock;
+        private readonly GameplayClockContainer masterClock;
 
         public double CurrentTime { get; private set; }
 
@@ -40,16 +41,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         /// </summary>
         public bool IsRunning { get; set; }
 
-        /// <summary>
-        /// The master clock time last seen by <see cref="ProcessFrame"/>. As <see cref="ProcessFrame"/> accumulates
-        /// elapsed time, it must only apply the master clock's elapsed time when the master clock has advanced.
-        /// </summary>
-        private double lastSeenMasterTime;
-
-        public SpectatorPlayerClock(IFrameBasedClock masterClock)
+        public SpectatorPlayerClock(GameplayClockContainer masterClock)
         {
             this.masterClock = masterClock;
-            lastSeenMasterTime = masterClock.CurrentTime;
         }
 
         public void Reset() => CurrentTime = 0;
@@ -75,36 +69,22 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         {
         }
 
-        private double catchUpMultiplier => IsCatchingUp ? CATCHUP_RATE : 1;
-
         public double Rate
         {
-            get => masterClock.Rate * catchUpMultiplier;
+            get => IsCatchingUp ? catchup_rate : 1;
             set => throw new NotImplementedException();
         }
 
         public void ProcessFrame()
         {
-            // ProcessFrame can get called more than once in a single update loop. Save the last seen master time
-            // to prevent double-accumulating elapsed time.
-            bool masterAdvanced = masterClock.CurrentTime != lastSeenMasterTime;
-            lastSeenMasterTime = masterClock.CurrentTime;
-
             if (IsRunning)
             {
-                double elapsedSource;
-
-                if (masterClock.ElapsedFrameTime != 0)
-                    elapsedSource = masterAdvanced ? masterClock.ElapsedFrameTime : 0;
-                else
-                {
-                    // When in catch-up mode, the source is usually not running.
-                    // In such a case, its elapsed time may be zero, which would cause catch-up to get stuck.
-                    // To avoid this, calculate the "elapsed" time manually based on the difference with the master clock.
-                    elapsedSource = Math.Clamp(masterClock.CurrentTime - CurrentTime, 0, 16);
-                }
-
-                double elapsed = elapsedSource * catchUpMultiplier;
+                // When in catch-up mode, the source is usually not running.
+                // In such a case, its elapsed time may be zero, which would cause catch-up to get stuck.
+                // To avoid this, use a constant 16ms elapsed time for now. Probably not too correct, but this whole logic isn't too correct anyway.
+                // Clamping is required to ensure that player clocks don't get too far ahead if ProcessFrame is run multiple times.
+                double elapsedSource = masterClock.ElapsedFrameTime != 0 ? masterClock.ElapsedFrameTime : Math.Clamp(masterClock.CurrentTime - CurrentTime, 0, 16);
+                double elapsed = elapsedSource * Rate;
 
                 CurrentTime += elapsed;
                 ElapsedFrameTime = elapsed;

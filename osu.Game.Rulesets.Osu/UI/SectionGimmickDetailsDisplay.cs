@@ -8,9 +8,9 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
-using osu.Game.Configuration;
-using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.SectionGimmicks;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets.Osu.Scoring;
@@ -73,7 +73,7 @@ namespace osu.Game.Rulesets.Osu.UI
                 return;
             }
 
-            LocalisableString text = BuildDetailsLabelForTest(active, new BindableBool(LayoutMode.Value == DetailsLayoutMode.MultiLine), workingBeatmap?.Value?.Beatmap?.Difficulty);
+            LocalisableString text = buildDetailsLabelForTest(active, new BindableBool(LayoutMode.Value == DetailsLayoutMode.MultiLine), workingBeatmap?.Value?.Beatmap?.Difficulty);
             if (!EqualityComparer<LocalisableString>.Default.Equals(detailsText.Text, text))
                 detailsText.Text = text;
 
@@ -83,7 +83,7 @@ namespace osu.Game.Rulesets.Osu.UI
         }
 
         // Kept non-public for tests via reflection.
-        private static string BuildDetailsLabelForTest(SectionGimmickSection section, BindableBool multiline, IBeatmapDifficultyInfo? difficulty = null)
+        private static string buildDetailsLabelForTest(SectionGimmickSection section, BindableBool multiline, IBeatmapDifficultyInfo? difficulty = null)
         {
             var settings = section.Settings;
             var details = new List<string>();

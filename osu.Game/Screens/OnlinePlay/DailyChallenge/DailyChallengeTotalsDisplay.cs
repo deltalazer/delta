@@ -10,7 +10,6 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Localisation;
 using osu.Game.Screens.OnlinePlay.DailyChallenge.Events;
 using osuTK;
 
@@ -43,7 +42,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                 {
                     new Drawable[]
                     {
-                        new SectionHeader(DailyChallengeStrings.SectionTotalPasses)
+                        new SectionHeader("Total pass count")
                     },
                     new Drawable[]
                     {
@@ -61,7 +60,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                     },
                     new Drawable[]
                     {
-                        new SectionHeader(DailyChallengeStrings.SectionCumulativeScore)
+                        new SectionHeader("Cumulative total score")
                     },
                     new Drawable[]
                     {

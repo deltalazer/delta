@@ -16,10 +16,10 @@ namespace osu.Game.Rulesets.Mania.Skinning.Legacy
         [BackgroundDependencyLoader]
         private void load(ISkinSource skin)
         {
-            float skinHeight = skin.GetManiaSkinConfig<float>(LegacyManiaSkinConfigurationLookups.BarLineHeight)?.Value ?? 1.2f;
+            float skinHeight = skin.GetManiaSkinConfig<float>(LegacyManiaSkinConfigurationLookups.BarLineHeight)?.Value ?? 1;
 
             RelativeSizeAxes = Axes.X;
-            Height = skinHeight;
+            Height = 1.2f * skinHeight;
             Colour = skin.GetManiaSkinConfig<Color4>(LegacyManiaSkinConfigurationLookups.BarLineColour)?.Value ?? Color4.White;
 
             // Avoid flickering due to no anti-aliasing of boxes by default.

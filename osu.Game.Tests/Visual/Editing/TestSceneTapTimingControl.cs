@@ -148,14 +148,14 @@ namespace osu.Game.Tests.Visual.Editing
 
             AddStep("adjust offset", () =>
             {
-                var adjustOffsetButton = control.ChildrenOfType<DiscreteAdjustmentControl<double>>().First();
+                var adjustOffsetButton = control.ChildrenOfType<TimingAdjustButton>().First();
                 InputManager.MoveMouseTo(adjustOffsetButton);
                 InputManager.Click(MouseButton.Left);
             });
 
             AddStep("adjust BPM", () =>
             {
-                var adjustBPMButton = control.ChildrenOfType<DiscreteAdjustmentControl<double>>().Last();
+                var adjustBPMButton = control.ChildrenOfType<TimingAdjustButton>().Last();
                 InputManager.MoveMouseTo(adjustBPMButton);
                 InputManager.Click(MouseButton.Left);
             });

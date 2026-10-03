@@ -323,16 +323,15 @@ namespace osu.Game.Tests.Visual.SongSelect
 
             SelectNextSet();
             // both sets have a difficulty with 0.00* star rating.
-            // in the case of a tie when sorting, the first tie-breaker is `Title` ascending, which will pick the first set added as the title contains the set ID
-            // (see `TestResources.CreateTestBeatmapSetInfo()`).
-            WaitForSetSelection(0, 0);
+            // in the case of a tie when sorting, the first tie-breaker is `DateAdded` descending, which will pick the last set added (see `TestResources.CreateTestBeatmapSetInfo()`).
+            WaitForSetSelection(1, 0);
 
             SelectNextSet();
-            WaitForSetSelection(1, 0);
+            WaitForSetSelection(0, 0);
 
             SelectNextPanel();
             Select();
-            WaitForSetSelection(0, 1);
+            WaitForSetSelection(1, 1);
         }
 
         [Test]

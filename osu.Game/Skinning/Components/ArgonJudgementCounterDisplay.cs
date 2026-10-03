@@ -8,6 +8,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Localisation.HUD;
 using osu.Game.Localisation.SkinComponents;
@@ -38,7 +39,7 @@ namespace osu.Game.Skinning.Components
         public BindableBool ShowMaxJudgement { get; } = new BindableBool(true);
 
         [SettingSource(typeof(JudgementCounterDisplayStrings), nameof(JudgementCounterDisplayStrings.JudgementDisplayMode))]
-        public Bindable<JudgementCounterDisplay.DisplayMode> Mode { get; } = new Bindable<JudgementCounterDisplay.DisplayMode>();
+        public Bindable<DisplayMode> Mode { get; } = new Bindable<DisplayMode>();
 
         [SettingSource(typeof(JudgementCounterDisplayStrings), nameof(JudgementCounterDisplayStrings.FlowDirection))]
         public Bindable<Direction> FlowDirection { get; } = new Bindable<Direction>();
@@ -118,19 +119,18 @@ namespace osu.Game.Skinning.Components
                 return false;
 
             var hitResult = counter.Result.Types.First();
+            if (hitResult.IsBasic())
+                return true;
 
             switch (Mode.Value)
             {
-                case JudgementCounterDisplay.DisplayMode.MissesOnly:
-                    return hitResult.IsMiss();
+                case DisplayMode.Simple:
+                    return false;
 
-                case JudgementCounterDisplay.DisplayMode.Simple:
-                    return hitResult.IsBasic();
-
-                case JudgementCounterDisplay.DisplayMode.Normal:
+                case DisplayMode.Normal:
                     return !hitResult.IsBonus();
 
-                case JudgementCounterDisplay.DisplayMode.All:
+                case DisplayMode.All:
                     return true;
 
                 default:
@@ -151,6 +151,18 @@ namespace osu.Game.Skinning.Components
                 default:
                     throw new ArgumentOutOfRangeException(nameof(flow), flow, null);
             }
+        }
+
+        public enum DisplayMode
+        {
+            [LocalisableDescription(typeof(JudgementCounterDisplayStrings), nameof(JudgementCounterDisplayStrings.JudgementDisplayModeSimple))]
+            Simple,
+
+            [LocalisableDescription(typeof(JudgementCounterDisplayStrings), nameof(JudgementCounterDisplayStrings.JudgementDisplayModeNormal))]
+            Normal,
+
+            [LocalisableDescription(typeof(JudgementCounterDisplayStrings), nameof(JudgementCounterDisplayStrings.JudgementDisplayModeAll))]
+            All
         }
 
         public bool UsesFixedAnchor { get; set; }

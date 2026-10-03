@@ -120,7 +120,7 @@ namespace osu.Game.Overlays.SkinEditor
             var closest = getClosestAnchor(drawable);
 
             applyAnchor(drawable, closest);
-            applyScreenSpaceOrigin(drawable, closest);
+            applyOrigin(drawable, closest);
         }
 
         protected override void OnSelectionChanged()
@@ -236,7 +236,10 @@ namespace osu.Game.Overlays.SkinEditor
             {
                 var drawable = (Drawable)item;
 
-                applyLocalSpaceOrigin(drawable, origin);
+                applyOrigin(drawable, origin);
+
+                if (!item.UsesFixedAnchor)
+                    ApplyClosestAnchorOrigin(drawable);
             }
 
             OnOperationEnded();
@@ -317,17 +320,7 @@ namespace osu.Game.Overlays.SkinEditor
             drawable.Position -= drawable.AnchorPosition - previousAnchor;
         }
 
-        private static void applyLocalSpaceOrigin(Drawable drawable, Anchor localSpaceOrigin)
-        {
-            if (localSpaceOrigin == drawable.Origin)
-                return;
-
-            Vector2 offset = drawable.ToParentSpace(localSpaceOrigin.PositionOnQuad(drawable.DrawRectangle)) - drawable.ToParentSpace(drawable.Origin.PositionOnQuad(drawable.DrawRectangle));
-            drawable.Origin = localSpaceOrigin;
-            drawable.Position += offset;
-        }
-
-        private static void applyScreenSpaceOrigin(Drawable drawable, Anchor screenSpaceOrigin)
+        private static void applyOrigin(Drawable drawable, Anchor screenSpaceOrigin)
         {
             var boundingBox = drawable.ScreenSpaceDrawQuad.AABBFloat;
 

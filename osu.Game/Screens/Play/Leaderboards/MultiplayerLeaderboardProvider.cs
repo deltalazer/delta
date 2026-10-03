@@ -89,7 +89,11 @@ namespace osu.Game.Screens.Play.Leaderboards
 
                                    for (int i = 0; i < lookedUpUsers.Length; i++)
                                    {
-                                       var user = lookedUpUsers[i] ?? APIUser.UnknownUser(users[i].UserID);
+                                       var user = lookedUpUsers[i] ?? new APIUser
+                                       {
+                                           Id = users[i].UserID,
+                                           Username = "Unknown user",
+                                       };
 
                                        var trackedUser = UserScores[user.Id];
 

@@ -114,7 +114,7 @@ namespace osu.Game.Storyboards.Drawables
         private TextureStore textureStore { get; set; }
 
         [BackgroundDependencyLoader]
-        private void load(Storyboard storyboard, StoryboardTriggerController triggerController)
+        private void load(Storyboard storyboard)
         {
             if (storyboard.UseSkinSprites)
             {
@@ -124,7 +124,7 @@ namespace osu.Game.Storyboards.Drawables
             else
                 addFramesFromStoryboardSource();
 
-            Animation.ApplyTransforms(this, triggerController);
+            Animation.ApplyTransforms(this);
         }
 
         protected override void LoadComplete()

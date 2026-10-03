@@ -22,7 +22,6 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Localisation;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Select;
@@ -457,7 +456,7 @@ namespace osu.Game.Online.Leaderboards
                 var copyableMods = Score.Mods.Where(m => m.Type != ModType.System).ToArray();
 
                 if (copyableMods.Length > 0 && songSelect != null)
-                    items.Add(new OsuMenuItem(SongSelectStrings.UseTheseMods, MenuItemType.Highlighted, () => songSelect.Mods.Value = copyableMods));
+                    items.Add(new OsuMenuItem("Use these mods", MenuItemType.Highlighted, () => songSelect.Mods.Value = copyableMods));
 
                 if (Score.OnlineID > 0)
                     items.Add(new OsuMenuItem(CommonStrings.CopyLink, MenuItemType.Standard, () => game?.CopyToClipboard($@"{api.Endpoints.WebsiteUrl}/scores/{Score.OnlineID}")));

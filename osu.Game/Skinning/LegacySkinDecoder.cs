@@ -13,7 +13,7 @@ namespace osu.Game.Skinning
         {
         }
 
-        protected override void ParseLine(SkinConfiguration skin, Section section, string line, bool isPrimaryStream)
+        protected override void ParseLine(SkinConfiguration skin, Section section, string line)
         {
             if (section != Section.Colours)
             {
@@ -34,15 +34,9 @@ namespace osu.Game.Skinning
 
                             case @"Version":
                                 if (pair.Value == "latest")
-                                {
                                     skin.LegacyVersion = SkinConfiguration.LATEST_VERSION;
-                                    skin.IsLatestVersion = true;
-                                }
                                 else if (decimal.TryParse(pair.Value, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out decimal version))
-                                {
                                     skin.LegacyVersion = version;
-                                    skin.IsLatestVersion = false;
-                                }
 
                                 return;
                         }
@@ -60,14 +54,13 @@ namespace osu.Game.Skinning
                     skin.ConfigDictionary[pair.Key] = pair.Value;
             }
 
-            base.ParseLine(skin, section, line, isPrimaryStream);
+            base.ParseLine(skin, section, line);
         }
 
         protected override SkinConfiguration CreateTemplateObject()
         {
             var config = base.CreateTemplateObject();
             config.LegacyVersion = 1.0m;
-            config.IsLatestVersion = false;
             return config;
         }
     }

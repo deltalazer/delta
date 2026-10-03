@@ -7,7 +7,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Localisation;
 using osu.Game.Online;
 using osuTK;
 
@@ -50,19 +49,19 @@ namespace osu.Game.Graphics.UserInterface
                     Background.FadeColour(colours.Gray4, 500, Easing.InOutExpo);
                     Icon.MoveToX(0, 500, Easing.InOutExpo);
                     checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
-                    TooltipText = CommonStrings.Download;
+                    TooltipText = "Download";
                     break;
 
                 case DownloadState.Downloading:
                     Background.FadeColour(colours.Blue, 500, Easing.InOutExpo);
                     Icon.MoveToX(0, 500, Easing.InOutExpo);
                     checkmark.ScaleTo(Vector2.Zero, 500, Easing.InOutExpo);
-                    TooltipText = CommonStrings.Downloading;
+                    TooltipText = "Downloading...";
                     break;
 
                 case DownloadState.Importing:
                     Background.FadeColour(colours.Yellow, 500, Easing.InOutExpo);
-                    TooltipText = CommonStrings.Importing;
+                    TooltipText = "Importing";
                     break;
 
                 case DownloadState.LocallyAvailable:

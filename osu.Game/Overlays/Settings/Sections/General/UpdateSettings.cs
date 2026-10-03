@@ -57,7 +57,6 @@ namespace osu.Game.Overlays.Settings.Sections.General
                 })
                 {
                     Keywords = new[] { @"version" },
-                    Note = { BindTarget = releaseStreamDropdownNote },
                     ShowRevertToDefaultButton = updateManager!.FixedReleaseStream == null
                 });
 
@@ -66,17 +65,7 @@ namespace osu.Game.Overlays.Settings.Sections.General
                     configReleaseStream.Value = updateManager.FixedReleaseStream.Value;
 
                     releaseStreamDropdown.Items = [updateManager.FixedReleaseStream.Value];
-                    releaseStreamDropdownNote.Value = new SettingsNote.Data(GeneralSettingsStrings.ChangeReleaseStreamPackageManagerWarning, SettingsNote.Type.Informational);
-                    releaseStreamDropdown.Current.Disabled = true;
-                }
-                else
-                {
-                    configReleaseStream.BindValueChanged(s =>
-                    {
-                        releaseStreamDropdownNote.Value = s.NewValue != ReleaseStream.Lazer
-                            ? new SettingsNote.Data(GeneralSettingsStrings.ReleaseStreamNonStableUpgradeInformation, SettingsNote.Type.Informational)
-                            : null;
-                    }, true);
+                    releaseStreamDropdownNote.Value = new SettingsNote.Data(GeneralSettingsStrings.ChangeReleaseStreamPackageManagerWarning, SettingsNote.Type.Warning);
                 }
 
                 releaseStreamDropdown.Current.BindValueChanged(releaseStreamChanged);
@@ -91,22 +80,20 @@ namespace osu.Game.Overlays.Settings.Sections.General
 
         private void releaseStreamChanged(ValueChangedEvent<ReleaseStream> stream)
         {
-            switch (stream.NewValue)
+            if (stream.NewValue == ReleaseStream.Tachyon)
             {
-                case ReleaseStream.Lazer:
-                    configReleaseStream.Value = stream.NewValue;
-                    break;
+                dialogOverlay?.Push(
+                    new ConfirmDialog(GeneralSettingsStrings.ChangeReleaseStreamConfirmation,
+                        () => configReleaseStream.Value = ReleaseStream.Tachyon,
+                        () => releaseStreamDropdown.Current.Value = ReleaseStream.Lazer)
+                    {
+                        BodyText = GeneralSettingsStrings.ChangeReleaseStreamConfirmationInfo
+                    });
 
-                default:
-                    dialogOverlay?.Push(
-                        new ConfirmDialog(GeneralSettingsStrings.ChangeReleaseStreamConfirmation,
-                            () => configReleaseStream.Value = stream.NewValue,
-                            () => releaseStreamDropdown.Current.Value = stream.OldValue)
-                        {
-                            BodyText = GeneralSettingsStrings.ChangeReleaseStreamConfirmationInfo
-                        });
-                    break;
+                return;
             }
+
+            configReleaseStream.Value = stream.NewValue;
         }
 
         private async Task checkForUpdates()
@@ -140,7 +127,10 @@ namespace osu.Game.Overlays.Settings.Sections.General
             }
             finally
             {
-                checkingNotification.CompleteSilently();
+                // This sequence allows the notification to be immediately dismissed without posting a continuation message.
+                checkingNotification.CompletionTarget = null;
+                checkingNotification.State = ProgressNotificationState.Completed;
+                checkingNotification.Close(false);
                 checkForUpdatesButton.Enabled.Value = true;
             }
         }

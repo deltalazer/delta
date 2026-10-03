@@ -6,7 +6,6 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -21,7 +20,6 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
-using osuTK;
 using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Settings.Sections.Input
@@ -58,18 +56,21 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
             public KeyButton()
             {
-                AutoSizeAxes = Axes.Both;
+                Margin = new MarginPadding(padding);
+
                 Masking = true;
-                CornerRadius = 3f;
-                CornerExponent = 2.5f;
+                CornerRadius = padding;
+
+                Height = height;
+                AutoSizeAxes = Axes.X;
 
                 Children = new Drawable[]
                 {
                     new Container
                     {
                         AlwaysPresent = true,
-                        Width = 65,
-                        AutoSizeAxes = Axes.Y,
+                        Width = 80,
+                        Height = height,
                     },
                     box = new Box
                     {
@@ -77,9 +78,8 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                     },
                     Text = new OsuSpriteText
                     {
-                        Font = OsuFont.Style.Caption1.With(weight: FontWeight.SemiBold),
-                        Spacing = new Vector2(1, 0),
-                        Margin = new MarginPadding { Horizontal = 10, Vertical = 5 },
+                        Font = OsuFont.Numeric.With(size: 10),
+                        Margin = new MarginPadding(5),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                     },
@@ -123,22 +123,15 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 
             private void updateHoverState()
             {
-                const float transition_time = 120;
-
                 if (isBinding)
                 {
-                    box.FadeColour(colourProvider.Light3, transition_time, Easing.OutQuint);
-                    Text.FadeColour(Color4.Black, transition_time, Easing.OutQuint);
-                }
-                else if (IsHovered)
-                {
-                    box.FadeColour(colourProvider.Light4, transition_time, Easing.OutQuint);
+                    box.FadeColour(colourProvider.Light2, transition_time, Easing.OutQuint);
                     Text.FadeColour(Color4.Black, transition_time, Easing.OutQuint);
                 }
                 else
                 {
-                    box.FadeColour(colourProvider.Background5, transition_time * 2, Easing.OutQuint);
-                    Text.FadeColour(colourProvider.Content1, transition_time * 2, Easing.OutQuint);
+                    box.FadeColour(IsHovered ? colourProvider.Light4 : colourProvider.Background6, transition_time, Easing.OutQuint);
+                    Text.FadeColour(IsHovered ? Color4.Black : Color4.White, transition_time, Easing.OutQuint);
                 }
             }
 
@@ -187,7 +180,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                         alpha = 0.4f;
                     }
 
-                    Text.Text = keyCombinationString.ToUpper();
+                    Text.Text = keyCombinationString;
                     Text.Alpha = alpha;
                 }
             }

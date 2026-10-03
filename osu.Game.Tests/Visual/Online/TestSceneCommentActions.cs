@@ -253,11 +253,6 @@ namespace osu.Game.Tests.Visual.Online
                 InputManager.MoveMouseTo(btn);
                 InputManager.Click(MouseButton.Left);
             });
-            AddStep("Set reason to other", () =>
-            {
-                var reason = this.ChildrenOfType<OsuEnumDropdown<CommentReportReason>>().Single();
-                reason.Current.Value = CommentReportReason.Other;
-            });
             AddStep("Try to report", () =>
             {
                 var btn = this.ChildrenOfType<ReportCommentPopover>().Single().ChildrenOfType<RoundedButton>().Single();
@@ -266,10 +261,12 @@ namespace osu.Game.Tests.Visual.Online
             });
             AddWaitStep("Wait", 3);
             AddAssert("Nothing happened", () => this.ChildrenOfType<ReportCommentPopover>().Any());
-            AddStep("Add comment", () =>
+            AddStep("Set report data", () =>
             {
                 var field = this.ChildrenOfType<ReportCommentPopover>().Single().ChildrenOfType<OsuTextBox>().First();
                 field.Current.Value = report_text;
+                var reason = this.ChildrenOfType<OsuEnumDropdown<CommentReportReason>>().Single();
+                reason.Current.Value = CommentReportReason.Other;
             });
             AddStep("Try to report", () =>
             {

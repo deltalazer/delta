@@ -20,7 +20,6 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
-using osu.Game.Localisation;
 using osu.Game.Overlays;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
@@ -30,8 +29,6 @@ namespace osu.Game.Screens.Edit.Components.TernaryButtons
 {
     public partial class NewComboTernaryButton : CompositeDrawable, IHasCurrentValue<TernaryState>
     {
-        public Func<Drawable>? CreateIcon { get; init; }
-
         public Bindable<TernaryState> Current
         {
             get => current.Current;
@@ -63,8 +60,8 @@ namespace osu.Game.Screens.Edit.Components.TernaryButtons
                     Child = mainButton = new DrawableTernaryButton
                     {
                         Current = Current,
-                        Description = EditorStrings.NewCombo,
-                        CreateIcon = CreateIcon,
+                        Description = "New combo",
+                        CreateIcon = () => new SpriteIcon { Icon = OsuIcon.EditorNewComboA },
                     },
                 },
                 pickerButton = new ColourPickerButton

@@ -12,7 +12,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.Rooms;
 using osu.Game.Rulesets;
@@ -81,7 +80,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                 ],
                 Content = new[]
                 {
-                    new Drawable[] { new SectionHeader(OnlinePlayStrings.PlaylistLeaderboard) },
+                    new Drawable[] { new SectionHeader("Leaderboard") },
                     new Drawable[]
                     {
                         new Container
@@ -110,7 +109,7 @@ namespace osu.Game.Screens.OnlinePlay.DailyChallenge
                             }
                         }
                     },
-                    new Drawable[] { userBestHeader = new SectionHeader(BeatmapLeaderboardWedgeStrings.PersonalBest) { Alpha = 0, } },
+                    new Drawable[] { userBestHeader = new SectionHeader("Personal best") { Alpha = 0, } },
                     new Drawable[]
                     {
                         userBestContainer = new Container

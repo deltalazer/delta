@@ -35,7 +35,7 @@ namespace osu.Game.Beatmaps.Formats
             FormatVersion = version;
         }
 
-        protected override void ParseStreamInto(LineBufferedReader stream, bool isPrimaryStream, T output)
+        protected override void ParseStreamInto(LineBufferedReader stream, T output)
         {
             Section section = Section.General;
 
@@ -65,7 +65,7 @@ namespace osu.Game.Beatmaps.Formats
 
                 try
                 {
-                    ParseLine(output, section, line, isPrimaryStream);
+                    ParseLine(output, section, line);
                 }
                 catch (Exception e)
                 {
@@ -84,7 +84,7 @@ namespace osu.Game.Beatmaps.Formats
         {
         }
 
-        protected virtual void ParseLine(T output, Section section, string line, bool isPrimaryStream)
+        protected virtual void ParseLine(T output, Section section, string line)
         {
             switch (section)
             {

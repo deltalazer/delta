@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Diagnostics;
 using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -37,9 +38,9 @@ namespace osu.Game.Screens.Edit.Setup
             this.beatmapHasMultipleDifficulties = beatmapHasMultipleDifficulties;
         }
 
-        protected override FileChooserPopover CreatePopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath, bool allowClear)
+        protected override FileChooserPopover CreatePopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath)
         {
-            var popover = new BeatmapFileChooserPopover(handledExtensions, current, chooserPath, allowClear, beatmapHasMultipleDifficulties);
+            var popover = new BeatmapFileChooserPopover(handledExtensions, current, chooserPath, beatmapHasMultipleDifficulties);
             popover.ApplyToAllDifficulties.BindTo(ApplyToAllDifficulties);
             return popover;
         }
@@ -52,8 +53,8 @@ namespace osu.Game.Screens.Edit.Setup
 
             private Container selectApplicationScopeContainer = null!;
 
-            public BeatmapFileChooserPopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath, bool allowClear, bool beatmapHasMultipleDifficulties)
-                : base(handledExtensions, current, chooserPath, allowClear)
+            public BeatmapFileChooserPopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath, bool beatmapHasMultipleDifficulties)
+                : base(handledExtensions, current, chooserPath)
             {
                 this.beatmapHasMultipleDifficulties = beatmapHasMultipleDifficulties;
             }
@@ -136,7 +137,7 @@ namespace osu.Game.Screens.Edit.Setup
                 });
             }
 
-            protected override void OnFileSelected(FileInfo? file)
+            protected override void OnFileSelected(FileInfo file)
             {
                 if (beatmapHasMultipleDifficulties)
                     selectApplicationScopeContainer.FadeIn(200, Easing.InQuint);
@@ -146,6 +147,7 @@ namespace osu.Game.Screens.Edit.Setup
 
             private void updateFileSelection()
             {
+                Debug.Assert(FileSelector.CurrentFile.Value != null);
                 base.OnFileSelected(FileSelector.CurrentFile.Value);
             }
         }

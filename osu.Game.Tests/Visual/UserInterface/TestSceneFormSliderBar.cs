@@ -8,6 +8,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
@@ -101,7 +102,7 @@ namespace osu.Game.Tests.Visual.UserInterface
             });
             AddStep("set slider to 1", () => slider.Current.Value = 1);
 
-            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<FormSliderBar<float>.InnerSliderNub>().Single()));
+            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<Circle>().Single()));
 
             AddStep("double click nub", () =>
             {
@@ -146,7 +147,7 @@ namespace osu.Game.Tests.Visual.UserInterface
             AddStep("set slider to 1", () => slider.Current.Value = 1);
             AddStep("disable slider", () => slider.Current.Disabled = true);
 
-            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<FormSliderBar<float>.InnerSliderNub>().Single()));
+            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<Circle>().Single()));
 
             AddStep("double click nub", () =>
             {
@@ -171,7 +172,7 @@ namespace osu.Game.Tests.Visual.UserInterface
 
             AddStep("re-enable slider", () => slider.Current.Disabled = false);
 
-            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<FormSliderBar<float>.InnerSliderNub>().Single()));
+            AddStep("move mouse to nub", () => InputManager.MoveMouseTo(slider.ChildrenOfType<Circle>().Single()));
 
             AddStep("double click nub", () =>
             {

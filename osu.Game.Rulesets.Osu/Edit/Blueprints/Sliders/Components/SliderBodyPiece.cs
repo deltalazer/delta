@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Game.Graphics;
@@ -56,7 +57,11 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
             if (lastVersion != hitObject.Path.Version.Value)
             {
                 lastVersion = hitObject.Path.Version.Value;
-                body.SetVertices(hitObject.Path.CalculatedPath);
+
+                var vertices = new List<Vector2>();
+                hitObject.Path.GetPathToProgress(vertices, 0, 1);
+
+                body.SetVertices(vertices);
             }
 
             OriginPosition = body.PathOffset;

@@ -136,11 +136,6 @@ Click to see what's new!", version);
         public static LocalisableString Mention => new TranslatableString(getKey(@"mention"), @"Mention");
 
         /// <summary>
-        /// "{0} in {1}"
-        /// </summary>
-        public static LocalisableString MentionDetails(string user, string channelName) => new TranslatableString(getKey(@"mention_details"), @"{0} in {1}", user, channelName);
-
-        /// <summary>
         /// "Online: {0}"
         /// </summary>
         public static LocalisableString FriendOnline(string info) => new TranslatableString(getKey(@"friend_online"), @"Online: {0}", info);

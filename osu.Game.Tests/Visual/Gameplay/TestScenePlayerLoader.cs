@@ -23,8 +23,6 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Leaderboards;
-using osu.Game.Online.Rooms;
-using osu.Game.Online.Solo;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
@@ -79,8 +77,6 @@ namespace osu.Game.Tests.Visual.Gameplay
         private double savedMasterVolume;
         private bool savedMutedState;
 
-        private int leaderboardRequestsHandled;
-
         public TestScenePlayerLoader()
         {
             AddRange(new Drawable[]
@@ -119,28 +115,6 @@ namespace osu.Game.Tests.Visual.Gameplay
         public override void SetUpSteps()
         {
             base.SetUpSteps();
-
-            AddStep("set up request handling", () =>
-            {
-                leaderboardRequestsHandled = 0;
-                ((DummyAPIAccess)API).HandleRequest = req =>
-                {
-                    switch (req)
-                    {
-                        case GetScoresRequest getScores:
-                            leaderboardRequestsHandled++;
-                            getScores.TriggerSuccess(new APIScoresCollection { Scores = [] });
-                            return true;
-
-                        case CreateSoloScoreRequest createSoloScoreRequest:
-                            createSoloScoreRequest.TriggerSuccess(new APIScoreToken { ID = 123456 });
-                            return true;
-
-                        default:
-                            return false;
-                    }
-                };
-            });
 
             AddStep("read all notifications", () =>
             {
@@ -401,6 +375,21 @@ namespace osu.Game.Tests.Visual.Gameplay
         [Test]
         public void TestLeaderboardForciblyRefetchedOnRestart([Values] bool quickRestart)
         {
+            int leaderboardRequestsHandled = 0;
+            AddStep("set up request handling", () => ((DummyAPIAccess)API).HandleRequest = req =>
+            {
+                switch (req)
+                {
+                    case GetScoresRequest getScores:
+                        leaderboardRequestsHandled++;
+                        getScores.TriggerSuccess(new APIScoresCollection { Scores = [] });
+                        return true;
+
+                    default:
+                        return false;
+                }
+            });
+
             AddStep("load player", () => resetPlayer(true));
 
             AddUntilStep("wait for loader to become current", () => loader.IsCurrentScreen());
@@ -432,27 +421,19 @@ namespace osu.Game.Tests.Visual.Gameplay
         {
             AddStep("reset notification lock", () => sessionStatics.GetBindable<bool>(Static.MutedAudioNotificationShownOnce).Value = false);
 
-            AddStep("load player", () =>
-            {
-                resetPlayer(false, beforeLoad);
-
-                // block load to test notifications
-                loader.BlockPlayerLoad = true;
-            });
-
+            AddStep("load player", () => resetPlayer(false, beforeLoad));
             AddUntilStep("wait for player", () => player?.LoadState == LoadState.Ready);
 
             saveVolumes();
 
-            AddUntilStep("check for notification", () => notificationOverlay.UnreadCount.Value, () => Is.EqualTo(1));
+            AddAssert("check for notification", () => notificationOverlay.UnreadCount.Value, () => Is.EqualTo(1));
 
             clickNotification();
 
-            AddUntilStep("check " + volumeName, assert);
+            AddAssert("check " + volumeName, assert);
 
             restoreVolumes();
 
-            AddStep("unblock load", () => loader.BlockPlayerLoad = false);
             AddUntilStep("wait for player load", () => player.IsLoaded);
         }
 
@@ -469,7 +450,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             AddUntilStep("wait for current", () => loader.IsCurrentScreen());
 
-            AddUntilStep($"epilepsy warning {(warning ? "present" : "absent")}", () => this.ChildrenOfType<PlayerLoaderDisclaimer>().Count(), () => Is.EqualTo(warning ? 1 : 0));
+            AddAssert($"epilepsy warning {(warning ? "present" : "absent")}", () => this.ChildrenOfType<PlayerLoaderDisclaimer>().Count(), () => Is.EqualTo(warning ? 1 : 0));
 
             restoreVolumes();
         }
@@ -538,18 +519,11 @@ namespace osu.Game.Tests.Visual.Gameplay
             AddStep("reset notification lock", () => sessionStatics.GetBindable<bool>(Static.LowBatteryNotificationShownOnce).Value = false);
 
             // set charge status and level
-            AddStep("load player", () =>
+            AddStep("load player", () => resetPlayer(false, () =>
             {
-                resetPlayer(false, () =>
-                {
-                    batteryInfo.SetOnBattery(onBattery);
-                    batteryInfo.SetChargeLevel(chargeLevel);
-                });
-
-                // block load to test notifications
-                loader.BlockPlayerLoad = true;
-            });
-
+                batteryInfo.SetOnBattery(onBattery);
+                batteryInfo.SetChargeLevel(chargeLevel);
+            }));
             AddUntilStep("wait for player", () => player?.LoadState == LoadState.Ready);
 
             if (shouldWarn)
@@ -557,7 +531,6 @@ namespace osu.Game.Tests.Visual.Gameplay
             else
                 AddAssert("notification not triggered", () => notificationOverlay.UnreadCount.Value == 0);
 
-            AddStep("unblock load", () => loader.BlockPlayerLoad = false);
             AddUntilStep("wait for player load", () => player.IsLoaded);
         }
 
@@ -638,10 +611,6 @@ namespace osu.Game.Tests.Visual.Gameplay
             public new Task DisposalTask => base.DisposalTask;
 
             public IReadOnlyList<Mod> DisplayedMods => MetadataInfo.Mods.Value;
-
-            public bool BlockPlayerLoad { get; set; }
-
-            protected override bool ReadyForGameplay => base.ReadyForGameplay && !BlockPlayerLoad;
 
             public TestPlayerLoader(Func<Player> createPlayer)
                 : base(createPlayer)

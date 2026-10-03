@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
@@ -14,13 +15,14 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Multiplayer.MatchTypes.RankedPlay;
-using osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Components;
+using osu.Game.Overlays;
 
 namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
 {
     public partial class IntroScreen : RankedPlaySubScreen
     {
-        public override LocalisableString StageHeading => string.Empty;
+        protected override LocalisableString StageHeading => string.Empty;
+        protected override LocalisableString StageCaption => string.Empty;
 
         public IntroScreen()
         {
@@ -35,7 +37,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
         private IAPIProvider api { get; set; } = null!;
 
         [Resolved]
-        private RankedPlayChatDisplay? chat { get; set; }
+        private MusicController? musicController { get; set; }
 
         private Sample? windupSample;
         private Sample? impactSample;
@@ -64,10 +66,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
 
             var users = await userLookupCache.GetUsersAsync(userIds).ConfigureAwait(false);
 
-            var player = users.OfType<APIUser>().FirstOrDefault(it => it.Id == api.LocalUser.Value.Id)
-                         ?? api.LocalUser.Value;
-            var opponent = users.OfType<APIUser>().FirstOrDefault(it => it.Id != api.LocalUser.Value.Id)
-                           ?? APIUser.UnknownUser(userIds.First(id => id != api.LocalUser.Value.Id));
+            var player = users.OfType<APIUser>().First(it => it.Id == api.LocalUser.Value.Id);
+            var opponent = users.OfType<APIUser>().First(it => it.Id != api.LocalUser.Value.Id);
 
             int playerRating = roomState.Users[player.Id].Rating;
             int opponentRating = roomState.Users[opponent.Id].Rating;
@@ -81,6 +81,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
 
         private StarRatingSequence? starRatingAnimation;
 
+        private IDisposable? duckOperation;
+
         public void PlayIntroSequence(UserWithRating player, UserWithRating opponent, double starRating)
         {
             double delay = 0;
@@ -93,6 +95,8 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
 
             vsScreen.Play(ref delay, out double impactDelay);
 
+            duckOperation = musicController?.Duck();
+
             if (windupSample != null)
             {
                 Scheduler.AddDelayed(() => windupSample?.Play(), impactDelay - windupSample.Length);
@@ -100,11 +104,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
                 Scheduler.AddDelayed(() => swooshSample?.Play(), impactDelay + 3200);
             }
 
-            Scheduler.AddDelayed(() =>
-            {
-                CornerPieceVisibility.Value = Visibility.Visible;
-                chat?.Show();
-            }, delay);
+            Scheduler.AddDelayed(() => CornerPieceVisibility.Value = Visibility.Visible, delay);
 
             starRatingAnimation.Play(ref delay, (float)starRating);
         }
@@ -113,7 +113,16 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Intro
         {
             starRatingAnimation?.PopOut();
 
+            duckOperation?.Dispose();
+
             this.Delay(500).FadeOut();
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+
+            duckOperation?.Dispose();
         }
     }
 }

@@ -7,7 +7,6 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.Formats;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Localisation;
 using osu.Game.Resources.Localisation.Web;
@@ -20,21 +19,12 @@ namespace osu.Game.Rulesets.Mania.Edit.Setup
     {
         public override LocalisableString Title => EditorSetupStrings.DifficultyHeader;
 
-        private FormSliderBar<int> keyCountSlider { get; set; } = null!;
-        private FormCheckBox dualStages { get; set; } = null!;
+        private FormSliderBar<float> keyCountSlider { get; set; } = null!;
         private FormCheckBox specialStyle { get; set; } = null!;
         private FormSliderBar<float> healthDrainSlider { get; set; } = null!;
         private FormSliderBar<float> overallDifficultySlider { get; set; } = null!;
         private FormSliderBar<double> baseVelocitySlider { get; set; } = null!;
         private FormSliderBar<double> tickRateSlider { get; set; } = null!;
-
-        private readonly BindableInt singleStageKeyCount = new BindableInt
-        {
-            Default = (int)BeatmapDifficulty.DEFAULT_DIFFICULTY,
-            Precision = 1,
-        };
-
-        private readonly BindableInt actualKeyCount = new BindableInt();
 
         [Resolved]
         private Editor? editor { get; set; }
@@ -47,18 +37,19 @@ namespace osu.Game.Rulesets.Mania.Edit.Setup
         {
             Children = new Drawable[]
             {
-                keyCountSlider = new FormSliderBar<int>
+                keyCountSlider = new FormSliderBar<float>
                 {
                     Caption = BeatmapsetsStrings.ShowStatsCsMania,
                     HintText = "The number of columns in the beatmap",
-                    Current = singleStageKeyCount,
+                    Current = new BindableFloat(Beatmap.Difficulty.CircleSize)
+                    {
+                        Default = BeatmapDifficulty.DEFAULT_DIFFICULTY,
+                        MinValue = 0,
+                        MaxValue = 10,
+                        Precision = 1,
+                    },
                     TransferValueOnCommit = true,
                     TabbableContentContainer = this,
-                },
-                dualStages = new FormCheckBox
-                {
-                    Caption = "Dual stages",
-                    HintText = "Doubles the number of keys by adding a second stage."
                 },
                 specialStyle = new FormCheckBox
                 {
@@ -126,54 +117,16 @@ namespace osu.Game.Rulesets.Mania.Edit.Setup
                 },
             };
 
-            setStateFromActualKeyCount((int)Beatmap.Difficulty.CircleSize);
-
-            keyCountSlider.Current.BindValueChanged(_ => calculateActualKeyCount());
-            dualStages.Current.BindValueChanged(_ =>
-            {
-                updateSingleStageKeyCountBounds();
-                calculateActualKeyCount();
-            });
-            actualKeyCount.BindValueChanged(updateKeyCount);
-
+            keyCountSlider.Current.BindValueChanged(updateKeyCount);
             healthDrainSlider.Current.BindValueChanged(_ => updateValues());
             overallDifficultySlider.Current.BindValueChanged(_ => updateValues());
             baseVelocitySlider.Current.BindValueChanged(_ => updateValues());
             tickRateSlider.Current.BindValueChanged(_ => updateValues());
         }
 
-        private void updateSingleStageKeyCountBounds()
-        {
-            singleStageKeyCount.MinValue = dualStages.Current.Value ? ManiaRuleset.MAX_STAGE_KEYS / 2 + 1 : 1;
-            singleStageKeyCount.MaxValue = dualStages.Current.Value ? LegacyBeatmapDecoder.MAX_MANIA_KEY_COUNT / 2 : ManiaRuleset.MAX_STAGE_KEYS;
-        }
-
-        private void setStateFromActualKeyCount(int keyCount)
-        {
-            actualKeyCount.Value = keyCount;
-
-            if (keyCount > 10)
-            {
-                dualStages.Current.Value = true;
-                singleStageKeyCount.Value = keyCount / 2;
-            }
-            else
-            {
-                dualStages.Current.Value = false;
-                singleStageKeyCount.Value = keyCount;
-            }
-
-            updateSingleStageKeyCountBounds();
-        }
-
-        private void calculateActualKeyCount()
-        {
-            actualKeyCount.Value = keyCountSlider.Current.Value * (dualStages.Current.Value ? 2 : 1);
-        }
-
         private bool updatingKeyCount;
 
-        private void updateKeyCount(ValueChangedEvent<int> keyCount)
+        private void updateKeyCount(ValueChangedEvent<float> keyCount)
         {
             if (updatingKeyCount) return;
 
@@ -190,8 +143,7 @@ namespace osu.Game.Rulesets.Mania.Edit.Setup
                     Schedule(() =>
                     {
                         changeHandler!.RestoreState(-1);
-                        Beatmap.Difficulty.CircleSize = keyCount.OldValue;
-                        setStateFromActualKeyCount(keyCount.OldValue);
+                        Beatmap.Difficulty.CircleSize = keyCountSlider.Current.Value = keyCount.OldValue;
                         updatingKeyCount = false;
                     });
                 }
@@ -206,7 +158,7 @@ namespace osu.Game.Rulesets.Mania.Edit.Setup
         {
             // for now, update these on commit rather than making BeatmapMetadata bindables.
             // after switching database engines we can reconsider if switching to bindables is a good direction.
-            Beatmap.Difficulty.CircleSize = actualKeyCount.Value;
+            Beatmap.Difficulty.CircleSize = keyCountSlider.Current.Value;
             Beatmap.SpecialStyle = specialStyle.Current.Value;
             Beatmap.Difficulty.DrainRate = healthDrainSlider.Current.Value;
             Beatmap.Difficulty.OverallDifficulty = overallDifficultySlider.Current.Value;

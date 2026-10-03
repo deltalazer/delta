@@ -21,6 +21,8 @@ namespace osu.Game.Rulesets.Mods
         /// </summary>
         public const double FINAL_RATE_PROGRESS = 0.75f;
 
+        public override double ScoreMultiplier => 0.5;
+
         [SettingSource("Initial rate", "The starting speed of the track", SettingControlType = typeof(MultiplierSettingsSlider))]
         public abstract BindableNumber<double> InitialRate { get; }
 

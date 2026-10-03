@@ -13,7 +13,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
-using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
@@ -108,7 +107,7 @@ namespace osu.Game.Overlays.SkinEditor
                 throw new InvalidOperationException("Cannot start multiple concurrent external edits!");
 
             Show();
-            showSpinner(EditorStrings.ExternalEditExporting);
+            showSpinner("Mounting external skin...");
             setGlobalSkinDisabled(true);
 
             await Task.Delay(500).ConfigureAwait(true);
@@ -121,7 +120,7 @@ namespace osu.Game.Overlays.SkinEditor
             {
                 Logger.Log($"Failed to initialize external edit operation: {ex}", LoggingTarget.Database, LogLevel.Error);
                 setGlobalSkinDisabled(false);
-                Schedule(() => showSpinner(EditorStrings.ExportFailed));
+                Schedule(() => showSpinner("Export failed!"));
                 Scheduler.AddDelayed(Hide, 1000);
                 return Task.FromException(ex);
             }
@@ -132,7 +131,7 @@ namespace osu.Game.Overlays.SkinEditor
                 {
                     new OsuSpriteText
                     {
-                        Text = SkinEditorStrings.SkinMountedExternally,
+                        Text = "Skin is mounted externally",
                         Font = OsuFont.Default.With(size: 30),
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
@@ -144,11 +143,11 @@ namespace osu.Game.Overlays.SkinEditor
                         Origin = Anchor.TopCentre,
                         Width = 350,
                         AutoSizeAxes = Axes.Y,
-                        Text = EditorStrings.ExternalEditMountedExplanation,
+                        Text = "Any changes made to the exported folder will be imported to the game, including file additions, modifications and deletions.",
                     },
                     new PurpleRoundedButton
                     {
-                        Text = EditorStrings.OpenFolder,
+                        Text = "Open folder",
                         Width = 350,
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
@@ -199,7 +198,7 @@ namespace osu.Game.Overlays.SkinEditor
 
             Debug.Assert(taskCompletionSource != null);
 
-            showSpinner(EditorStrings.ExternalEditCleaningUp);
+            showSpinner("Cleaning up...");
             await Task.Delay(500).ConfigureAwait(true);
 
             try
@@ -209,7 +208,7 @@ namespace osu.Game.Overlays.SkinEditor
             catch (Exception ex)
             {
                 Logger.Log($"Failed to finish external edit operation: {ex}", LoggingTarget.Database, LogLevel.Error);
-                showSpinner(EditorStrings.ImportFailed);
+                showSpinner("Import failed!");
                 Scheduler.AddDelayed(Hide, 1000);
                 setGlobalSkinDisabled(false);
                 taskCompletionSource.SetException(ex);
@@ -276,7 +275,7 @@ namespace osu.Game.Overlays.SkinEditor
             return base.OnPressed(e);
         }
 
-        private void showSpinner(LocalisableString text)
+        private void showSpinner(string text)
         {
             foreach (var b in flow.ChildrenOfType<RoundedButton>())
                 b.Enabled.Value = false;

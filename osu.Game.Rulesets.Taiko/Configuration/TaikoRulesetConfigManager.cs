@@ -18,15 +18,11 @@ namespace osu.Game.Rulesets.Taiko.Configuration
             base.InitialiseDefaults();
 
             SetDefault(TaikoRulesetSetting.TouchControlScheme, TaikoTouchControlScheme.KDDK);
-            SetDefault(TaikoRulesetSetting.RateAdjustedHitAnimation, true);
-            SetDefault(TaikoRulesetSetting.HitAnimations, true);
         }
     }
 
     public enum TaikoRulesetSetting
     {
-        TouchControlScheme,
-        RateAdjustedHitAnimation,
-        HitAnimations,
+        TouchControlScheme
     }
 }

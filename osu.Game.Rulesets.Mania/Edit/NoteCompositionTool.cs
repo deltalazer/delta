@@ -2,8 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Sprites;
-using osu.Game.Graphics;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Edit.Tools;
 using osu.Game.Rulesets.Mania.Edit.Blueprints;
@@ -18,7 +17,7 @@ namespace osu.Game.Rulesets.Mania.Edit
         {
         }
 
-        public override Drawable CreateIcon() => new SpriteIcon { Icon = OsuIcon.EditorNote };
+        public override Drawable CreateIcon() => new BeatmapStatisticIcon(BeatmapStatisticsIconType.Circles);
 
         public override HitObjectPlacementBlueprint CreatePlacementBlueprint() => new NotePlacementBlueprint();
     }

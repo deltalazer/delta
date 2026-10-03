@@ -10,7 +10,6 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
@@ -119,7 +118,7 @@ namespace osu.Game.Screens.Edit
 
         private async Task begin()
         {
-            showSpinner(EditorStrings.ExternalEditExporting);
+            showSpinner("Exporting for edit...");
 
             await Task.Delay(500).ConfigureAwait(true);
 
@@ -131,7 +130,7 @@ namespace osu.Game.Screens.Edit
             {
                 Logger.Log($@"Failed to initiate external edit operation: {ex}", LoggingTarget.Database);
                 fileMountOperation = null;
-                showSpinner(EditorStrings.ExportFailed);
+                showSpinner("Export failed!");
                 await Task.Delay(1000).ConfigureAwait(true);
                 this.Exit();
             }
@@ -140,7 +139,7 @@ namespace osu.Game.Screens.Edit
             {
                 new OsuSpriteText
                 {
-                    Text = EditorStrings.BeatmapMountedExternally,
+                    Text = "Beatmap is mounted externally",
                     Font = OsuFont.Default.With(size: 30),
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
@@ -152,11 +151,11 @@ namespace osu.Game.Screens.Edit
                     Origin = Anchor.TopCentre,
                     Width = 350,
                     AutoSizeAxes = Axes.Y,
-                    Text = EditorStrings.ExternalEditMountedExplanation,
+                    Text = "Any changes made to the exported folder will be imported to the game, including file additions, modifications and deletions.",
                 },
                 new PurpleRoundedButton
                 {
-                    Text = EditorStrings.OpenFolder,
+                    Text = "Open folder",
                     Width = 350,
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
@@ -201,7 +200,7 @@ namespace osu.Game.Screens.Edit
             BackButtonVisibility.Value = false;
             string originalDifficulty = editor.Beatmap.Value.Beatmap.BeatmapInfo.DifficultyName;
 
-            showSpinner(EditorStrings.ExternalEditCleaningUp);
+            showSpinner("Cleaning up...");
 
             Live<BeatmapSetInfo>? beatmap = null;
 
@@ -212,7 +211,7 @@ namespace osu.Game.Screens.Edit
             catch (Exception ex)
             {
                 Logger.Log($@"Failed to finish external edit operation: {ex}", LoggingTarget.Database);
-                showSpinner(EditorStrings.ImportFailed);
+                showSpinner("Import failed!");
                 await Task.Delay(1000).ConfigureAwait(true);
             }
 
@@ -247,7 +246,7 @@ namespace osu.Game.Screens.Edit
             }
         }
 
-        private void showSpinner(LocalisableString text)
+        private void showSpinner(string text)
         {
             foreach (var b in flow.ChildrenOfType<RoundedButton>())
                 b.Enabled.Value = false;

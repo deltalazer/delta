@@ -29,8 +29,6 @@ namespace osu.Game.Graphics.Backgrounds
 
         public Action? StoryboardLoaded { get; set; }
 
-        public readonly BindableBool ShowStoryboard = new BindableBool(true);
-
         [Resolved(CanBeNull = true)]
         private MusicController? musicController { get; set; }
 
@@ -77,11 +75,13 @@ namespace osu.Game.Graphics.Backgrounds
 
             void finishLoad(DrawableStoryboard s)
             {
+                if (Beatmap.Storyboard.ReplacesBackground)
+                    Sprite.FadeOut(BackgroundScreen.TRANSITION_LENGTH, Easing.InQuint);
+
                 Storyboard.FadeInFromZero(BackgroundScreen.TRANSITION_LENGTH, Easing.OutQuint);
                 Storyboard.Add(s);
 
                 StoryboardLoaded?.Invoke();
-                updateStoryboardVisibility();
             }
         }
 
@@ -97,7 +97,8 @@ namespace osu.Game.Graphics.Backgrounds
             Storyboard.Clear();
 
             drawableStoryboard = null;
-            updateStoryboardVisibility();
+
+            Sprite.Alpha = 1f;
         }
 
         protected override void LoadComplete()
@@ -107,17 +108,6 @@ namespace osu.Game.Graphics.Backgrounds
                 musicController.TrackChanged += onTrackChanged;
 
             updateStoryboardClockSource(Beatmap);
-
-            ShowStoryboard.BindValueChanged(_ => updateStoryboardVisibility(), true);
-        }
-
-        private void updateStoryboardVisibility()
-        {
-            bool showStoryboard = drawableStoryboard != null && ShowStoryboard.Value;
-            bool showBackground = !showStoryboard || !Beatmap.Storyboard.ReplacesBackground;
-
-            Storyboard.FadeTo(showStoryboard ? 1 : 0, BackgroundScreen.TRANSITION_LENGTH, Easing.OutQuint);
-            Sprite.FadeTo(showBackground ? 1 : 0, BackgroundScreen.TRANSITION_LENGTH, Easing.OutQuint);
         }
 
         private void onTrackChanged(WorkingBeatmap newBeatmap, TrackChangeDirection _) => updateStoryboardClockSource(newBeatmap);

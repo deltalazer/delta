@@ -55,8 +55,5 @@ namespace osu.Game.Screens.Select.Filter
 
         [LocalisableDescription(typeof(SongSelectStrings), nameof(SongSelectStrings.Title))]
         Title,
-
-        // purposefully unlocalised - `Ruleset.VariantDescription` is the intended localisation insertion point
-        Variant,
     }
 }

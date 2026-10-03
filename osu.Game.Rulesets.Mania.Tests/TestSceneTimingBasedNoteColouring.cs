@@ -26,8 +26,6 @@ namespace osu.Game.Rulesets.Mania.Tests
     [TestFixture]
     public partial class TestSceneTimingBasedNoteColouring : OsuTestScene
     {
-        protected override Ruleset CreateRuleset() => new ManiaRuleset();
-
         private Bindable<bool> configTimingBasedNoteColouring;
 
         private ManualClock clock;

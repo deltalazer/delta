@@ -19,27 +19,24 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Utils
             const double big_tick_score = 30;
             const double small_tick_score = 10;
 
-            int amountOfBigTicks = 0;
-            int amountOfSmallTicks = 0;
-            double spinnerScore = 0;
+            var sliders = beatmap.HitObjects.OfType<Slider>().ToArray();
 
-            foreach (var obj in beatmap.HitObjects)
-            {
-                switch (obj)
-                {
-                    case Slider s:
-                        // 1 for head, 1 for tail, plus repeats
-                        amountOfBigTicks += 2 + s.RepeatCount;
-                        amountOfSmallTicks += s.NestedHitObjects.Count(nho => nho is SliderTick);
-                        break;
+            // 1 for head, 1 for tail
+            int amountOfBigTicks = sliders.Length * 2;
 
-                    case Spinner sp:
-                        spinnerScore += calculateSpinnerScore(sp);
-                        break;
-                }
-            }
+            // Add slider repeats
+            amountOfBigTicks += sliders.Select(s => s.RepeatCount).Sum();
+
+            int amountOfSmallTicks = sliders.Select(s => s.NestedHitObjects.Count(nho => nho is SliderTick)).Sum();
 
             double sliderScore = amountOfBigTicks * big_tick_score + amountOfSmallTicks * small_tick_score;
+
+            double spinnerScore = 0;
+
+            foreach (var spinner in beatmap.HitObjects.OfType<Spinner>())
+            {
+                spinnerScore += calculateSpinnerScore(spinner);
+            }
 
             return (sliderScore + spinnerScore) / objectCount;
         }

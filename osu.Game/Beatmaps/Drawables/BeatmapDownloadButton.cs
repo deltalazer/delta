@@ -15,7 +15,6 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Resources.Localisation.Web;
-using CommonStrings = osu.Game.Localisation.CommonStrings;
 
 namespace osu.Game.Beatmaps.Drawables
 {
@@ -101,7 +100,7 @@ namespace osu.Game.Beatmaps.Drawables
                 {
                     case DownloadState.LocallyAvailable:
                         button.Enabled.Value = true;
-                        button.TooltipText = CommonStrings.GoToBeatmap;
+                        button.TooltipText = "Go to beatmap";
                         break;
 
                     default:

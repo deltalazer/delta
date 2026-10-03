@@ -10,14 +10,12 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
-using osu.Game.Resources.Localisation.Web;
 using osuTK;
 
 namespace osu.Game.Overlays.Profile.Header.Components
@@ -41,10 +39,8 @@ namespace osu.Game.Overlays.Profile.Header.Components
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
-        private ILocalisedBindableString titleText = null!;
-
         [BackgroundDependencyLoader]
-        private void load(LocalisationManager localisationManager)
+        private void load()
         {
             AutoSizeAxes = Axes.Both;
 
@@ -54,8 +50,7 @@ namespace osu.Game.Overlays.Profile.Header.Components
             {
                 content = new Container
                 {
-                    AutoSizeAxes = Axes.X,
-                    Height = MainDetails.BADGE_HEIGHT,
+                    AutoSizeAxes = Axes.Both,
                     CornerRadius = 6,
                     BorderThickness = 2,
                     BorderColour = colourProvider.Background4,
@@ -72,22 +67,17 @@ namespace osu.Game.Overlays.Profile.Header.Components
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Padding = new MarginPadding(3f),
-                            AutoSizeAxes = Axes.X,
-                            RelativeSizeAxes = Axes.Y,
+                            AutoSizeAxes = Axes.Both,
                             Direction = FillDirection.Horizontal,
                             Children = new Drawable[]
                             {
                                 label = new OsuTextFlowContainer(s => s.Font = OsuFont.GetFont(size: 12))
                                 {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
                                     AutoSizeAxes = Axes.Both,
-                                    Margin = new MarginPadding { Horizontal = 5f, },
+                                    Margin = new MarginPadding { Horizontal = 5f, Bottom = 2f },
                                 },
                                 new Container
                                 {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
                                     AutoSizeAxes = Axes.X,
                                     RelativeSizeAxes = Axes.Y,
                                     CornerRadius = 3,
@@ -139,12 +129,9 @@ namespace osu.Game.Overlays.Profile.Header.Components
                 },
             };
 
-            titleText = localisationManager.GetLocalisedBindableString(UsersStrings.ShowDailyChallengeTitle);
-            titleText.BindValueChanged(val =>
-            {
-                label.Clear();
-                label.AddParagraph(val.NewValue.Replace(@"\n", "\n"));
-            }, true);
+            // can't use this because osu-web does weird stuff with \\n.
+            // Text = UsersStrings.ShowDailyChallengeTitle.,
+            label.AddParagraph("Daily\nChallenge");
         }
 
         protected override void LoadComplete()

@@ -21,11 +21,9 @@ using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Database;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osuTK;
 using osuTK.Graphics;
-using CommonStrings = osu.Game.Resources.Localisation.Web.CommonStrings;
 
 namespace osu.Game.Graphics.UserInterfaceV2
 {
@@ -68,12 +66,6 @@ namespace osu.Game.Graphics.UserInterfaceV2
         /// Text displayed in the selector when no file is selected.
         /// </summary>
         public LocalisableString PlaceholderText { get; init; }
-
-        /// <summary>
-        /// If set to <see langword="true"/>, the selector will display a button,
-        /// which when clicked, will change <see cref="Current"/>'s value to <see langword="null"/>.
-        /// </summary>
-        public bool AllowClear { get; init; }
 
         public Container PreviewContainer { get; private set; } = null!;
 
@@ -188,13 +180,13 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         private void onFileSelected()
         {
-            if (Current.Value != null || AllowClear)
+            if (Current.Value != null)
                 this.HidePopover();
 
             initialChooserPath = Current.Value?.DirectoryName;
             placeholderText.Alpha = Current.Value == null ? 1 : 0;
             filenameText.Text = Current.Value?.Name ?? string.Empty;
-            background.FlashOnCommit();
+            background.Flash();
         }
 
         protected override bool OnClick(ClickEvent e)
@@ -246,12 +238,12 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         Task ICanAcceptFiles.Import(ImportTask[] tasks, ImportParameters parameters) => throw new NotImplementedException();
 
-        protected virtual FileChooserPopover CreatePopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath, bool allowClear) =>
-            new FileChooserPopover(handledExtensions, current, chooserPath, allowClear);
+        protected virtual FileChooserPopover CreatePopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath) =>
+            new FileChooserPopover(handledExtensions, current, chooserPath);
 
         public Popover GetPopover()
         {
-            var popover = CreatePopover(handledExtensions, Current, initialChooserPath, AllowClear);
+            var popover = CreatePopover(handledExtensions, Current, initialChooserPath);
             popoverState.UnbindBindings();
             popoverState.BindTo(popover.State);
             return popover;
@@ -266,7 +258,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
             protected OsuFileSelector FileSelector;
 
-            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath, bool allowClear)
+            public FileChooserPopover(string[] handledExtensions, Bindable<FileInfo?> current, string? chooserPath)
                 : base(false)
             {
                 Child = new Container
@@ -275,37 +267,9 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     // simplest solution to avoid underlying text to bleed through the bottom border
                     // https://github.com/ppy/osu/pull/30005#issuecomment-2378884430
                     Padding = new MarginPadding { Bottom = 1 },
-                    Children = new[]
+                    Child = FileSelector = new OsuFileSelector(chooserPath, handledExtensions)
                     {
-                        new Container
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Bottom = allowClear ? 50 : 0 },
-                            Child = FileSelector = new OsuFileSelector(chooserPath, handledExtensions)
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                            },
-                        },
-                        allowClear
-                            ? new Container
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Anchor = Anchor.BottomCentre,
-                                Origin = Anchor.BottomCentre,
-                                Padding = new MarginPadding(5),
-                                Child = new DangerousRoundedButton
-                                {
-                                    Text = CommonStrings.ButtonsClear,
-                                    Action = () => OnFileSelected(null),
-                                    Enabled = { Value = current.Value != null },
-                                    Padding = new MarginPadding(5),
-                                    Anchor = Anchor.CentreRight,
-                                    Origin = Anchor.CentreRight,
-                                    Width = 60,
-                                }
-                            }
-                            : Empty()
+                        RelativeSizeAxes = Axes.Both,
                     },
                 };
 
@@ -344,7 +308,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 };
             }
 
-            protected virtual void OnFileSelected(FileInfo? file) => current.Value = file;
+            protected virtual void OnFileSelected(FileInfo file) => current.Value = file;
         }
     }
 }

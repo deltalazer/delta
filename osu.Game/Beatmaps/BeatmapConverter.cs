@@ -72,6 +72,7 @@ namespace osu.Game.Beatmaps
             beatmap.ControlPointInfo = original.ControlPointInfo;
             beatmap.HitObjects = convertHitObjects(original.HitObjects, original, cancellationToken).OrderBy(s => s.StartTime).ToList();
             beatmap.Breaks = original.Breaks;
+            beatmap.UnhandledEventLines = original.UnhandledEventLines;
             beatmap.AudioLeadIn = original.AudioLeadIn;
             beatmap.StackLeniency = original.StackLeniency;
             beatmap.SpecialStyle = original.SpecialStyle;
@@ -85,7 +86,6 @@ namespace osu.Game.Beatmaps
             beatmap.Countdown = original.Countdown;
             beatmap.CountdownOffset = original.CountdownOffset;
             beatmap.Bookmarks = original.Bookmarks;
-            beatmap.SliderVelocityPresets = original.SliderVelocityPresets;
             beatmap.SectionGimmicks = original.SectionGimmicks;
             beatmap.HitObjectGimmicks = original.HitObjectGimmicks;
             beatmap.BeatmapVersion = original.BeatmapVersion;

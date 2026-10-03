@@ -21,8 +21,6 @@ namespace osu.Game.Rulesets.Mania.Tests
 {
     public partial class TestSceneMaximumScore : RateAdjustedBeatmapTestScene
     {
-        protected override Ruleset CreateRuleset() => new ManiaRuleset();
-
         private ScoreAccessibleReplayPlayer currentPlayer = null!;
 
         private List<JudgementResult> judgementResults = new List<JudgementResult>();

@@ -197,7 +197,7 @@ namespace osu.Desktop
             }
 
             // user party
-            if (!hideIdentifiableInformation && multiplayerClient.Room != null && !multiplayerClient.Room.Settings.MatchType.IsMatchmakingType())
+            if (!hideIdentifiableInformation && multiplayerClient.Room != null && multiplayerClient.Room.Settings.MatchType != MatchType.Matchmaking)
             {
                 MultiplayerRoom room = multiplayerClient.Room;
 

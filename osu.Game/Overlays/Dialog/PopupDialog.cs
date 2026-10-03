@@ -14,6 +14,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Containers;
 using osuTK;
@@ -39,8 +40,6 @@ namespace osu.Game.Overlays.Dialog
         private readonly SpriteIcon icon;
         private readonly TextFlowContainer header;
         private readonly TextFlowContainer body;
-
-        public Container MainContent { get; private set; }
 
         private bool actionInvoked;
 
@@ -169,7 +168,7 @@ namespace osu.Game.Overlays.Dialog
                             AutoSizeAxes = Axes.Y,
                             Direction = FillDirection.Vertical,
                             Spacing = new Vector2(0f, 10f),
-                            Padding = new MarginPadding { Top = 60, Bottom = 30 },
+                            Padding = new MarginPadding { Vertical = 60 },
                             Children = new Drawable[]
                             {
                                 new Container
@@ -223,13 +222,6 @@ namespace osu.Game.Overlays.Dialog
                                     AutoSizeAxes = Axes.Y,
                                     Padding = new MarginPadding { Horizontal = 15 },
                                 },
-                                MainContent = new Container
-                                {
-                                    Origin = Anchor.TopCentre,
-                                    Anchor = Anchor.TopCentre,
-                                    RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y,
-                                },
                                 buttonsContainer = new FillFlowContainer<PopupDialogButton>
                                 {
                                     Anchor = Anchor.TopCentre,
@@ -237,7 +229,6 @@ namespace osu.Game.Overlays.Dialog
                                     RelativeSizeAxes = Axes.X,
                                     AutoSizeAxes = Axes.Y,
                                     Direction = FillDirection.Vertical,
-                                    Spacing = new Vector2(5),
                                     Padding = new MarginPadding { Top = 30 },
                                 },
                             },
@@ -252,7 +243,7 @@ namespace osu.Game.Overlays.Dialog
         }
 
         [BackgroundDependencyLoader]
-        private void load(AudioManager audio)
+        private void load(AudioManager audio, OsuColour colours)
         {
             flashSample = audio.Samples.Get(@"UI/default-select-disabled");
         }

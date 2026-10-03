@@ -24,7 +24,7 @@ namespace osu.Game.Overlays.Settings.Sections
         {
             Children = new Drawable[]
             {
-                new ContentDownloadSettings(),
+                new WebSettings(),
                 new AlertsAndPrivacySettings(),
             };
 

@@ -20,7 +20,7 @@ namespace osu.Game.Tests.Visual.Gameplay
         private bool seek;
 
         [Test]
-        [Ignore("Still failing even with [FlakyTest] applied.")]
+        [FlakyTest]
         public void TestAllSamplesStopDuringSeek()
         {
             DrawableSlider? slider = null;

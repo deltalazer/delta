@@ -3,6 +3,8 @@
 
 using System;
 using System.Diagnostics;
+using System.Net;
+using System.Text.RegularExpressions;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -24,6 +26,9 @@ namespace osu.Game.Overlays.Changelog
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
+
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
         [Resolved]
         private ILinkHandler? linkHandler { get; set; }
@@ -175,17 +180,21 @@ namespace osu.Game.Overlays.Changelog
 
         private Drawable createMessage()
         {
-            if (string.IsNullOrEmpty(entry.Message))
+            if (string.IsNullOrEmpty(entry.MessageHtml))
                 return Empty();
 
-            var message = new ChangelogMarkdownContainer
+            var message = new TextFlowContainer
             {
                 AutoSizeAxes = Axes.Y,
                 RelativeSizeAxes = Axes.X,
-                DocumentMargin = new MarginPadding { Bottom = 10 },
-                DocumentPadding = new MarginPadding(0),
-                Text = entry.Message,
             };
+
+            // todo: use markdown parsing once API returns markdown
+            message.AddText(WebUtility.HtmlDecode(Regex.Replace(entry.MessageHtml, @"<(.|\n)*?>", string.Empty)), t =>
+            {
+                t.Font = fontMedium;
+                t.Colour = colourProvider.Foreground1;
+            });
 
             return message;
         }

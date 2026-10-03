@@ -5,7 +5,7 @@ using osu.Framework.Localisation;
 
 namespace osu.Game.Localisation
 {
-    public static class BeatmapStatisticStrings
+    public class BeatmapStatisticStrings
     {
         private const string prefix = @"osu.Game.Resources.Localisation.BeatmapStatisticStrings";
 

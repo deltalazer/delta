@@ -80,9 +80,6 @@ namespace osu.Game.Graphics.UserInterface
             FinishTransforms();
         }
 
-        [Resolved]
-        private OsuColour colours { get; set; }
-
         private void updateText()
         {
             var osuMenuItem = Item as OsuMenuItem;
@@ -95,7 +92,7 @@ namespace osu.Game.Graphics.UserInterface
                     break;
 
                 case MenuItemType.Destructive:
-                    text.Colour = colours.Red1;
+                    text.Colour = Color4.Red;
                     break;
 
                 case MenuItemType.Highlighted:

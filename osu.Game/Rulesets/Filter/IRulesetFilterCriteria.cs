@@ -59,9 +59,8 @@ namespace osu.Game.Rulesets.Filter
         /// <summary>
         /// Whether to reapply the filter as a result of the given change in applied mods.
         /// </summary>
-        /// <param name="criteria">The current filter criteria.</param>
         /// <param name="mods">The change in mods.</param>
         /// <returns>Whether the filter should be re-applied.</returns>
-        bool FilterMayChangeFromMods(FilterCriteria criteria, ValueChangedEvent<IReadOnlyList<Mod>> mods);
+        bool FilterMayChangeFromMods(ValueChangedEvent<IReadOnlyList<Mod>> mods);
     }
 }
