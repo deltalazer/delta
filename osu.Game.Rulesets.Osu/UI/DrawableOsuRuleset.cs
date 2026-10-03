@@ -72,20 +72,18 @@ namespace osu.Game.Rulesets.Osu.UI
             // Section gimmick displays are now provided through the skin system
             // They will appear in MainHUDComponents container when enabled
             if (replayPlayer != null)
+            {
+                ReplayAnalysisOverlay analysisOverlay;
+                PlayfieldAdjustmentContainer.Add(analysisOverlay = new ReplayAnalysisOverlay(replayPlayer.Score.Replay));
+                Overlays.Add(analysisOverlay.CreateProxy().With(p => p.Depth = float.NegativeInfinity));
+                replayPlayer.AddSettings(new ReplayAnalysisSettings(Config));
 
-                if (replayPlayer != null)
-                {
-                    ReplayAnalysisOverlay analysisOverlay;
-                    PlayfieldAdjustmentContainer.Add(analysisOverlay = new ReplayAnalysisOverlay(replayPlayer.Score.Replay));
-                    Overlays.Add(analysisOverlay.CreateProxy().With(p => p.Depth = float.NegativeInfinity));
-                    replayPlayer.AddSettings(new ReplayAnalysisSettings(Config));
+                cursorHideEnabled = Config.GetBindable<bool>(OsuRulesetSetting.ReplayCursorHideEnabled);
 
-                    cursorHideEnabled = Config.GetBindable<bool>(OsuRulesetSetting.ReplayCursorHideEnabled);
-
-                    // I have little faith in this working (other things touch cursor visibility) but haven't broken it yet.
-                    // Let's wait for someone to report an issue before spending too much time on it.
-                    cursorHideEnabled.BindValueChanged(enabled => Playfield.Cursor.FadeTo(enabled.NewValue ? 0 : 1), true);
-                }
+                // I have little faith in this working (other things touch cursor visibility) but haven't broken it yet.
+                // Let's wait for someone to report an issue before spending too much time on it.
+                cursorHideEnabled.BindValueChanged(enabled => Playfield.Cursor.FadeTo(enabled.NewValue ? 0 : 1), true);
+            }
         }
 
         public override DrawableHitObject<OsuHitObject>? CreateDrawableRepresentation(OsuHitObject h) => null;
