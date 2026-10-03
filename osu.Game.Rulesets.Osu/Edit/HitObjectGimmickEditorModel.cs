@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Osu.Objects;
@@ -247,6 +248,29 @@ namespace osu.Game.Rulesets.Osu.Edit
             editorBeatmap.EndChange();
         }
 
+        public void SetSelectionEnumSetting<T>(System.Action<HitObjectGimmickSettings, T> setter, T value) where T : struct, System.Enum
+        {
+            var selected = editorBeatmap.SelectedHitObjects.OfType<OsuHitObject>().ToList();
+            HitObjectGimmickBindingUtils.EnsureObjectIds(selected);
+
+            if (selected.Count == 0)
+                return;
+
+            var updated = CloneHitObjectGimmicks(editorBeatmap.HitObjectGimmicks ?? new BeatmapHitObjectGimmicks());
+
+            foreach (var hitObject in selected)
+            {
+                var entry = getOrCreateEntry(updated, hitObject);
+                setter(entry.Settings, value);
+                cleanupEntryIfEmpty(updated, entry);
+            }
+
+            editorBeatmap.BeginChange();
+            editorBeatmap.HitObjectGimmicks = updated;
+            editorBeatmap.UpdateAllHitObjects();
+            editorBeatmap.EndChange();
+        }
+
         public void SetSelectionFakePunishMode(FakePunishMode mode)
         {
             var selected = editorBeatmap.SelectedHitObjects.OfType<OsuHitObject>().ToList();
@@ -398,6 +422,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                             ForceNoApproachCircle = settings.ForceNoApproachCircle,
                             ForceHardRock = settings.ForceHardRock,
                             ForceFlashlight = settings.ForceFlashlight,
+                            SpinnerDirection = settings.SpinnerDirection,
+                            SpinnerWrongDirection = settings.SpinnerWrongDirection,
+                            SpinnerIndicator = settings.SpinnerIndicator,
                             FlashlightRadius = settings.FlashlightRadius,
                         }
                     };
@@ -521,6 +548,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                           || s.ForceNoApproachCircle
                           || s.ForceHardRock
                           || s.ForceFlashlight
+                          || s.SpinnerDirection != ForcedSpinnerDirection.Any
+                          || s.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.NoProgress
+                          || s.SpinnerIndicator != SpinnerDirectionIndicator.None
                           || s.Max300s >= 0
                           || s.Max100s >= 0
                           || s.Max50s >= 0

@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
+using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Screens.Play;
@@ -95,6 +96,29 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
             if (!IsSpinnableTime)
                 return;
 
+            if (drawableSpinner.DirectionLockFailed)
+                return;
+
+            var required = drawableSpinner.HitObject.SpinnerDirection;
+
+            if (required != ForcedSpinnerDirection.Any && delta != 0)
+            {
+                bool correct = required == ForcedSpinnerDirection.Clockwise ? delta > 0 : delta < 0;
+
+                if (!correct)
+                {
+                    switch (drawableSpinner.HitObject.SpinnerWrongDirection)
+                    {
+                        case SpinnerWrongDirectionBehaviour.NoProgress:
+                            return;
+
+                        case SpinnerWrongDirectionBehaviour.InstantMiss:
+                            drawableSpinner.DirectionLockFailed = true;
+                            return;
+                    }
+                }
+            }
+
             if (!rotationTransferred)
             {
                 currentRotation = Rotation;
@@ -113,6 +137,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
         private void resetState(DrawableHitObject obj)
         {
             Tracking = false;
+            drawableSpinner.DirectionLockFailed = false;
             IsSpinning.Value = false;
             mousePosition = null;
             lastAngle = null;

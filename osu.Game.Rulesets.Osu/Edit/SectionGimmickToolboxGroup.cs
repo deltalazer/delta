@@ -155,6 +155,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         private FormCheckBox forceNoApproachCircle = null!;
         private FormCheckBox forceHardRock = null!;
         private FormCheckBox forceFlashlight = null!;
+        private FormEnumDropdown<ForcedSpinnerDirection> spinnerDirection = null!;
+        private FormEnumDropdown<SpinnerWrongDirectionBehaviour> spinnerWrongDirection = null!;
+        private FormEnumDropdown<SpinnerDirectionIndicator> spinnerIndicator = null!;
         private FormNumberBox flashlightRadius = null!;
         private FormCheckBox enableGradualFlashlightRadiusChange = null!;
         private FormCheckBox enableGradualFlashlightFadeIn = null!;
@@ -935,6 +938,18 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     {
                                         Caption = "Force FL",
                                     },
+                                    spinnerDirection = new FormEnumDropdown<ForcedSpinnerDirection>
+                                    {
+                                        Caption = "Spinner direction",
+                                    },
+                                    spinnerWrongDirection = new FormEnumDropdown<SpinnerWrongDirectionBehaviour>
+                                    {
+                                        Caption = "Wrong direction",
+                                    },
+                                    spinnerIndicator = new FormEnumDropdown<SpinnerDirectionIndicator>
+                                    {
+                                        Caption = "Direction indicator",
+                                    },
                                     flashlightRadius = new FormNumberBox(allowDecimals: true)
                                     {
                                         Caption = "FL radius (20-400)",
@@ -1316,6 +1331,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceNoApproachCircle.Current.BindValueChanged(v => mutateSetting(s => s.ForceNoApproachCircle = v.NewValue));
             forceHardRock.Current.BindValueChanged(v => mutateSetting(s => s.ForceHardRock = v.NewValue));
             forceFlashlight.Current.BindValueChanged(v => mutateSetting(s => s.ForceFlashlight = v.NewValue));
+            spinnerDirection.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerDirection = v.NewValue));
+            spinnerWrongDirection.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerWrongDirection = v.NewValue));
+            spinnerIndicator.Current.BindValueChanged(v => mutateSetting(s => s.SpinnerIndicator = v.NewValue));
             bindFloatSettingOnCommitOnly(flashlightRadius, (s, v) => s.FlashlightRadius = v, v => Math.Clamp(v, 20f, 400f));
             enableGradualFlashlightRadiusChange.Current.BindValueChanged(v => mutateSetting(s => s.EnableGradualFlashlightRadiusChange = v.NewValue));
             bindFloatSetting(gradualFlashlightRadiusEndTime, (s, v) => s.GradualFlashlightRadiusEndTimeMs = v, v => Math.Max(0f, v));
@@ -1505,6 +1523,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                 forceNoApproachCircle.Current.Value = settings.ForceNoApproachCircle;
                 forceHardRock.Current.Value = settings.ForceHardRock;
                 forceFlashlight.Current.Value = settings.ForceFlashlight;
+                spinnerDirection.Current.Value = settings.SpinnerDirection;
+                spinnerWrongDirection.Current.Value = settings.SpinnerWrongDirection;
+                spinnerIndicator.Current.Value = settings.SpinnerIndicator;
                 flashlightRadius.Current.Value = formatFloat(settings.FlashlightRadius);
                 enableGradualFlashlightRadiusChange.Current.Value = settings.EnableGradualFlashlightRadiusChange;
                 enableGradualFlashlightFadeIn.Current.Value = settings.EnableGradualFlashlightFadeIn;

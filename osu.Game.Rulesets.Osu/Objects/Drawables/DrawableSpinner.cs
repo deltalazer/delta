@@ -12,6 +12,8 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Sprites;
+using osu.Game.Beatmaps;
 using osu.Game.Audio;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects;
@@ -23,6 +25,7 @@ using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Screens.Ranking;
 using osu.Game.Skinning;
+using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
@@ -35,6 +38,10 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         public SkinnableDrawable Body { get; private set; }
 
         public SpinnerRotationTracker RotationTracker { get; private set; }
+
+        public bool DirectionLockFailed { get; set; }
+
+        private SpriteIcon directionIndicator;
 
         private SpinnerSpmCalculator spmCalculator;
 
@@ -129,6 +136,42 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             isSpinning = RotationTracker.IsSpinning.GetBoundCopy();
             isSpinning.BindValueChanged(updateSpinningSample);
+        }
+
+        protected override void OnApply()
+        {
+            base.OnApply();
+
+            updateDirectionIndicator();
+        }
+
+        private void updateDirectionIndicator()
+        {
+            bool show = HitObject.SpinnerIndicator == SpinnerDirectionIndicator.Arrow
+                        && HitObject.SpinnerDirection != ForcedSpinnerDirection.Any;
+
+            if (show && directionIndicator == null)
+            {
+                AddInternal(directionIndicator = new SpriteIcon
+                {
+                    Anchor = Anchor.TopCentre,
+                    Origin = Anchor.TopCentre,
+                    Y = 60,
+                    Size = new Vector2(28),
+                });
+            }
+
+            if (directionIndicator == null)
+                return;
+
+            directionIndicator.Alpha = show ? 1 : 0;
+
+            if (show)
+            {
+                directionIndicator.Icon = HitObject.SpinnerDirection == ForcedSpinnerDirection.Clockwise
+                    ? FontAwesome.Solid.RedoAlt
+                    : FontAwesome.Solid.UndoAlt;
+            }
         }
 
         protected override void OnFree()
@@ -261,6 +304,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             ApplyResult(static (r, hitObject) =>
             {
                 var spinner = (DrawableSpinner)hitObject;
+
+                if (spinner.DirectionLockFailed)
+                {
+                    r.Type = r.Judgement.MinResult;
+                    return;
+                }
+
                 if (spinner.Progress >= 1)
                     r.Type = HitResult.Great;
                 else if (spinner.Progress > .9)
@@ -275,6 +325,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         protected override void Update()
         {
             base.Update();
+
+            updateDirectionIndicator();
 
             if (HandleUserInput)
                 RotationTracker.Tracking = RotationTracker.IsSpinnableTime && !Result.HasResult && correctButtonPressed();
