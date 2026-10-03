@@ -9,6 +9,7 @@ using MessagePack;
 using osu.Framework.Bindables;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Extensions;
 using osu.Game.Localisation;
 using osu.Game.Rulesets.Judgements;
@@ -248,7 +249,7 @@ namespace osu.Game.Rulesets.Scoring
 
             if (result.Type.IncreasesCombo())
                 Combo.Value++;
-            else if (result.Type.BreaksCombo())
+            else if (result.Type.BreaksCombo() && result.HitObject is not { ForceAllMiss: true, FreezeCombo: true })
                 Combo.Value = 0;
 
             HighestCombo.Value = Math.Max(HighestCombo.Value, Combo.Value);
@@ -256,7 +257,7 @@ namespace osu.Game.Rulesets.Scoring
             result.ComboAfterJudgement = Combo.Value;
             result.HighestComboAfterJudgement = HighestCombo.Value;
 
-            if (AffectsAccuracyDenominator(result))
+            if (contributesToAccuracyDenominator(result))
             {
                 currentMaximumBaseScore += GetAccuracyMaxBaseScoreForResult(result);
                 currentAccuracyJudgementCount++;
@@ -308,7 +309,7 @@ namespace osu.Game.Rulesets.Scoring
 
             ScoreResultCounts[result.Type] = ScoreResultCounts.GetValueOrDefault(result.Type) - 1;
 
-            if (AffectsAccuracyDenominator(result))
+            if (contributesToAccuracyDenominator(result))
             {
                 currentMaximumBaseScore -= GetAccuracyMaxBaseScoreForResult(result);
                 currentAccuracyJudgementCount--;
@@ -384,6 +385,10 @@ namespace osu.Game.Rulesets.Scoring
         /// Whether the judgement contributes to the maximum (denominator) portion of accuracy.
         /// </summary>
         protected virtual bool AffectsAccuracyDenominator(JudgementResult result) => result.Judgement.MaxResult.AffectsAccuracy();
+
+        private bool contributesToAccuracyDenominator(JudgementResult result)
+            => AffectsAccuracyDenominator(result)
+               && result.HitObject is not { ForceAllMiss: true, FreezeAccuracy: true };
 
         /// <summary>
         /// The max-base-score contribution to use for accuracy denominator updates.

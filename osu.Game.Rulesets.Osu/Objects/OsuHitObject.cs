@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
+using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Objects.Types;
@@ -69,6 +70,12 @@ namespace osu.Game.Rulesets.Osu.Objects
         /// Set by section or object gimmicks during PostProcess.
         /// </summary>
         public bool ForceTraceable { get; set; }
+
+        public ForcedSpinnerDirection SpinnerDirection { get; set; }
+
+        public SpinnerWrongDirectionBehaviour SpinnerWrongDirection { get; set; }
+
+        public SpinnerDirectionIndicator SpinnerIndicator { get; set; }
 
         /// <summary>
         /// Baseline non-HR position used to make section force-HR reversible.

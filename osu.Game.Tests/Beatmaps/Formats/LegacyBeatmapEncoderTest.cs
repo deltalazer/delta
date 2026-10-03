@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -245,6 +245,66 @@ namespace osu.Game.Tests.Beatmaps.Formats
             var decodedSlider = (Slider)decodedAfterEncode.Beatmap.HitObjects[0];
             Assert.That(decodedSlider.Path.ControlPoints.Select(p => p.Position),
                 Is.EquivalentTo(originalSlider.Path.ControlPoints.Select(p => p.Position)));
+        }
+
+        [Test]
+        public void TestEncodeDecodeSectionGimmicksPersistsAllMiss()
+        {
+            var beatmap = new Beatmap
+            {
+                SectionGimmicks = new BeatmapSectionGimmicks
+                {
+                    Sections =
+                    {
+                        new SectionGimmickSection
+                        {
+                            Id = 0,
+                            StartTime = 0,
+                            EndTime = 1500,
+                            Settings = new SectionGimmickSettings
+                            {
+                                ForceAllMiss = true,
+                                FreezeHP = false,
+                            }
+                        }
+                    }
+                }
+            };
+
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
+
+            Assert.That(decodedAfterEncode.Beatmap.SectionGimmicks.Sections.Count, Is.EqualTo(1));
+
+            var settings = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0].Settings;
+            Assert.That(settings.ForceAllMiss, Is.True);
+            Assert.That(settings.FreezeHP, Is.False);
+        }
+
+        [Test]
+        public void TestEncodeDecodeSectionGimmicksAllMissFreezeDefaults()
+        {
+            var beatmap = new Beatmap
+            {
+                SectionGimmicks = new BeatmapSectionGimmicks
+                {
+                    Sections =
+                    {
+                        new SectionGimmickSection
+                        {
+                            Id = 0,
+                            StartTime = 0,
+                            EndTime = 1500,
+                            Settings = new SectionGimmickSettings { ForceAllMiss = true }
+                        }
+                    }
+                }
+            };
+
+            var decodedAfterEncode = DecodeFromLegacy(EncodeToLegacy(new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard())), beatmaps_resource_store, string.Empty);
+
+            var settings = decodedAfterEncode.Beatmap.SectionGimmicks.Sections[0].Settings;
+            Assert.That(settings.ForceAllMiss, Is.True);
+            Assert.That(settings.FreezeHP, Is.True);
         }
 
         [Test]

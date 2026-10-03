@@ -15,6 +15,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Threading;
 using osu.Framework.Utils;
 using osu.Game.Graphics.Containers;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 
@@ -56,6 +57,9 @@ namespace osu.Game.Screens.Menu
 
         protected override void PopOut() => content.FadeOut(transition_duration, Easing.OutQuint);
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -69,10 +73,16 @@ namespace osu.Game.Screens.Menu
             if (!FetchOnlineContent)
                 return;
 
-            var request = new GetMenuContentRequest();
+            var request = new GetMenuContentRequest(api.Endpoints.WebsiteUrl);
             Task.Run(request.Perform)
                 .ContinueWith(r =>
                 {
+                    // if the request failed, "observe" the exception.
+                    // it isn't very important why this failed, as it's only for display.
+                    // the inner error will be logged by framework mechanisms anyway.
+                    if (r.IsFaulted)
+                        _ = r.Exception;
+
                     if (!FetchOnlineContent)
                         return;
 
@@ -86,12 +96,6 @@ namespace osu.Game.Screens.Menu
                             Current.Value = request.ResponseObject;
                         });
                     }
-
-                    // if the request failed, "observe" the exception.
-                    // it isn't very important why this failed, as it's only for display.
-                    // the inner error will be logged by framework mechanisms anyway.
-                    if (r.IsFaulted)
-                        _ = r.Exception;
 
                     Scheduler.AddDelayed(checkForUpdates, TimeSpan.FromMinutes(5).TotalMilliseconds);
                 });

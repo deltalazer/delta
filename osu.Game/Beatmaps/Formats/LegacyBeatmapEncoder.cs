@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -481,6 +481,10 @@ namespace osu.Game.Beatmaps.Formats
         {
             if (settings.EnableHPGimmick) yield return "EnableHPGimmick=True";
             if (settings.EnableNoMiss) yield return "EnableNoMiss=True";
+            if (settings.ForceAllMiss) yield return "ForceAllMiss=True";
+            if (!settings.FreezeHP) yield return "FreezeHP=False";
+            if (!settings.FreezeAccuracy) yield return "FreezeAccuracy=False";
+            if (!settings.FreezeCombo) yield return "FreezeCombo=False";
             if (settings.EnableAccuracyRequirement) yield return "EnableAccuracyRequirement=True";
             if (!float.IsNaN(settings.RequiredAccuracy)) yield return $"RequiredAccuracy={settings.RequiredAccuracy.ToString(CultureInfo.InvariantCulture)}";
             if (settings.EnableCountLimits) yield return "EnableCountLimits=True";
@@ -542,6 +546,9 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
+            if (settings.SpinnerDirection != ForcedSpinnerDirection.Any) yield return $"SpinnerDirection={settings.SpinnerDirection}";
+            if (settings.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.NoProgress) yield return $"SpinnerWrongDirection={settings.SpinnerWrongDirection}";
+            if (settings.SpinnerIndicator != SpinnerDirectionIndicator.None) yield return $"SpinnerIndicator={settings.SpinnerIndicator}";
             if (settings.ForceTraceable) yield return "ForceTraceable=True";
             if (!float.IsNaN(settings.FlashlightRadius)) yield return $"FlashlightRadius={settings.FlashlightRadius.ToString(CultureInfo.InvariantCulture)}";
             if (settings.EnableGradualFlashlightRadiusChange) yield return "EnableGradualFlashlightRadiusChange=True";
@@ -609,6 +616,10 @@ namespace osu.Game.Beatmaps.Formats
 
             if (settings.EnableHPGimmick) yield return "EnableHPGimmick=True";
             if (settings.EnableNoMiss) yield return "EnableNoMiss=True";
+            if (settings.ForceAllMiss) yield return "ForceAllMiss=True";
+            if (!settings.FreezeHP) yield return "FreezeHP=False";
+            if (!settings.FreezeAccuracy) yield return "FreezeAccuracy=False";
+            if (!settings.FreezeCombo) yield return "FreezeCombo=False";
             if (settings.EnableCountLimits) yield return "EnableCountLimits=True";
             if (settings.EnableGreatOffsetPenalty) yield return "EnableGreatOffsetPenalty=True";
 
@@ -639,6 +650,9 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
+            if (settings.SpinnerDirection != ForcedSpinnerDirection.Any) yield return $"SpinnerDirection={settings.SpinnerDirection}";
+            if (settings.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.NoProgress) yield return $"SpinnerWrongDirection={settings.SpinnerWrongDirection}";
+            if (settings.SpinnerIndicator != SpinnerDirectionIndicator.None) yield return $"SpinnerIndicator={settings.SpinnerIndicator}";
             if (settings.ForceTraceable) yield return "ForceTraceable=True";
             if (!float.IsNaN(settings.FlashlightRadius)) yield return $"FlashlightRadius={settings.FlashlightRadius.ToString(CultureInfo.InvariantCulture)}";
         }
