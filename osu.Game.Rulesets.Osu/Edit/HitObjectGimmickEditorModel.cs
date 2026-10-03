@@ -548,9 +548,9 @@ namespace osu.Game.Rulesets.Osu.Edit
                           || s.ForceNoApproachCircle
                           || s.ForceHardRock
                           || s.ForceFlashlight
-                          || s.SpinnerDirection != ForcedSpinnerDirection.Any
-                          || s.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.NoProgress
-                          || s.SpinnerIndicator != SpinnerDirectionIndicator.None
+                          || s.SpinnerDirection != ForcedSpinnerDirection.Inherit
+                          || s.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.Inherit
+                          || s.SpinnerIndicator != SpinnerDirectionIndicator.Inherit
                           || s.Max300s >= 0
                           || s.Max100s >= 0
                           || s.Max50s >= 0

@@ -9,7 +9,6 @@ using MessagePack;
 using osu.Framework.Bindables;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Extensions;
 using osu.Game.Localisation;
 using osu.Game.Rulesets.Judgements;

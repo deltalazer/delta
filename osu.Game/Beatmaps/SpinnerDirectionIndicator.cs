@@ -5,7 +5,8 @@ namespace osu.Game.Beatmaps
 {
     public enum SpinnerDirectionIndicator
     {
-        None,
+        Inherit = -1,
+        None = 0,
         Arrow,
     }
 }

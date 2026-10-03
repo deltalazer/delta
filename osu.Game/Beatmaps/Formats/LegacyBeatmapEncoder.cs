@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using osu.Framework.Graphics.Colour;
 using osu.Game.Audio;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.HitObjectGimmicks;
@@ -19,7 +18,6 @@ using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Skinning;
 using osu.Game.Storyboards;
 using osuTK;
-using osuTK.Graphics;
 using Color4 = osuTK.Graphics.Color4;
 
 namespace osu.Game.Beatmaps.Formats
@@ -650,9 +648,9 @@ namespace osu.Game.Beatmaps.Formats
             if (settings.ForceNoApproachCircle) yield return "ForceNoApproachCircle=True";
             if (settings.ForceHardRock) yield return "ForceHardRock=True";
             if (settings.ForceFlashlight) yield return "ForceFlashlight=True";
-            if (settings.SpinnerDirection != ForcedSpinnerDirection.Any) yield return $"SpinnerDirection={settings.SpinnerDirection}";
-            if (settings.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.NoProgress) yield return $"SpinnerWrongDirection={settings.SpinnerWrongDirection}";
-            if (settings.SpinnerIndicator != SpinnerDirectionIndicator.None) yield return $"SpinnerIndicator={settings.SpinnerIndicator}";
+            if (settings.SpinnerDirection != ForcedSpinnerDirection.Inherit) yield return $"SpinnerDirection={settings.SpinnerDirection}";
+            if (settings.SpinnerWrongDirection != SpinnerWrongDirectionBehaviour.Inherit) yield return $"SpinnerWrongDirection={settings.SpinnerWrongDirection}";
+            if (settings.SpinnerIndicator != SpinnerDirectionIndicator.Inherit) yield return $"SpinnerIndicator={settings.SpinnerIndicator}";
             if (settings.ForceTraceable) yield return "ForceTraceable=True";
             if (!float.IsNaN(settings.FlashlightRadius)) yield return $"FlashlightRadius={settings.FlashlightRadius.ToString(CultureInfo.InvariantCulture)}";
         }

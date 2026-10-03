@@ -66,6 +66,47 @@ namespace osu.Game.Rulesets.Osu.Tests
         }
 
         [Test]
+        public void TestExplicitDefaultsOverrideSection()
+        {
+            var spinner = new Spinner { StartTime = 1000, EndTime = 3000 };
+            var beatmap = createBeatmap(spinner);
+            addSection(beatmap, new SectionGimmickSettings
+            {
+                SpinnerDirection = ForcedSpinnerDirection.Clockwise,
+                SpinnerWrongDirection = SpinnerWrongDirectionBehaviour.InstantMiss,
+                SpinnerIndicator = SpinnerDirectionIndicator.Arrow,
+            });
+            addObjectSettings(beatmap, spinner, new HitObjectGimmickSettings
+            {
+                SpinnerDirection = ForcedSpinnerDirection.Any,
+                SpinnerWrongDirection = SpinnerWrongDirectionBehaviour.NoProgress,
+                SpinnerIndicator = SpinnerDirectionIndicator.None,
+            });
+            process(beatmap);
+            Assert.That(spinner.SpinnerDirection, Is.EqualTo(ForcedSpinnerDirection.Any));
+            Assert.That(spinner.SpinnerWrongDirection, Is.EqualTo(SpinnerWrongDirectionBehaviour.NoProgress));
+            Assert.That(spinner.SpinnerIndicator, Is.EqualTo(SpinnerDirectionIndicator.None));
+        }
+
+        [Test]
+        public void TestUnspecifiedObjectSettingsInheritSection()
+        {
+            var spinner = new Spinner { StartTime = 1000, EndTime = 3000 };
+            var beatmap = createBeatmap(spinner);
+            addSection(beatmap, new SectionGimmickSettings
+            {
+                SpinnerDirection = ForcedSpinnerDirection.CounterClockwise,
+                SpinnerWrongDirection = SpinnerWrongDirectionBehaviour.SubtractProgress,
+                SpinnerIndicator = SpinnerDirectionIndicator.Arrow,
+            });
+            addObjectSettings(beatmap, spinner, new HitObjectGimmickSettings());
+            process(beatmap);
+            Assert.That(spinner.SpinnerDirection, Is.EqualTo(ForcedSpinnerDirection.CounterClockwise));
+            Assert.That(spinner.SpinnerWrongDirection, Is.EqualTo(SpinnerWrongDirectionBehaviour.SubtractProgress));
+            Assert.That(spinner.SpinnerIndicator, Is.EqualTo(SpinnerDirectionIndicator.Arrow));
+        }
+
+        [Test]
         public void TestDefaultsWhenNoGimmickPresent()
         {
             var spinner = new Spinner { StartTime = 1000, EndTime = 3000 };

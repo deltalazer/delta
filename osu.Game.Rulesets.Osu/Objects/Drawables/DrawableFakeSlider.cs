@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Game.Rulesets.Osu.Objects;
 using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables

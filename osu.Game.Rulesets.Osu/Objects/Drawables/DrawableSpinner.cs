@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -393,8 +393,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             if (spins < completedFullSpins.Value)
             {
-                // rewinding, silently handle
-                completedFullSpins.Value = spins;
+                // Subtraction during forward playback must not award ticks again when progress recovers.
+                bool subtracting = HitObject.SpinnerDirection != ForcedSpinnerDirection.Any
+                                   && HitObject.SpinnerWrongDirection == SpinnerWrongDirectionBehaviour.SubtractProgress
+                                   && Time.Elapsed >= 0;
+                if (!subtracting)
+                    completedFullSpins.Value = spins;
                 return;
             }
 

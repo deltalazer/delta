@@ -5,7 +5,8 @@ namespace osu.Game.Beatmaps
 {
     public enum ForcedSpinnerDirection
     {
-        Any,
+        Inherit = -1,
+        Any = 0,
         Clockwise,
         CounterClockwise,
     }

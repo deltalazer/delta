@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -41,6 +41,65 @@ namespace osu.Game.Rulesets.Osu.Tests
         public void SetUpSteps()
         {
             AddStep("Reset rate", () => spinRate.Value = 1);
+        }
+
+        [TestCase(ForcedSpinnerDirection.Clockwise, SpinnerWrongDirectionBehaviour.NoProgress)]
+        [TestCase(ForcedSpinnerDirection.CounterClockwise, SpinnerWrongDirectionBehaviour.NoProgress)]
+        [TestCase(ForcedSpinnerDirection.Clockwise, SpinnerWrongDirectionBehaviour.SubtractProgress)]
+        [TestCase(ForcedSpinnerDirection.CounterClockwise, SpinnerWrongDirectionBehaviour.SubtractProgress)]
+        [TestCase(ForcedSpinnerDirection.Clockwise, SpinnerWrongDirectionBehaviour.InstantMiss)]
+        [TestCase(ForcedSpinnerDirection.CounterClockwise, SpinnerWrongDirectionBehaviour.InstantMiss)]
+        public void TestWrongDirectionScoring(ForcedSpinnerDirection direction, SpinnerWrongDirectionBehaviour behaviour)
+        {
+            int sign = direction == ForcedSpinnerDirection.Clockwise ? 1 : -1;
+            AddStep("add locked spinner", () => SetContents(_ =>
+            {
+                var spinner = new Spinner
+                {
+                    StartTime = Time.Current,
+                    EndTime = Time.Current + 60000,
+                    SpinnerDirection = direction,
+                    SpinnerWrongDirection = behaviour,
+                };
+                spinner.ApplyDefaults(new ControlPointInfo(), new BeatmapDifficulty());
+                return drawableSpinner = new TestDrawableSpinner(spinner, false, spinRate) { Anchor = Anchor.Centre };
+            }));
+            AddUntilStep("spinner loaded", () => drawableSpinner.IsLoaded);
+            AddStep("correct half spin", () => drawableSpinner.RotationTracker.AddRotation(sign * 180));
+            AddAssert("correct progress counted", () => drawableSpinner.Result.TotalRotation, () => Is.EqualTo(180));
+            AddStep("wrong quarter spin", () => drawableSpinner.RotationTracker.AddRotation(-sign * 90));
+            AddAssert("wrong direction handled", () => drawableSpinner.Result.TotalRotation,
+                () => Is.EqualTo(behaviour == SpinnerWrongDirectionBehaviour.SubtractProgress ? 90 : 180));
+            AddAssert("instant miss latched", () => drawableSpinner.DirectionLockFailed,
+                () => Is.EqualTo(behaviour == SpinnerWrongDirectionBehaviour.InstantMiss));
+        }
+
+        [Test]
+        public void TestSubtractProgressDoesNotAwardTicksTwice()
+        {
+            AddStep("add locked spinner", () => SetContents(_ =>
+            {
+                var spinner = new Spinner
+                {
+                    StartTime = Time.Current,
+                    EndTime = Time.Current + 60000,
+                    SpinnerDirection = ForcedSpinnerDirection.Clockwise,
+                    SpinnerWrongDirection = SpinnerWrongDirectionBehaviour.SubtractProgress,
+                };
+                spinner.ApplyDefaults(new ControlPointInfo(), new BeatmapDifficulty());
+                return drawableSpinner = new TestDrawableSpinner(spinner, false, spinRate) { Anchor = Anchor.Centre };
+            }));
+            AddUntilStep("spinner loaded", () => drawableSpinner.IsLoaded);
+            AddStep("complete spin", () =>
+            {
+                drawableSpinner.RotationTracker.AddRotation(180);
+                drawableSpinner.RotationTracker.AddRotation(180);
+            });
+            AddAssert("one tick awarded", () => drawableSpinner.NestedHitObjects.Count(h => h.Judged), () => Is.EqualTo(1));
+            AddStep("subtract half spin", () => drawableSpinner.RotationTracker.AddRotation(-180));
+            AddAssert("progress reduced", () => drawableSpinner.Result.TotalRotation, () => Is.EqualTo(180));
+            AddStep("regain progress", () => drawableSpinner.RotationTracker.AddRotation(180));
+            AddAssert("tick not awarded twice", () => drawableSpinner.NestedHitObjects.Count(h => h.Judged), () => Is.EqualTo(1));
         }
 
         [TestCase(true)]
