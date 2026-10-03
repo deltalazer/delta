@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 namespace osu.Game.Beatmaps.HitObjectGimmicks
@@ -36,6 +36,11 @@ namespace osu.Game.Beatmaps.HitObjectGimmicks
         public bool EnableNoMiss { get; set; }
         public bool EnableCountLimits { get; set; }
         public bool EnableGreatOffsetPenalty { get; set; }
+
+        public bool ForceAllMiss { get; set; }
+        public bool FreezeHP { get; set; } = true;
+        public bool FreezeAccuracy { get; set; } = true;
+        public bool FreezeCombo { get; set; } = true;
 
         public int Max300s { get; set; } = -1;
         public int Max100s { get; set; } = -1;

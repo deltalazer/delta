@@ -81,6 +81,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                     setHiddenFlagRecursive(hitObject, objectForceHidden);
                     setNoApproachCircleFlagRecursive(hitObject, objectNoApproach);
                     setTraceableFlagRecursive(hitObject, objectForceTraceable);
+                    setAllMissFlags(hitObject, objectSettings?.ForceAllMiss == true, objectSettings?.FreezeHP ?? true, objectSettings?.FreezeAccuracy ?? true, objectSettings?.FreezeCombo ?? true);
 
                     if (objectForceHardRock)
                         applyHardRockTransforms(hitObject);
@@ -114,6 +115,23 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 bool objectForceTraceable = objectSettings?.ForceTraceable == true;
                 bool sectionForceTraceable = section?.Settings.ForceTraceable == true;
                 setTraceableFlagRecursive(hitObject, sectionForceTraceable || objectForceTraceable);
+
+                bool objectAllMiss = objectSettings?.ForceAllMiss == true;
+                bool sectionAllMiss = section?.Settings.ForceAllMiss == true;
+
+                bool freezeHP = objectAllMiss
+                    ? objectSettings!.FreezeHP
+                    : !sectionAllMiss || section!.Settings.FreezeHP;
+
+                bool freezeAccuracy = objectAllMiss
+                    ? objectSettings!.FreezeAccuracy
+                    : !sectionAllMiss || section!.Settings.FreezeAccuracy;
+
+                bool freezeCombo = objectAllMiss
+                    ? objectSettings!.FreezeCombo
+                    : !sectionAllMiss || section!.Settings.FreezeCombo;
+
+                setAllMissFlags(hitObject, sectionAllMiss || objectAllMiss, freezeHP, freezeAccuracy, freezeCombo);
 
                 bool forceHardRock = section?.Settings.ForceHardRock == true || objectSettings?.ForceHardRock == true;
 
@@ -278,6 +296,20 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
             foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
                 setTraceableFlagRecursive(nested, traceable);
+        }
+
+        private static void setAllMissFlags(OsuHitObject osuObject, bool allMiss, bool freezeHP, bool freezeAccuracy, bool freezeCombo)
+        {
+            if (osuObject is FakeHitCircle || osuObject is FakeSlider)
+                return;
+
+            osuObject.ForceAllMiss = allMiss;
+            osuObject.FreezeHP = freezeHP;
+            osuObject.FreezeAccuracy = freezeAccuracy;
+            osuObject.FreezeCombo = freezeCombo;
+
+            foreach (var nested in osuObject.NestedHitObjects.OfType<OsuHitObject>())
+                setAllMissFlags(nested, allMiss, freezeHP, freezeAccuracy, freezeCombo);
         }
 
         private static void applyHiddenEffect(OsuHitObject hitObject)

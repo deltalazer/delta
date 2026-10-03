@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -509,6 +509,10 @@ namespace osu.Game.Rulesets.Osu.Edit
                           || Math.Abs(s.FakeRevealFadeOutStartMs - HitObjectGimmickSettings.DEFAULT_FAKE_REVEAL_FADE_OUT_START_MS) > 0.0001f
                           || Math.Abs(s.FakeRevealFadeOutLengthMs - HitObjectGimmickSettings.DEFAULT_FAKE_REVEAL_FADE_OUT_LENGTH_MS) > 0.0001f
                           || s.EnableNoMiss
+                          || s.ForceAllMiss
+                          || !s.FreezeHP
+                          || !s.FreezeAccuracy
+                          || !s.FreezeCombo
                           || s.EnableCountLimits
                           || s.EnableGreatOffsetPenalty
                           || s.EnableDifficultyOverrides
