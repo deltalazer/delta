@@ -55,31 +55,31 @@ namespace osu.Game.Tests.Visual.Online
         });
 
         [TestCase("test!")]
-        [TestCase("dev.ppy.sh!")]
-        [TestCase("https://dev.ppy.sh!", LinkAction.External)]
-        [TestCase("http://dev.ppy.sh!", LinkAction.External)]
-        [TestCase("forgothttps://dev.ppy.sh!", LinkAction.External)]
-        [TestCase("forgothttp://dev.ppy.sh!", LinkAction.External)]
+        [TestCase("delta.mikuuu.xyz!")]
+        [TestCase("https://delta.mikuuu.xyz!", LinkAction.External)]
+        [TestCase("http://delta.mikuuu.xyz!", LinkAction.External)]
+        [TestCase("forgothttps://delta.mikuuu.xyz!", LinkAction.External)]
+        [TestCase("forgothttp://delta.mikuuu.xyz!", LinkAction.External)]
         [TestCase("00:12:345 - Test?", LinkAction.OpenEditorTimestamp)]
         [TestCase("00:12:345 (1,2) - Test?", LinkAction.OpenEditorTimestamp)]
         [TestCase($"{OsuGameBase.OSU_PROTOCOL}edit/00:12:345 - Test?", LinkAction.OpenEditorTimestamp)]
         [TestCase($"{OsuGameBase.OSU_PROTOCOL}edit/00:12:345 (1,2) - Test?", LinkAction.OpenEditorTimestamp)]
         [TestCase($"{OsuGameBase.OSU_PROTOCOL}00:12:345 - not an editor timestamp", LinkAction.External)]
         [TestCase("Wiki link for tasty [[Performance Points]]", LinkAction.OpenWiki)]
-        [TestCase("(osu forums)[https://dev.ppy.sh/forum] (old link format)", LinkAction.External)]
-        [TestCase("[https://dev.ppy.sh/home New site] (new link format)", LinkAction.External)]
-        [TestCase("[osu forums](https://dev.ppy.sh/forum) (new link format 2)", LinkAction.External)]
-        [TestCase("[https://dev.ppy.sh/home This is only a link to the new osu webpage but this is supposed to test word wrap.]", LinkAction.External)]
-        [TestCase("Let's (try)[https://dev.ppy.sh/home] [https://dev.ppy.sh/b/252238 multiple links] https://dev.ppy.sh/home", LinkAction.External, LinkAction.OpenBeatmap, LinkAction.External)]
-        [TestCase("[https://dev.ppy.sh/home New link format with escaped [and \\[ paired] braces]", LinkAction.External)]
-        [TestCase("[Markdown link format with escaped [and \\[ paired] braces](https://dev.ppy.sh/home)", LinkAction.External)]
-        [TestCase("(Old link format with escaped (and \\( paired) parentheses)[https://dev.ppy.sh/home] and [[also a rogue wiki link]]", LinkAction.External, LinkAction.OpenWiki)]
+        [TestCase("(osu forums)[https://delta.mikuuu.xyz/forum] (old link format)", LinkAction.External)]
+        [TestCase("[https://delta.mikuuu.xyz/home New site] (new link format)", LinkAction.External)]
+        [TestCase("[osu forums](https://delta.mikuuu.xyz/forum) (new link format 2)", LinkAction.External)]
+        [TestCase("[https://delta.mikuuu.xyz/home This is only a link to the new osu webpage but this is supposed to test word wrap.]", LinkAction.External)]
+        [TestCase("Let's (try)[https://delta.mikuuu.xyz/home] [https://delta.mikuuu.xyz/b/252238 multiple links] https://delta.mikuuu.xyz/home", LinkAction.External, LinkAction.OpenBeatmap, LinkAction.External)]
+        [TestCase("[https://delta.mikuuu.xyz/home New link format with escaped [and \\[ paired] braces]", LinkAction.External)]
+        [TestCase("[Markdown link format with escaped [and \\[ paired] braces](https://delta.mikuuu.xyz/home)", LinkAction.External)]
+        [TestCase("(Old link format with escaped (and \\( paired) parentheses)[https://delta.mikuuu.xyz/home] and [[also a rogue wiki link]]", LinkAction.External, LinkAction.OpenWiki)]
         [TestCase("#lobby or #osu would be blue (and work) in the ChatDisplay test (when a proper ChatOverlay is present).")] // note that there's 0 links here (they get removed if a channel is not found)
         [TestCase("Join my multiplayer game osu://room/12346.", LinkAction.JoinRoom)]
         [TestCase("Join my multiplayer gameosu://room/12346.", LinkAction.JoinRoom)]
         [TestCase("Join my [multiplayer game](osu://room/12346).", LinkAction.JoinRoom)]
-        [TestCase("Join my multiplayer game http://dev.ppy.sh/multiplayer/rooms/12346", LinkAction.JoinRoom)]
-        [TestCase("Join my [multiplayer game](http://dev.ppy.sh/multiplayer/rooms/12346).", LinkAction.JoinRoom)]
+        [TestCase("Join my multiplayer game http://delta.mikuuu.xyz/multiplayer/rooms/12346", LinkAction.JoinRoom)]
+        [TestCase("Join my [multiplayer game](http://delta.mikuuu.xyz/multiplayer/rooms/12346).", LinkAction.JoinRoom)]
         [TestCase($"Join my [#english]({OsuGameBase.OSU_PROTOCOL}chan/#english).", LinkAction.OpenChannel)]
         [TestCase($"Join my {OsuGameBase.OSU_PROTOCOL}chan/#english.", LinkAction.OpenChannel)]
         [TestCase($"Join my{OsuGameBase.OSU_PROTOCOL}chan/#english.", LinkAction.OpenChannel)]
@@ -91,11 +91,11 @@ namespace osu.Game.Tests.Visual.Online
             addMessageWithChecks(text, expectedActions: actions);
         }
 
-        [TestCase("is now listening to [https://dev.ppy.sh/s/93523 IMAGE -MATERIAL- <Version 0>]", true, false, LinkAction.OpenBeatmapSet)]
-        [TestCase("is now playing [https://dev.ppy.sh/b/252238 IMAGE -MATERIAL- <Version 0>]", true, false, LinkAction.OpenBeatmap)]
+        [TestCase("is now listening to [https://delta.mikuuu.xyz/s/93523 IMAGE -MATERIAL- <Version 0>]", true, false, LinkAction.OpenBeatmapSet)]
+        [TestCase("is now playing [https://delta.mikuuu.xyz/b/252238 IMAGE -MATERIAL- <Version 0>]", true, false, LinkAction.OpenBeatmap)]
         [TestCase("I am important!", false, true)]
         [TestCase("feels important", true, true)]
-        [TestCase("likes to post this [https://dev.ppy.sh/home link].", true, true, LinkAction.External)]
+        [TestCase("likes to post this [https://delta.mikuuu.xyz/home link].", true, true, LinkAction.External)]
         public void TestActionAndImportantLinks(string text, bool isAction, bool isImportant, params LinkAction[] expectedActions)
         {
             addMessageWithChecks(text, isAction, isImportant, expectedActions);
@@ -135,9 +135,9 @@ namespace osu.Game.Tests.Visual.Online
             int messageIndex = 0;
 
             addEchoWithWait("sent!", "received!");
-            addEchoWithWait("https://dev.ppy.sh/home", null, 500);
-            addEchoWithWait("[https://dev.ppy.sh/forum let's try multiple words too!]");
-            addEchoWithWait("(long loading times! clickable while loading?)[https://dev.ppy.sh/home]", null, 5000);
+            addEchoWithWait("https://delta.mikuuu.xyz/home", null, 500);
+            addEchoWithWait("[https://delta.mikuuu.xyz/forum let's try multiple words too!]");
+            addEchoWithWait("(long loading times! clickable while loading?)[https://delta.mikuuu.xyz/home]", null, 5000);
 
             void addEchoWithWait(string text, string? completeText = null, double delay = 250)
             {
