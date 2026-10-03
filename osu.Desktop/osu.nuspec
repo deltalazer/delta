@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>osulazer</id>
+        <id>deltalazer</id>
         <version>0.0.0</version>
-        <title>osu!</title>
+        <title>deltalazer</title>
         <authors>ppy Pty Ltd</authors>
         <owners>Dean Herbert</owners>
-        <projectUrl>https://osu.ppy.sh/</projectUrl>
-        <iconUrl>https://github.com/ppy/osu/blob/master/assets/lazer-nuget.png?raw=true</iconUrl>
+        <projectUrl>https://github.com/deltalazer/delta</projectUrl>
+        <iconUrl>https://github.com/deltalazer/delta/blob/master/assets/osudelta.png?raw=true</iconUrl>
         <icon>icon.png</icon>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>A free-to-win rhythm game. Rhythm is just a *click* away!</description>
