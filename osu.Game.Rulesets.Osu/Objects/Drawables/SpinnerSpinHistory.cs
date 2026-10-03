@@ -81,7 +81,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
                     directedRotation = directedHistory.TryPeek(out var previous) ? previous.Rotation : 0;
                 }
-                else
+                else if (delta != 0)
                 {
                     directedRotation = Math.Max(0, directedRotation + delta);
                     directedHistory.Push((currentTime, directedRotation));
