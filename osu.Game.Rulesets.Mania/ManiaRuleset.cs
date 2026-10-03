@@ -14,6 +14,7 @@ using osu.Game.Beatmaps.Legacy;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Localisation;
+using osu.Game.Localisation.Mania;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.Configuration;
 using osu.Game.Rulesets.Difficulty;
@@ -307,6 +308,8 @@ namespace osu.Game.Rulesets.Mania
             }
         }
 
+        public override ScoreMultiplierCalculator CreateScoreMultiplierCalculator(ScoreMultiplierContext context) => new ManiaScoreMultiplierCalculator(context);
+
         public override string Description => "osu!mania";
 
         public override string ShortName => SHORT_NAME;
@@ -326,6 +329,8 @@ namespace osu.Game.Rulesets.Mania
         public override IRulesetConfigManager CreateConfig(SettingsStore? settings) => new ManiaRulesetConfigManager(settings, RulesetInfo);
 
         public override RulesetSettingsSubsection CreateSettings() => new ManiaSettingsSubsection(this);
+
+        public override LocalisableString VariantDescription => ManiaRulesetStrings.VariantDescription;
 
         public override IEnumerable<int> AvailableVariants
         {
@@ -458,7 +463,7 @@ namespace osu.Game.Rulesets.Mania
 
             yield return new RulesetBeatmapAttribute(SongSelectStrings.KeyCount, @"KC", originalDifficulty.CircleSize, adjustedDifficulty.CircleSize, 18)
             {
-                Description = "Affects the number of key columns on the playfield."
+                Description = ManiaRulesetStrings.KeyCountDescription
             };
 
             var hitWindows = new ManiaHitWindows();
@@ -467,11 +472,11 @@ namespace osu.Game.Rulesets.Mania
             hitWindows.ClassicModActive = mods.Any(m => m is ManiaModClassic);
             yield return new RulesetBeatmapAttribute(SongSelectStrings.Accuracy, @"OD", originalDifficulty.OverallDifficulty, adjustedDifficulty.OverallDifficulty, 10)
             {
-                Description = "Affects timing requirements for notes.",
+                Description = ManiaRulesetStrings.AccuracyDescription,
                 AdditionalMetrics = hitWindows.GetAllAvailableWindows()
                                               .Reverse()
                                               .Select(window => new RulesetBeatmapAttribute.AdditionalMetric(
-                                                  $"{window.result.GetDescription().ToUpperInvariant()} hit window",
+                                                  SongSelectStrings.HitResultWindow(window.result.GetDescription().ToUpperInvariant()),
                                                   LocalisableString.Interpolate($@"±{hitWindows.WindowFor(window.result):0.##} ms"),
                                                   colours.ForHitResult(window.result)
                                               )).ToArray()
@@ -479,8 +484,24 @@ namespace osu.Game.Rulesets.Mania
 
             yield return new RulesetBeatmapAttribute(SongSelectStrings.HPDrain, @"HP", originalDifficulty.DrainRate, adjustedDifficulty.DrainRate, 10)
             {
-                Description = "Affects the harshness of health drain and the health penalties for missing."
+                Description = SongSelectStrings.HPDrainDescription
             };
+        }
+
+        public override IEnumerable<RulesetBeatmapAttribute> GetBeatmapAttributesForRankedPlayCard(IBeatmapInfo beatmapInfo, IReadOnlyCollection<Mod> mods)
+        {
+            var attributes = GetBeatmapAttributesForDisplay(beatmapInfo, mods).ToList();
+
+            // Key count attribute isn't relevant to ranked play (it's decided by the pool).
+            attributes.RemoveAll(a => a.Acronym == "KC");
+
+            float holdNoteRatio = beatmapInfo.TotalObjectCount == 0 ? 0 : (float)beatmapInfo.EndTimeObjectCount / beatmapInfo.TotalObjectCount;
+            attributes.Insert(0, new RulesetBeatmapAttribute(BeatmapStatisticStrings.HoldNotes, @"HN", holdNoteRatio, holdNoteRatio, 1)
+            {
+                ValueFormat = "P0"
+            });
+
+            return attributes;
         }
 
         public override IRulesetFilterCriteria CreateRulesetFilterCriteria()
@@ -498,6 +519,9 @@ namespace osu.Game.Rulesets.Mania
 
         public int GetKeyCount(IBeatmapInfo beatmapInfo, IReadOnlyList<Mod>? mods = null)
             => ManiaBeatmapConverter.GetColumnCount(LegacyBeatmapConversionDifficultyInfo.FromBeatmapInfo(beatmapInfo), mods);
+
+        public override int GetVariantForBeatmap(IBeatmapInfo beatmapInfo, IReadOnlyList<Mod>? mods = null)
+            => GetKeyCount(beatmapInfo, mods);
     }
 
     public enum PlayfieldType

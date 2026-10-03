@@ -191,7 +191,6 @@ namespace osu.Game.Rulesets.Osu.UI
         private sealed class SectionForcedFlashlightMod : ModFlashlight<OsuHitObject>, IApplicableToDrawableHitObject
         {
             public DrawableRuleset<OsuHitObject> DrawableRuleset { get; private set; } = null!;
-            public override double ScoreMultiplier => 1;
 
             public override BindableFloat SizeMultiplier { get; } = new BindableFloat(1)
             {

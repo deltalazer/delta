@@ -7,7 +7,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Configuration;
-using osu.Game.Rulesets.Osu.UI.Cursor;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Skinning;
 using osuTK;
 

@@ -26,6 +26,7 @@ using osu.Framework.Input.Handlers;
 using osu.Framework.Input.Handlers.Joystick;
 using osu.Framework.Input.Handlers.Midi;
 using osu.Framework.Input.Handlers.Mouse;
+using osu.Framework.Input.Handlers.Pen;
 using osu.Framework.Input.Handlers.Tablet;
 using osu.Framework.Input.Handlers.Touch;
 using osu.Framework.IO.Stores;
@@ -275,7 +276,25 @@ namespace osu.Game
                 VersionHash = $"{Version}-{RuntimeInfo.OS}".ComputeMD5Hash();
             }
 
+
+            try
+            {
+                // This loads DeltaLazer resource overrides from NuGet.
+                var overrideAssembly = typeof(delta.Game.Resources.Overrides.DeltaResources).Assembly;
+                Resources.AddStore(new DllResourceStore(overrideAssembly));
+            }
+            catch (Exception e)
+            {
+                // In case said overrides fail, this
+                Logger.Log($"Warning: Failed to append assets to game. Please open a bug report as this is unintended behavior!", LoggingTarget.Runtime, LogLevel.Important);
+                Logger.Log($"[DeltaLazer] Internal Error - Failed to append assets on build - {e.Message}", LoggingTarget.Runtime, LogLevel.Verbose);
+            }
+
+            // Fallback to OsuResources if a resource is found to be missing
+            // This pretty much applies to most resources in-game
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
+
+            Logger.Log("Deltalazer is currently very experimental, and may contain bugs!", LoggingTarget.Runtime, LogLevel.Important);
 
             dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread));
 
@@ -589,7 +608,7 @@ namespace osu.Game
         /// <param name="path">The path to migrate to.</param>
         /// <returns>Whether migration succeeded to completion. If <c>false</c>, some files were left behind.</returns>
         /// <exception cref="TimeoutException"></exception>
-        public bool Migrate(string path)
+        public bool MigrateUserData(string path)
         {
             Logger.Log($@"Migrating osu! data from ""{Storage.GetFullPath(string.Empty)}"" to ""{path}""...");
 
@@ -670,6 +689,9 @@ namespace osu.Game
 
                 case TouchHandler th:
                     return new TouchSettings(th);
+
+                case PenHandler ph:
+                    return new PenSettings(ph);
 
                 case MidiHandler:
                     return new InputSubsection(handler);

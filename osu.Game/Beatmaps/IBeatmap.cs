@@ -47,12 +47,6 @@ namespace osu.Game.Beatmaps
         SortedList<BreakPeriod> Breaks { get; set; }
 
         /// <summary>
-        /// All lines from the [Events] section which aren't handled in the encoding process yet.
-        /// These lines should be written out to the beatmap file on save or export.
-        /// </summary>
-        List<string> UnhandledEventLines { get; }
-
-        /// <summary>
         /// Total amount of break time in the beatmap.
         /// </summary>
         double TotalBreakTime { get; }
@@ -111,9 +105,12 @@ namespace osu.Game.Beatmaps
 
         int[] Bookmarks { get; internal set; }
 
+        double[] SliderVelocityPresets { get; internal set; }
+
         BeatmapSectionGimmicks SectionGimmicks { get; internal set; }
 
         BeatmapHitObjectGimmicks HitObjectGimmicks { get; internal set; }
+
 
         int BeatmapVersion { get; }
 

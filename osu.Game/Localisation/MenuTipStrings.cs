@@ -160,6 +160,11 @@ namespace osu.Game.Localisation
         public static LocalisableString ShiftClickInBeatmapOverlay => new TranslatableString(getKey(@"shift_click_in_beatmap_overlay"), @"Shift-click on a beatmap panel in the beatmap listing overlay to quickly download or view the beatmap in song select!");
 
         /// <summary>
+        /// "The symbol on deltalazer's icon and logo, has a cut in it... and it is NOT a perfect half-square [Triangle]! Awful, right?"
+        /// </summary>
+        public static LocalisableString DeltaLazerLogoCut => new TranslatableString(getKey(@"delta-lazer-logo-cut"), @"The symbol on deltalazer's icon and logo, has a cut in it... and it is NOT a perfect half-square [Triangle]! Awful, right?");
+
+        /// <summary>
         /// "a tip for you:"
         /// </summary>
         public static LocalisableString MenuTipTitle => new TranslatableString(getKey(@"menu_tip_title"), @"a tip for you:");

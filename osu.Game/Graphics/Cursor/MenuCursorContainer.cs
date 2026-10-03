@@ -8,12 +8,18 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
+using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Utils;
 using osu.Game.Configuration;
+using osu.Game.Localisation;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
+using osu.Game.Skinning;
 using osuTK;
 
 namespace osu.Game.Graphics.Cursor
@@ -51,6 +57,14 @@ namespace osu.Game.Graphics.Cursor
 
         private MouseInputDetector mouseInputDetector = null!;
 
+        private SkinCursorTrail trail = null!;
+        private Texture? trailTexture;
+        private Bindable<bool> cursorTrail = null!;
+        private Bindable<bool> trailFromSkin = null!;
+
+        [Resolved(canBeNull: true)]
+        private ISkinSource? trailSkin { get; set; }
+
         private bool visible;
 
         [BackgroundDependencyLoader]
@@ -63,6 +77,10 @@ namespace osu.Game.Graphics.Cursor
 
             tapSample = audio.Samples.Get(@"UI/cursor-tap");
 
+            cursorTrail = config.GetBindable<bool>(OsuSetting.MenuCursorTrail);
+            trailFromSkin = config.GetBindable<bool>(OsuSetting.MenuCursorFromSkin);
+
+            Add(trail = new SkinCursorTrail { Depth = 1, Alpha = 0 });
             Add(mouseInputDetector = new MouseInputDetector());
         }
 
@@ -79,6 +97,14 @@ namespace osu.Game.Graphics.Cursor
 
             lastInputWasMouse.BindTo(mouseInputDetector.LastInputWasMouseSource);
             lastInputWasMouse.BindValueChanged(_ => updateState(), true);
+
+            cursorTrail.BindValueChanged(_ => updateTrailVisibility());
+            trailFromSkin.BindValueChanged(_ => updateTrailVisibility());
+
+            if (trailSkin != null)
+                trailSkin.SourceChanged += updateTrailTexture;
+
+            updateTrailTexture();
 
             if (game != null)
             {
@@ -105,6 +131,38 @@ namespace osu.Game.Graphics.Cursor
                 PopIn();
             else
                 PopOut();
+
+            updateTrailVisibility();
+        }
+
+        private void updateTrailTexture()
+        {
+            trailTexture = isolate(trailSkin?.GetTexture(@"cursortrail"));
+
+            if (trailTexture != null)
+            {
+                var cursorProvider = trailSkin?.FindProvider(s => s.GetTexture(@"cursor") != null);
+
+                trail.DisjointTrail = cursorProvider?.GetTexture(@"cursormiddle") == null;
+                trail.Blending = trail.DisjointTrail ? BlendingParameters.Inherit : BlendingParameters.Additive;
+                trail.Texture = trailTexture;
+            }
+
+            updateTrailVisibility();
+        }
+
+        private void updateTrailVisibility()
+            => trail.Alpha = trailTexture != null && cursorTrail.Value && trailFromSkin.Value && visible ? 1 : 0;
+
+        private static Texture? isolate(Texture? texture)
+        {
+            if (texture == null)
+                return null;
+
+            var isolated = texture.Crop(new RectangleF(0, 0, texture.Width, texture.Height));
+
+            isolated.ScaleAdjust = texture.ScaleAdjust;
+            return isolated;
         }
 
         private bool getCursorVisibility()
@@ -131,6 +189,9 @@ namespace osu.Game.Graphics.Cursor
         protected override void Update()
         {
             base.Update();
+
+            if (trail.CursorScale != activeCursor.CurrentScale)
+                trail.CursorScale = activeCursor.CurrentScale;
 
             if (dragRotationState != DragRotationState.NotDragging
                 && Vector2.Distance(positionMouseDown, lastMovePosition) > 60)
@@ -176,18 +237,21 @@ namespace osu.Game.Graphics.Cursor
         {
             if (State.Value == Visibility.Visible)
             {
-                // only trigger animation for main mouse buttons
-                activeCursor.Scale = new Vector2(1);
-                activeCursor.ScaleTo(0.90f, 800, Easing.OutQuint);
-
-                activeCursor.AdditiveLayer.Alpha = 0;
-                activeCursor.AdditiveLayer.FadeInFromZero(800, Easing.OutQuint);
-
-                if (cursorRotate.Value && dragRotationState != DragRotationState.Rotating)
+                if (!activeCursor.UsingSkinCursor)
                 {
-                    // if cursor is already rotating don't reset its rotate origin
-                    dragRotationState = DragRotationState.DragStarted;
-                    positionMouseDown = e.MousePosition;
+                    // only trigger animation for main mouse buttons
+                    activeCursor.Scale = new Vector2(1);
+                    activeCursor.ScaleTo(0.90f, 800, Easing.OutQuint);
+
+                    activeCursor.AdditiveLayer.Alpha = 0;
+                    activeCursor.AdditiveLayer.FadeInFromZero(800, Easing.OutQuint);
+
+                    if (cursorRotate.Value && dragRotationState != DragRotationState.Rotating)
+                    {
+                        // if cursor is already rotating don't reset its rotate origin
+                        dragRotationState = DragRotationState.DragStarted;
+                        positionMouseDown = e.MousePosition;
+                    }
                 }
 
                 playTapSample();
@@ -200,13 +264,16 @@ namespace osu.Game.Graphics.Cursor
         {
             if (!e.HasAnyButtonPressed)
             {
-                activeCursor.AdditiveLayer.FadeOutFromOne(500, Easing.OutQuint);
-                activeCursor.ScaleTo(1, 500, Easing.OutElastic);
-
-                if (dragRotationState != DragRotationState.NotDragging)
+                if (!activeCursor.UsingSkinCursor)
                 {
-                    activeCursor.RotateTo(0, 400 * (0.5f + Math.Abs(activeCursor.Rotation / 960)), Easing.OutElasticQuarter);
-                    dragRotationState = DragRotationState.NotDragging;
+                    activeCursor.AdditiveLayer.FadeOutFromOne(500, Easing.OutQuint);
+                    activeCursor.ScaleTo(1, 500, Easing.OutElastic);
+
+                    if (dragRotationState != DragRotationState.NotDragging)
+                    {
+                        activeCursor.RotateTo(0, 400 * (0.5f + Math.Abs(activeCursor.Rotation / 960)), Easing.OutElasticQuarter);
+                        dragRotationState = DragRotationState.NotDragging;
+                    }
                 }
 
                 if (State.Value == Visibility.Visible)
@@ -247,13 +314,39 @@ namespace osu.Game.Graphics.Cursor
             channel.Play();
         }
 
+        protected override void Dispose(bool isDisposing)
+        {
+            if (trailSkin.IsNotNull())
+                trailSkin.SourceChanged -= updateTrailTexture;
+
+            base.Dispose(isDisposing);
+        }
+
         public partial class Cursor : Container
         {
+            public Vector2 CurrentScale => cursorContainer.Scale;
+
             private Container cursorContainer = null!;
+            private Sprite cursorSprite = null!;
             private Bindable<float> cursorScale = null!;
+            private Bindable<float> skinCursorScale = null!;
+            private Bindable<float> cursorScaleX = null!;
+            private Bindable<float> cursorScaleY = null!;
+            private Bindable<bool> cursorFromSkin = null!;
             private const float base_scale = 0.15f;
 
+            private TextureStore textures = null!;
+            private float currentBaseScale = base_scale;
+
+            public bool UsingSkinCursor { get; private set; }
+
             public Sprite AdditiveLayer = null!;
+
+            [Resolved(canBeNull: true)]
+            private ISkinSource? skin { get; set; }
+
+            [Resolved]
+            private INotificationOverlay? notifications { get; set; }
 
             public Cursor()
             {
@@ -263,6 +356,8 @@ namespace osu.Game.Graphics.Cursor
             [BackgroundDependencyLoader]
             private void load(OsuConfigManager config, TextureStore textures, OsuColour colour)
             {
+                this.textures = textures;
+
                 Children = new Drawable[]
                 {
                     cursorContainer = new Container
@@ -270,23 +365,139 @@ namespace osu.Game.Graphics.Cursor
                         AutoSizeAxes = Axes.Both,
                         Children = new Drawable[]
                         {
-                            new Sprite
-                            {
-                                Texture = textures.Get(@"Cursor/menu-cursor"),
-                            },
+                            cursorSprite = new Sprite(),
                             AdditiveLayer = new Sprite
                             {
                                 Blending = BlendingParameters.Additive,
                                 Colour = colour.Pink,
                                 Alpha = 0,
-                                Texture = textures.Get(@"Cursor/menu-cursor-additive"),
                             },
                         }
                     }
                 };
 
                 cursorScale = config.GetBindable<float>(OsuSetting.MenuCursorSize);
-                cursorScale.BindValueChanged(scale => cursorContainer.Scale = new Vector2(scale.NewValue * base_scale), true);
+                skinCursorScale = config.GetBindable<float>(OsuSetting.MenuCursorFromSkinSize);
+                cursorScaleX = config.GetBindable<float>(OsuSetting.MenuCursorScaleX);
+                cursorScaleY = config.GetBindable<float>(OsuSetting.MenuCursorScaleY);
+                cursorFromSkin = config.GetBindable<bool>(OsuSetting.MenuCursorFromSkin);
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+
+                cursorScale.BindValueChanged(_ => updateScale());
+                skinCursorScale.BindValueChanged(_ => updateScale());
+                cursorScaleX.BindValueChanged(_ => updateScale());
+                cursorScaleY.BindValueChanged(_ => updateScale());
+                cursorFromSkin.BindValueChanged(_ => updateTextures());
+
+                if (skin != null)
+                    skin.SourceChanged += updateTextures;
+
+                updateTextures();
+            }
+
+            private void updateTextures()
+            {
+                Texture? skinCursor = isolate(cursorFromSkin.Value ? skin?.GetTexture(@"cursor") : null);
+
+                if (cursorFromSkin.Value && skin != null && skinCursor == null)
+                {
+                    cursorFromSkin.Value = false;
+
+                    notifications?.Post(new SimpleNotification
+                    {
+                        Text = UserInterfaceStrings.MenuCursorFromSkinUnsupported,
+                        Icon = FontAwesome.Solid.ExclamationTriangle,
+                    });
+
+                    return;
+                }
+
+                var defaultCursor = textures.Get(@"Cursor/menu-cursor");
+
+                if (skinCursor != null)
+                {
+                    cursorSprite.Texture = skinCursor;
+                    AdditiveLayer.Texture = skinCursor;
+
+                    Origin = Anchor.Centre;
+
+                    currentBaseScale = 1;
+
+                    // effects are skipped from here on, so anything left mid-animation has to be undone.
+                    Scale = Vector2.One;
+                    Rotation = 0;
+                    AdditiveLayer.Alpha = 0;
+                }
+                else
+                {
+                    cursorSprite.Texture = defaultCursor;
+                    AdditiveLayer.Texture = textures.Get(@"Cursor/menu-cursor-additive");
+
+                    Origin = Anchor.TopLeft;
+                    currentBaseScale = base_scale;
+                }
+
+                UsingSkinCursor = skinCursor != null;
+                updateScale();
+            }
+
+            private void updateScale()
+            {
+                float size = (UsingSkinCursor ? skinCursorScale.Value : cursorScale.Value) * currentBaseScale;
+
+                cursorContainer.Scale = new Vector2(size * cursorScaleX.Value, size * cursorScaleY.Value);
+            }
+
+            protected override void Dispose(bool isDisposing)
+            {
+                if (skin.IsNotNull())
+                    skin.SourceChanged -= updateTextures;
+
+                base.Dispose(isDisposing);
+            }
+        }
+
+        private partial class SkinCursorTrail : CursorTrail
+        {
+            private const double disjoint_trail_time_separation = 1000 / 60.0;
+
+            public bool DisjointTrail { get; set; }
+
+            private double lastTrailTime;
+            private Vector2? currentPosition;
+
+            protected override double FadeDuration => DisjointTrail ? 150 : 500;
+            protected override float FadeExponent => 1;
+            protected override bool InterpolateMovements => !DisjointTrail;
+            protected override bool AvoidDrawingNearCursor => !DisjointTrail;
+
+            protected override void Update()
+            {
+                base.Update();
+
+                if (!DisjointTrail || !currentPosition.HasValue)
+                    return;
+
+                if (Time.Current - lastTrailTime >= disjoint_trail_time_separation)
+                {
+                    lastTrailTime = Time.Current;
+                    AddTrail(currentPosition.Value);
+                }
+            }
+
+            protected override bool OnMouseMove(MouseMoveEvent e)
+            {
+                if (!DisjointTrail)
+                    return base.OnMouseMove(e);
+
+                currentPosition = e.ScreenSpaceMousePosition;
+
+                // Intentionally block the base call as we're adding the trails ourselves.
+                return false;
             }
         }
 

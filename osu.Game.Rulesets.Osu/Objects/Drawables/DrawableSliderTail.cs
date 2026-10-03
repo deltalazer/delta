@@ -1,16 +1,15 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System.Diagnostics;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Utils;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Skinning;
 using osuTK;
 using osuTK.Graphics;
@@ -23,10 +22,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         public override bool DisplayResult => Slider is FakeSlider ? false : base.DisplayResult;
 
-        [CanBeNull]
-        public Slider Slider => DrawableSlider?.HitObject;
+        public Slider? Slider => DrawableSlider?.HitObject;
 
-        protected DrawableSlider DrawableSlider => (DrawableSlider)ParentHitObject;
+        protected DrawableSlider? DrawableSlider => ParentHitObject as DrawableSlider;
 
         /// <summary>
         /// Whether the hit samples only play on successful hits.
@@ -34,9 +32,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// </summary>
         public bool SamplePlaysOnlyOnHit { get; set; } = true;
 
-        public SkinnableDrawable CirclePiece { get; private set; }
+        public SkinnableDrawable? CirclePiece { get; private set; }
 
-        private Container scaleContainer;
+        private Container scaleContainer = null!;
 
         public DrawableSliderTail()
             : base(null)
@@ -48,9 +46,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
         }
 
+        private readonly Bindable<bool> hitAnimations = new Bindable<bool>(true);
+
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuRulesetConfigManager? osuConfig)
         {
+            osuConfig?.BindWith(OsuRulesetSetting.HitAnimations, hitAnimations);
+
             Origin = Anchor.Centre;
             Size = OsuHitObject.OBJECT_DIMENSIONS;
 
@@ -108,13 +110,19 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     break;
 
                 case ArmedState.Hit:
-                    // todo: temporary / arbitrary
-                    this.Delay(800).FadeOut();
+                    if (!hitAnimations.Value)
+                        this.FadeOut(60, Easing.Out);
+                    else
+                    {
+                        // todo: temporary / arbitrary
+                        this.Delay(800).FadeOut();
+                    }
+
                     break;
             }
         }
 
-        protected override void CheckForResult(bool userTriggered, double timeOffset) => DrawableSlider.SliderInputManager.TryJudgeNestedObject(this, timeOffset);
+        protected override void CheckForResult(bool userTriggered, double timeOffset) => DrawableSlider!.SliderInputManager.TryJudgeNestedObject(this, timeOffset);
 
         protected override void OnApply()
         {
