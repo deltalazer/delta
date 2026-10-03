@@ -77,6 +77,12 @@ namespace osu.Game.Screens.Menu
             Task.Run(request.Perform)
                 .ContinueWith(r =>
                 {
+                    // if the request failed, "observe" the exception.
+                    // it isn't very important why this failed, as it's only for display.
+                    // the inner error will be logged by framework mechanisms anyway.
+                    if (r.IsFaulted)
+                        _ = r.Exception;
+
                     if (!FetchOnlineContent)
                         return;
 
@@ -90,12 +96,6 @@ namespace osu.Game.Screens.Menu
                             Current.Value = request.ResponseObject;
                         });
                     }
-
-                    // if the request failed, "observe" the exception.
-                    // it isn't very important why this failed, as it's only for display.
-                    // the inner error will be logged by framework mechanisms anyway.
-                    if (r.IsFaulted)
-                        _ = r.Exception;
 
                     Scheduler.AddDelayed(checkForUpdates, TimeSpan.FromMinutes(5).TotalMilliseconds);
                 });
