@@ -393,8 +393,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             if (spins < completedFullSpins.Value)
             {
-                // rewinding, silently handle
-                completedFullSpins.Value = spins;
+                // Subtraction during forward playback must not award ticks again when progress recovers.
+                bool subtracting = HitObject.SpinnerDirection != ForcedSpinnerDirection.Any
+                                   && HitObject.SpinnerWrongDirection == SpinnerWrongDirectionBehaviour.SubtractProgress
+                                   && Time.Elapsed >= 0;
+                if (!subtracting)
+                    completedFullSpins.Value = spins;
                 return;
             }
 

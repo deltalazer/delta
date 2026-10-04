@@ -595,6 +595,31 @@ namespace osu.Game.Tests.Beatmaps.Formats
             Assert.That(section.Settings.ForceAlternate, Is.True);
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestEncodeDecodeSpinnerOverrides(bool inherit)
+        {
+            var settings = new HitObjectGimmickSettings
+            {
+                SpinnerDirection = inherit ? ForcedSpinnerDirection.Inherit : ForcedSpinnerDirection.Any,
+                SpinnerWrongDirection = inherit ? SpinnerWrongDirectionBehaviour.Inherit : SpinnerWrongDirectionBehaviour.NoProgress,
+                SpinnerIndicator = inherit ? SpinnerDirectionIndicator.Inherit : SpinnerDirectionIndicator.None,
+            };
+            var beatmap = new Beatmap();
+            beatmap.HitObjectGimmicks.Entries.Add(new HitObjectGimmickEntry
+            {
+                ObjectId = 12345,
+                StartTime = 1000,
+                Settings = settings,
+            });
+            var components = new BeatmapComponents(beatmap, new TestLegacySkin(beatmaps_resource_store, string.Empty), new Storyboard());
+            var decoded = DecodeFromLegacy(EncodeToLegacy(components), beatmaps_resource_store, string.Empty);
+            var result = decoded.Beatmap.HitObjectGimmicks.Entries.Single().Settings;
+            Assert.That(result.SpinnerDirection, Is.EqualTo(settings.SpinnerDirection));
+            Assert.That(result.SpinnerWrongDirection, Is.EqualTo(settings.SpinnerWrongDirection));
+            Assert.That(result.SpinnerIndicator, Is.EqualTo(settings.SpinnerIndicator));
+        }
+
         [Test]
         public void TestEncodeDecodeHitObjectGimmicksPersistsForceNoApproachCircle()
         {

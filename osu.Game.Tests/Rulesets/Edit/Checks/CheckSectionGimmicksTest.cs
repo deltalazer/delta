@@ -11,7 +11,6 @@ using osu.Game.Beatmaps.SectionGimmicks;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Edit.Checks;
 using osu.Game.Skinning;
-using osu.Game.Tests.Beatmaps;
 
 namespace osu.Game.Tests.Rulesets.Edit.Checks
 {

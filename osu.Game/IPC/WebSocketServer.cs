@@ -132,6 +132,10 @@ namespace osu.Game.IPC
                         context = ((HttpListener)iar.AsyncState!).EndGetContext(iar);
                         contextResetEvent.Set();
                     }
+                    catch (ObjectDisposedException) when (isDisposed || runningTokenSource.IsCancellationRequested)
+                    {
+                        // A pending accept callback may complete after shutdown has disposed the listener or signal.
+                    }
                     catch (HttpListenerException ex) when (ex.ErrorCode == 995)
                     {
                         // occurs on Windows when the listener is stopped.

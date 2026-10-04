@@ -11,14 +11,12 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.HitObjectGimmicks;
 using osu.Game.Beatmaps.SectionGimmicks;
-using osu.Game.Overlays;
-using osu.Game.Overlays.Notifications;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Edit;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Scoring;
@@ -940,14 +938,17 @@ namespace osu.Game.Rulesets.Osu.Edit
                                     },
                                     spinnerDirection = new FormEnumDropdown<ForcedSpinnerDirection>
                                     {
+                                        Items = Enum.GetValues<ForcedSpinnerDirection>().Where(value => value != ForcedSpinnerDirection.Inherit),
                                         Caption = "Spinner direction",
                                     },
                                     spinnerWrongDirection = new FormEnumDropdown<SpinnerWrongDirectionBehaviour>
                                     {
+                                        Items = Enum.GetValues<SpinnerWrongDirectionBehaviour>().Where(value => value != SpinnerWrongDirectionBehaviour.Inherit),
                                         Caption = "Wrong direction",
                                     },
                                     spinnerIndicator = new FormEnumDropdown<SpinnerDirectionIndicator>
                                     {
+                                        Items = Enum.GetValues<SpinnerDirectionIndicator>().Where(value => value != SpinnerDirectionIndicator.Inherit),
                                         Caption = "Direction indicator",
                                     },
                                     flashlightRadius = new FormNumberBox(allowDecimals: true)

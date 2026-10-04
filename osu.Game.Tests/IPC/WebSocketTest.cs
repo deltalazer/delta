@@ -14,6 +14,22 @@ namespace osu.Game.Tests.IPC
     public class WebSocketTest
     {
         [Test]
+        public async Task TestRepeatedServerShutdownWithoutClients()
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                using (var server = new WebSocketServer(54321))
+                {
+                    await server.StartAsync();
+                    await server.StopAsync();
+                }
+
+                // Allow the pending accept callback to complete after the listener has been disposed.
+                await Task.Delay(10);
+            }
+        }
+
+        [Test]
         public async Task TestClientInitiatedDuplexCommunication()
         {
             const int port = 54321;

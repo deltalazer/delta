@@ -501,9 +501,9 @@ namespace osu.Game.Rulesets.Osu.Edit
             forceHardRock.Current.Value = hasSelection && state.ForceHardRock;
             forceFlashlight.Current.Value = hasSelection && state.ForceFlashlight;
             forceNoApproachCircle.Current.Value = hasSelection && state.ForceNoApproachCircle;
-            spinnerDirection.Current.Value = state.RepresentativeSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Any;
-            spinnerWrongDirection.Current.Value = state.RepresentativeSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.NoProgress;
-            spinnerIndicator.Current.Value = state.RepresentativeSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.None;
+            spinnerDirection.Current.Value = state.RepresentativeSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Inherit;
+            spinnerWrongDirection.Current.Value = state.RepresentativeSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.Inherit;
+            spinnerIndicator.Current.Value = state.RepresentativeSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.Inherit;
 
             hp300.Current.Value = formatFloat(representative?.HP300 ?? float.NaN);
             hp100.Current.Value = formatFloat(representative?.HP100 ?? float.NaN);

@@ -5,7 +5,8 @@ namespace osu.Game.Beatmaps
 {
     public enum SpinnerWrongDirectionBehaviour
     {
-        NoProgress,
+        Inherit = -1,
+        NoProgress = 0,
         SubtractProgress,
         InstantMiss,
     }

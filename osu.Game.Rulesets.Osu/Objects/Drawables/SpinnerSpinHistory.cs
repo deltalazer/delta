@@ -26,7 +26,16 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <remarks>
         /// This is the final scoring value.
         /// </remarks>
-        public float TotalRotation => 360 * completedSpins.Count + currentSpinMaxRotation;
+        public float TotalRotation => subtractWrongDirection ? directedRotation : 360 * completedSpins.Count + currentSpinMaxRotation;
+
+        private readonly bool subtractWrongDirection;
+        private readonly Stack<(double Time, float Rotation)> directedHistory = new Stack<(double, float)>();
+        private float directedRotation;
+
+        public SpinnerSpinHistory(bool subtractWrongDirection = false)
+        {
+            this.subtractWrongDirection = subtractWrongDirection;
+        }
 
         private readonly Stack<CompletedSpin> completedSpins = new Stack<CompletedSpin>();
 
@@ -63,6 +72,25 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         /// <param name="delta">The delta of the angle moved through since the last report.</param>
         public void ReportDelta(double currentTime, float delta)
         {
+            if (subtractWrongDirection)
+            {
+                if (currentTime < lastReportTime)
+                {
+                    while (directedHistory.TryPeek(out var sample) && sample.Time > currentTime)
+                        directedHistory.Pop();
+
+                    directedRotation = directedHistory.TryPeek(out var previous) ? previous.Rotation : 0;
+                }
+                else if (delta != 0)
+                {
+                    directedRotation = Math.Max(0, directedRotation + delta);
+                    directedHistory.Push((currentTime, directedRotation));
+                }
+
+                lastReportTime = currentTime;
+                return;
+            }
+
             if (delta == 0)
                 return;
 

@@ -131,7 +131,9 @@ namespace osu.Game.Rulesets.Osu.Skinning.Default
             delta = (float)(delta * Math.Abs(rate));
 
             currentRotation += delta;
-            drawableSpinner.Result.History.ReportDelta(Time.Current, delta);
+            float scoringDelta = required == ForcedSpinnerDirection.CounterClockwise
+                                 && drawableSpinner.HitObject.SpinnerWrongDirection == SpinnerWrongDirectionBehaviour.SubtractProgress ? -delta : delta;
+            drawableSpinner.Result.History.ReportDelta(Time.Current, scoringDelta);
         }
 
         private void resetState(DrawableHitObject obj)

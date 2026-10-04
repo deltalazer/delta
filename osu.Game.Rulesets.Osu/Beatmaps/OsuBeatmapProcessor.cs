@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using osu.Game.Audio;
 using osu.Framework.Graphics;
+using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.HitObjectGimmicks;
@@ -16,7 +16,6 @@ using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Scoring;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Rulesets.Osu.Beatmaps
 {
@@ -82,9 +81,9 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                     setNoApproachCircleFlagRecursive(hitObject, objectNoApproach);
                     setTraceableFlagRecursive(hitObject, objectForceTraceable);
                     setSpinnerDirection(hitObject,
-                        objectSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Any,
-                        objectSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.NoProgress,
-                        objectSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.None);
+                        objectSettings?.SpinnerDirection is { } spinnerDirection && spinnerDirection != ForcedSpinnerDirection.Inherit ? spinnerDirection : ForcedSpinnerDirection.Any,
+                        objectSettings?.SpinnerWrongDirection is { } spinnerWrongDirection && spinnerWrongDirection != SpinnerWrongDirectionBehaviour.Inherit ? spinnerWrongDirection : SpinnerWrongDirectionBehaviour.NoProgress,
+                        objectSettings?.SpinnerIndicator is { } indicator && indicator != SpinnerDirectionIndicator.Inherit ? indicator : SpinnerDirectionIndicator.None);
                     setAllMissFlags(hitObject, objectSettings?.ForceAllMiss == true, objectSettings?.FreezeHP ?? true, objectSettings?.FreezeAccuracy ?? true, objectSettings?.FreezeCombo ?? true);
 
                     if (objectForceHardRock)
@@ -120,16 +119,16 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
                 bool sectionForceTraceable = section?.Settings.ForceTraceable == true;
                 setTraceableFlagRecursive(hitObject, sectionForceTraceable || objectForceTraceable);
 
-                var spinnerDirection = objectSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Any;
-                if (spinnerDirection == ForcedSpinnerDirection.Any)
+                var spinnerDirection = objectSettings?.SpinnerDirection ?? ForcedSpinnerDirection.Inherit;
+                if (spinnerDirection == ForcedSpinnerDirection.Inherit)
                     spinnerDirection = section?.Settings.SpinnerDirection ?? ForcedSpinnerDirection.Any;
 
-                var spinnerWrongDirection = objectSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.NoProgress;
-                if (spinnerWrongDirection == SpinnerWrongDirectionBehaviour.NoProgress)
+                var spinnerWrongDirection = objectSettings?.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.Inherit;
+                if (spinnerWrongDirection == SpinnerWrongDirectionBehaviour.Inherit)
                     spinnerWrongDirection = section?.Settings.SpinnerWrongDirection ?? SpinnerWrongDirectionBehaviour.NoProgress;
 
-                var spinnerIndicator = objectSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.None;
-                if (spinnerIndicator == SpinnerDirectionIndicator.None)
+                var spinnerIndicator = objectSettings?.SpinnerIndicator ?? SpinnerDirectionIndicator.Inherit;
+                if (spinnerIndicator == SpinnerDirectionIndicator.Inherit)
                     spinnerIndicator = section?.Settings.SpinnerIndicator ?? SpinnerDirectionIndicator.None;
 
                 setSpinnerDirection(hitObject, spinnerDirection, spinnerWrongDirection, spinnerIndicator);

@@ -9,6 +9,34 @@ namespace osu.Game.Rulesets.Osu.Tests
     [TestFixture]
     public class SpinnerSpinHistoryTest
     {
+        [Test]
+        public void TestWrongDirectionSubtractsAndClampsAtZero()
+        {
+            var directed = new SpinnerSpinHistory(subtractWrongDirection: true);
+            directed.ReportDelta(1, 180);
+            directed.ReportDelta(2, -90);
+            Assert.That(directed.TotalRotation, Is.EqualTo(90));
+            directed.ReportDelta(3, -360);
+            Assert.That(directed.TotalRotation, Is.Zero);
+            directed.ReportDelta(4, 90);
+            Assert.That(directed.TotalRotation, Is.EqualTo(90));
+        }
+
+        [Test]
+        public void TestWrongDirectionRemovesCompletedSpinsAndRewinds()
+        {
+            var directed = new SpinnerSpinHistory(subtractWrongDirection: true);
+            directed.ReportDelta(1, 720);
+            directed.ReportDelta(2, -450);
+            Assert.That(directed.TotalRotation, Is.EqualTo(270));
+            directed.ReportDelta(1, 450);
+            Assert.That(directed.TotalRotation, Is.EqualTo(720));
+            directed.ReportDelta(2, -450);
+            Assert.That(directed.TotalRotation, Is.EqualTo(270));
+            directed.ReportDelta(0, -720);
+            Assert.That(directed.TotalRotation, Is.Zero);
+        }
+
         private SpinnerSpinHistory history = null!;
 
         [SetUp]

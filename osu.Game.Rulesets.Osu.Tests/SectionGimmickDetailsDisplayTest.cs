@@ -191,7 +191,7 @@ namespace osu.Game.Rulesets.Osu.Tests
 
         private static string invokeBuildLabel(SectionGimmickSection section, bool multiline, IBeatmapDifficultyInfo? difficulty = null)
         {
-            var method = typeof(SectionGimmickDetailsDisplay).GetMethod("BuildDetailsLabelForTest", BindingFlags.NonPublic | BindingFlags.Static);
+            var method = typeof(SectionGimmickDetailsDisplay).GetMethod("buildDetailsLabelForTest", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.That(method, Is.Not.Null);
 
             var bindable = new BindableBool(multiline);

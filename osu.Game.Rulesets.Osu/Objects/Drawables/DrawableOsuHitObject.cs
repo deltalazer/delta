@@ -104,7 +104,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                 // the above is just to ensure they don't get overwritten later.
                 applyDim(piece);
             }
-            
+
             // Apply Hidden effect if ForceHidden is set on this hitobject
             if (HitObject.ForceHidden)
             {
